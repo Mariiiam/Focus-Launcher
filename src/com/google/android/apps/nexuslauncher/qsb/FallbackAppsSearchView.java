@@ -61,7 +61,7 @@ public class FallbackAppsSearchView extends ExtendedEditText implements AllAppsS
 
     }
 
-    public void onSearchResult(final String lastSearchQuery, final ArrayList orderedFilter) {
+    public void onSearchResult(final String lastSearchQuery, final ArrayList<com.android.launcher3.util.ComponentKey> orderedFilter) {
         if (orderedFilter != null && getParent() != null) {
             mApps.setOrderedFilter(orderedFilter);
             notifyResultChanged();

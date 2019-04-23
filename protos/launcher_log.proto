@@ -99,6 +99,7 @@ enum ControlType {
   VERTICAL_SCROLL = 9;
   HOME_INTENT = 10; // Deprecated, use enum Command instead
   BACK_BUTTON = 11; // Deprecated, use enum Command instead
+  PROFILES_BUTTON = 12;
   // GO_TO_PLAYSTORE
 }
 

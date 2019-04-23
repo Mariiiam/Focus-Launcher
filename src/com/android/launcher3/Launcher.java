@@ -17,11 +17,7 @@
 package com.android.launcher3;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
+import android.animation.*;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityOptions;
@@ -29,17 +25,7 @@ import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
-import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks2;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentSender;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -47,40 +33,25 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Process;
-import android.os.StrictMode;
-import android.os.SystemClock;
-import android.os.Trace;
-import android.os.UserHandle;
+import android.os.*;
 import android.support.annotation.Nullable;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.util.Log;
-import android.view.Display;
-import android.view.HapticFeedbackConstants;
-import android.view.KeyEvent;
-import android.view.KeyboardShortcutGroup;
-import android.view.KeyboardShortcutInfo;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MotionEvent;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace.ItemOperator;
@@ -92,13 +63,8 @@ import com.android.launcher3.compat.AppWidgetManagerCompat;
 import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.LauncherAppsCompatVO;
 import com.android.launcher3.compat.UserManagerCompat;
-import com.android.launcher3.compat.WallpaperManagerCompat;
 import com.android.launcher3.config.FeatureFlags;
-import com.android.launcher3.dragndrop.DragController;
-import com.android.launcher3.dragndrop.DragLayer;
-import com.android.launcher3.dragndrop.DragOptions;
-import com.android.launcher3.dragndrop.DragView;
-import com.android.launcher3.dragndrop.PinItemDragListener;
+import com.android.launcher3.dragndrop.*;
 import com.android.launcher3.dynamicui.ExtractedColors;
 import com.android.launcher3.dynamicui.WallpaperColorInfo;
 import com.android.launcher3.folder.Folder;
@@ -120,35 +86,13 @@ import com.android.launcher3.userevent.nano.LauncherLogProto;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ControlType;
-import com.android.launcher3.util.ActivityResultInfo;
-import com.android.launcher3.util.RunnableWithId;
-import com.android.launcher3.util.ComponentKey;
-import com.android.launcher3.util.ComponentKeyMapper;
-import com.android.launcher3.util.ItemInfoMatcher;
-import com.android.launcher3.util.MultiHashMap;
-import com.android.launcher3.util.PackageManagerHelper;
-import com.android.launcher3.util.PackageUserKey;
-import com.android.launcher3.util.PendingRequestArgs;
-import com.android.launcher3.util.SystemUiController;
-import com.android.launcher3.util.TestingUtils;
-import com.android.launcher3.util.Themes;
-import com.android.launcher3.util.Thunk;
-import com.android.launcher3.util.ViewOnDrawExecutor;
-import com.android.launcher3.widget.PendingAddShortcutInfo;
-import com.android.launcher3.widget.PendingAddWidgetInfo;
-import com.android.launcher3.widget.WidgetAddFlowHandler;
-import com.android.launcher3.widget.WidgetHostViewLoader;
-import com.android.launcher3.widget.WidgetsContainerView;
-
+import com.android.launcher3.util.*;
+import com.android.launcher3.widget.*;
+import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 import static com.android.launcher3.util.RunnableWithId.RUNNABLE_ID_BIND_APPS;
@@ -482,6 +426,13 @@ public class Launcher extends BaseActivity
         filter.addAction(Intent.ACTION_USER_PRESENT); // When the device wakes up + keyguard is gone
         registerReceiver(mReceiver, filter);
         mShouldFadeInScrim = true;
+
+        filter = new IntentFilter();
+        filter.addAction("android.net.wifi.STATE_CHANGE");
+        filter.addAction("android.net.wifi.supplicant.CONNECTION_CHANGE");
+        filter.setPriority(100);
+        registerReceiver(mWiFiReceiver, filter);
+        updateProfile(mSharedPrefs.getString("current_profile", "default"));
 
         getSystemUiController().updateUiState(SystemUiController.UI_STATE_BASE_WINDOW,
                 Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText));
@@ -1360,6 +1311,15 @@ public class Launcher extends BaseActivity
             settingsButton.setVisibility(View.GONE);
         }
 
+        // Bind profiles button actions
+        View profilesButton = findViewById(R.id.profiles_button);
+        new OverviewButtonClickListener(ControlType.PROFILES_BUTTON) {
+            @Override
+            public void handleViewClick(View view) {
+                onClickProfilesButton(view);
+            }
+        }.attachTo(profilesButton);
+
         mOverviewPanel.setAlpha(0f);
     }
 
@@ -1561,6 +1521,95 @@ public class Launcher extends BaseActivity
             }
         }
     };
+
+    private final BroadcastReceiver mWiFiReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String newWifiConnection = null;
+
+            if (intent.getAction().equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+                boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
+                if(!connected) {
+                    //Start service for disconnected state here
+                    Toast.makeText(context, "WiFi disconnected", Toast.LENGTH_LONG).show();
+                    newWifiConnection = "disconnected";
+                }
+            } else if(intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if (netInfo != null && netInfo.isConnected()) {
+                    //Start service for connected state here.
+                    WifiManager wifiManager = (WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    if (wifiManager != null) {
+                        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                        String ssid = wifiInfo.getSSID().replaceAll("\"", "");
+                        Toast.makeText(context, "SSID: " + ssid, Toast.LENGTH_LONG).show();
+                        //TODO multiple SSIDs per profile possible!
+                        newWifiConnection = ssid;
+                    }
+                }
+            }
+
+            if (newWifiConnection != null && context instanceof Launcher) {
+                changeProfile(newWifiConnection);
+            }
+
+            /*
+            NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+            if(info != null && info.isConnected()) {
+                disconnected = false;
+                // Do your work.
+
+                // e.g. To check the Network Name or other info:
+                WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                String ssid = wifiInfo.getSSID();
+                Toast.makeText(context, "SSID: "+ssid, Toast.LENGTH_LONG).show();
+
+                //TODO multiple SSIDs per profile possible!
+            } else {
+                if (!disconnected) {
+                    disconnected = true;
+                    Toast.makeText(context, "WiFi disconnected", Toast.LENGTH_LONG).show();
+                }
+            }
+            */
+        }
+    };
+
+    public boolean changeProfile(String newSSID) {
+        if (newSSID == null) return false;
+
+        //TODO disconnected should only fire if no connection to the internet exists (no LTE!!)
+        if (newSSID.equals("disconnected")) return updateProfile("disconnected");
+
+        String[] work_ssids = mSharedPrefs.getString("work_ssids", "").split("\\s+");
+        for (String ssid : work_ssids) {
+            if (ssid.equals(newSSID)) return updateProfile("work");
+        }
+
+        String[] home_ssids = mSharedPrefs.getString("home_ssids", "").split("\\s+");
+        for (String ssid : home_ssids) {
+            if (ssid.equals(newSSID)) return updateProfile("home");
+        }
+
+        return updateProfile("default");
+    }
+
+    private boolean updateProfile(String profile) {
+        if (profile == null || profile.isEmpty()) return false;
+        if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
+        mSharedPrefs.edit().putString("current_profile", profile).apply();
+
+        String capitalizedProfileName = profile.substring(0, 1).toUpperCase() + profile.substring(1).toLowerCase();
+
+        TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
+        if (profileDisplay != null) {
+            System.err.println("Launcher found the profile display");
+            profileDisplay.setText(capitalizedProfileName);
+        }
+
+        return true;
+    }
 
     public void updateIconBadges(final Set<PackageUserKey> updatedBadges) {
         Runnable r = new Runnable() {
@@ -2551,6 +2600,19 @@ public class Launcher extends BaseActivity
     public void onClickSettingsButton(View v) {
         if (LOGD) Log.d(TAG, "onClickSettingsButton");
         Intent intent = new Intent(Intent.ACTION_APPLICATION_PREFERENCES)
+                .setPackage(getPackageName());
+        intent.setSourceBounds(getViewBounds(v));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent, getActivityLaunchOptions(v));
+    }
+
+    /**
+     * Event handler for a click on the profiles button that appears after a long press
+     * on the home screen.
+     */
+    public void onClickProfilesButton(View v) {
+        if (LOGD) Log.d(TAG, "onClickProfilesButton");
+        Intent intent = new Intent(this, ProfilesActivity.class)
                 .setPackage(getPackageName());
         intent.setSourceBounds(getViewBounds(v));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

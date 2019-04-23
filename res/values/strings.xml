@@ -159,7 +159,9 @@
     <!-- Text for wallpaper change button -->
     <string name="wallpaper_button_text">Wallpapers</string>
     <!-- Text for settings button -->
-    <string name="settings_button_text">Home settings</string>
+    <string name="settings_button_text">Settings</string>
+    <!-- Text for profiles button -->
+    <string name="profiles_button_text">Profiles</string>
     <!-- Message shown when a feature is disabled by the administrator -->
     <string name="msg_disabled_by_admin">Disabled by your admin</string>
     <!-- Text for custom accessibility action to go to the overview mode, where users can look and change the overall UI of the launcher. -->
@@ -331,6 +333,22 @@
     <string name="pref_show_google_now_summary">@string/msg_minus_one_on_left</string>
     <string name="msg_minus_one_on_left">To the left of the main Home screen</string>
     <string name="about">About</string>
+    <string name="profiles">Profiles</string>
+    <string name="profile_display_default">Current Profile</string>
+    <string name="profile_work">Work</string>
+    <string name="profile_home">Home</string>
+    <string name="profile_disconnected">Disconnected</string>
+    <string name="profile_default">Default</string>
+    <string name="profile_pref_wallpaper">Wallpaper</string>
+    <string name="profile_pref_wallpaper_hint">Wallpaper</string>
+    <string name="profile_pref_ringtone">Ringtone</string>
+    <string name="profile_pref_ringtone_silent">Silent</string>
+    <string name="profile_pref_ssids">Associated WiFi Names</string>
+    <string name="profile_pref_ssids_hint">This profile is active while connected to one of the provided WiFis</string>
+    <string name="profile_pref_ssids_disconnected">WiFi</string>
+    <string name="profile_pref_ssids_disconnected_summary">This profile is active when in airplane mode</string>
+    <string name="profile_pref_ssids_default">WiFi</string>
+    <string name="profile_pref_ssids_default_summary">This profile is active if the requirements of no other profile are met</string>
     <string name="title_google_app">Google app</string>
     <string name="title_app_suggestions">Display app suggestions</string>
     <string name="summary_app_suggestions">At the top of your All Apps list</string>
