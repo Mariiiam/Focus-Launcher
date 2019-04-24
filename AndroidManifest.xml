@@ -48,6 +48,8 @@
     <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
     <uses-permission android:name="${applicationId}.permission.READ_SETTINGS" />
     <uses-permission android:name="${applicationId}.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <!-- Custom -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
@@ -102,6 +104,22 @@
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+        </activity>
+
+        <!--
+        The profiles activity. When extending keep the intent filter present
+        -->
+        <activity
+            android:name="com.google.android.apps.nexuslauncher.ProfilesActivity"
+            android:label="@string/profiles_button_text"
+            android:theme="@style/SettingsTheme"
+            android:autoRemoveFromRecents="true">
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_APP_INFO" />
+                <category android:name="android.intent.category." />
+            </intent-filter>
+            -->
         </activity>
 
         <!--

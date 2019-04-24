@@ -1603,10 +1603,7 @@ public class Launcher extends BaseActivity
         String capitalizedProfileName = profile.substring(0, 1).toUpperCase() + profile.substring(1).toLowerCase();
 
         TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
-        if (profileDisplay != null) {
-            System.err.println("Launcher found the profile display");
-            profileDisplay.setText(capitalizedProfileName);
-        }
+        if (profileDisplay != null) profileDisplay.setText(capitalizedProfileName);
 
         return true;
     }

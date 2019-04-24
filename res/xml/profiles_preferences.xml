@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="profiles_screen"
+    android:title="@string/profiles">
+
+    <PreferenceScreen
+            android:key="profile_work"
+            android:title="@string/profile_work"
+            android:icon="@drawable/ic_profile_work"
+            android:persistent="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+                android:key="work_ssids"
+                android:title="@string/profile_pref_ssids"
+                android:hint="@string/profile_pref_ssids_hint"
+                android:selectAllOnFocus="false"
+                android:inputType="textMultiLine"
+        />
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <!--
+        <EditTextPreference
+                android:key="work_wallpaper"
+                android:title="@string/pref_title_wallpaper"
+                android:defaultValue="@string/pref_default_wallpaper"
+                android:selectAllOnFocus="true"
+                android:inputType="textCapWords"
+                android:capitalize="words"
+                android:singleLine="true"
+                android:maxLines="1"
+        />
+        -->
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+                android:key="work_ringtone"
+                android:title="@string/profile_pref_ringtone"
+                android:ringtoneType="notification"
+                android:defaultValue="content://settings/system/notification_sound"/>
+        <!-- android:dependency="notifications_new_message" NOTE: This preference will be enabled only when the checkbox above is checked. -->
+
+        <Preference
+                android:key="work_wallpaper"
+                android:title="@string/profile_pref_wallpaper">
+            <!--android:defaultValue="@string/pref_default_wallpaper">-->
+            <!--<intent
+                    android:action="android.intent.action.VIEW"
+                    android:targetPackage="my.notifier.ui"
+                    android:targetClass="my.notifier.ui.EditCoursesNamesActivity" />
+                    -->
+        </Preference>
+
+        <!--
+        <Preference
+                android:key="work_thumbnail"
+                android:id="@+id/work_thumbnail"
+                android:title="Preview"
+                android:layout="@layout/pref_wallpaper_thumbnail"
+        />-->
+
+        <Preference
+                android:persistent="false"
+                android:title="@string/pref_open_source_licenses_title"
+                android:key="open_source_licenses"
+                android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+            android:key="profile_home"
+            android:title="@string/profile_home"
+            android:icon="@drawable/ic_profile_home"
+            android:persistent="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+                android:key="home_ssids"
+                android:title="@string/profile_pref_ssids"
+                android:hint="@string/profile_pref_ssids_hint"
+                android:selectAllOnFocus="false"
+                android:inputType="textMultiLine"
+        />
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <!--
+        <EditTextPreference
+                android:key="work_wallpaper"
+                android:title="@string/pref_title_wallpaper"
+                android:defaultValue="@string/pref_default_wallpaper"
+                android:selectAllOnFocus="true"
+                android:inputType="textCapWords"
+                android:capitalize="words"
+                android:singleLine="true"
+                android:maxLines="1"
+        />
+        -->
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+                android:key="home_ringtone"
+                android:title="@string/profile_pref_ringtone"
+                android:ringtoneType="ringtone"
+                android:defaultValue="content://settings/system/notification_sound"/>
+        <!-- android:dependency="notifications_new_message" NOTE: This preference will be enabled only when the checkbox above is checked. -->
+
+        <Preference
+                android:key="home_wallpaper"
+                android:title="@string/profile_pref_wallpaper">
+            <!--android:defaultValue="@string/pref_default_wallpaper">-->
+            <!--<intent
+                    android:action="android.intent.action.VIEW"
+                    android:targetPackage="my.notifier.ui"
+                    android:targetClass="my.notifier.ui.EditCoursesNamesActivity" />
+                    -->
+        </Preference>
+
+        <!--
+        <Preference
+                android:key="work_thumbnail"
+                android:id="@+id/work_thumbnail"
+                android:title="Preview"
+                android:layout="@layout/pref_wallpaper_thumbnail"
+        />-->
+
+        <Preference
+                android:persistent="false"
+                android:title="@string/pref_open_source_licenses_title"
+                android:key="open_source_licenses"
+                android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+            android:key="profile_disconnected"
+            android:title="@string/profile_disconnected"
+            android:summary="Enable by activating airplane mode"
+            android:icon="@drawable/ic_profile_disconnected"
+            android:persistent="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+                android:key="disconnected_ssids"
+                android:title="@string/profile_pref_ssids_disconnected"
+                android:summary="@string/profile_pref_ssids_disconnected_summary"
+                android:selectAllOnFocus="false"
+                android:inputType="textMultiLine"
+                android:enabled="false"
+        />
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <!--
+        <EditTextPreference
+                android:key="work_wallpaper"
+                android:title="@string/pref_title_wallpaper"
+                android:defaultValue="@string/pref_default_wallpaper"
+                android:selectAllOnFocus="true"
+                android:inputType="textCapWords"
+                android:capitalize="words"
+                android:singleLine="true"
+                android:maxLines="1"
+        />
+        -->
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+                android:key="disconnected_ringtone"
+                android:title="@string/profile_pref_ringtone"
+                android:ringtoneType="notification"
+                android:defaultValue="content://settings/system/notification_sound"/>
+        <!-- android:dependency="notifications_new_message" NOTE: This preference will be enabled only when the checkbox above is checked. -->
+
+        <Preference
+                android:key="disconnected_wallpaper"
+                android:title="@string/profile_pref_wallpaper">
+            <!--android:defaultValue="@string/pref_default_wallpaper">-->
+            <!--<intent
+                    android:action="android.intent.action.VIEW"
+                    android:targetPackage="my.notifier.ui"
+                    android:targetClass="my.notifier.ui.EditCoursesNamesActivity" />
+                    -->
+        </Preference>
+
+        <!--
+        <Preference
+                android:key="work_thumbnail"
+                android:id="@+id/work_thumbnail"
+                android:title="Preview"
+                android:layout="@layout/pref_wallpaper_thumbnail"
+        />-->
+
+        <Preference
+                android:persistent="false"
+                android:title="@string/pref_open_source_licenses_title"
+                android:key="open_source_licenses"
+                android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+            android:key="profile_default"
+            android:title="@string/profile_default"
+            android:summary="Used if no other profile is enabled"
+            android:icon="@drawable/ic_profiles"
+            android:persistent="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+                android:key="default_ssids"
+                android:title="@string/profile_pref_ssids_default"
+                android:summary="@string/profile_pref_ssids_default_summary"
+                android:selectAllOnFocus="false"
+                android:inputType="textMultiLine"
+                android:enabled="false"
+        />
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <!--
+        <EditTextPreference
+                android:key="work_wallpaper"
+                android:title="@string/pref_title_wallpaper"
+                android:defaultValue="@string/pref_default_wallpaper"
+                android:selectAllOnFocus="true"
+                android:inputType="textCapWords"
+                android:capitalize="words"
+                android:singleLine="true"
+                android:maxLines="1"
+        />
+        -->
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+                android:key="default_ringtone"
+                android:title="@string/profile_pref_ringtone"
+                android:ringtoneType="notification"
+                android:defaultValue="content://settings/system/notification_sound"/>
+        <!-- android:dependency="notifications_new_message" NOTE: This preference will be enabled only when the checkbox above is checked. -->
+
+        <Preference
+                android:key="default_wallpaper"
+                android:title="@string/profile_pref_wallpaper">
+            <!--android:defaultValue="@string/pref_default_wallpaper">-->
+            <!--<intent
+                    android:action="android.intent.action.VIEW"
+                    android:targetPackage="my.notifier.ui"
+                    android:targetClass="my.notifier.ui.EditCoursesNamesActivity" />
+                    -->
+        </Preference>
+
+        <!--
+        <Preference
+                android:key="work_thumbnail"
+                android:id="@+id/work_thumbnail"
+                android:title="Preview"
+                android:layout="@layout/pref_wallpaper_thumbnail"
+        />-->
+
+        <Preference
+                android:persistent="false"
+                android:title="@string/pref_open_source_licenses_title"
+                android:key="open_source_licenses"
+                android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
+
+    </PreferenceScreen>
+
+</PreferenceScreen>
