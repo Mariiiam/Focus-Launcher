@@ -333,6 +333,7 @@
     <string name="pref_show_google_now_summary">@string/msg_minus_one_on_left</string>
     <string name="msg_minus_one_on_left">To the left of the main Home screen</string>
     <string name="about">About</string>
+    <string name="about_summary">Show info about this app</string>
     <string name="profiles">Profiles</string>
     <string name="profile_display_default">Current Profile</string>
     <string name="profile_work">Work</string>
@@ -342,6 +343,7 @@
     <string name="profile_pref_wallpaper">Wallpaper</string>
     <string name="profile_pref_wallpaper_hint">Wallpaper</string>
     <string name="profile_pref_ringtone">Ringtone</string>
+    <string name="profile_pref_notification_sound">Notification Sound</string>
     <string name="profile_pref_ringtone_silent">Silent</string>
     <string name="profile_pref_ssids">Associated WiFi Names</string>
     <string name="profile_pref_ssids_hint">This profile is active while connected to one of the provided WiFis</string>

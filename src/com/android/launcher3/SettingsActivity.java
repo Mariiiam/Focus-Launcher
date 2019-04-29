@@ -63,14 +63,15 @@ public class SettingsActivity extends Activity {
         private IconBadgingObserver mIconBadgingObserver;
         private ProfilesActivity.ProfilesSettingsFragment mProfileSettings = new ProfilesActivity.ProfilesSettingsFragment(this);
 
-
-
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             getPreferenceManager().setSharedPreferencesName(LauncherFiles.SHARED_PREFERENCES_KEY);
             addPreferencesFromResource(R.xml.launcher_preferences);
             populateProfilesPlaceholder();
+
+            // No smartspace
+            getPreferenceScreen().removePreference(findPreference(AT_A_GLANCE_KEY));
 
             ContentResolver resolver = getActivity().getContentResolver();
 

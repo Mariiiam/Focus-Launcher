@@ -17,7 +17,6 @@
 package com.google.android.apps.nexuslauncher;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -29,7 +28,7 @@ import android.preference.PreferenceFragment;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
 
@@ -88,7 +87,7 @@ public class ProfilesActivity extends Activity {
                             if (key.equals("current_profile")) {
                                 String profile = sharedPreferences.getString(key, "default");
                                 String capitalizedProfileName = profile.substring(0, 1).toUpperCase() + profile.substring(1).toLowerCase();
-                                profilesGroup.setSummary(capitalizedProfileName);
+                                profilesGroup.setSummary("Currently enabled: " + capitalizedProfileName);
                             }
                         }
                     };
@@ -96,81 +95,24 @@ public class ProfilesActivity extends Activity {
             mCurrentProfileListener.onSharedPreferenceChanged(parent.getPreferenceManager().getSharedPreferences(), "current_profile");
         }
 
-        private enum OPEN_WALLPAPER_CODES {
-            HOME(2), WORK(3), DISCONNECTED(4), DEFAULT(1);
-
-            private int code;
-
-            OPEN_WALLPAPER_CODES(int code) {
-                this.code = code;
-            }
-
-            public static int getCodeForProfile(String profile) {
-                for (OPEN_WALLPAPER_CODES enm : OPEN_WALLPAPER_CODES.values()) {
-                    if (enm.name().toLowerCase().equals(profile)) {
-                        return enm.code;
-                    }
-                }
-                return -1;
-            }
-
-            public static String getProfileFromCode(int code) {
-                for (OPEN_WALLPAPER_CODES enm : OPEN_WALLPAPER_CODES.values()) {
-                    if (enm.code == code) {
-                        return enm.name().toLowerCase();
-                    }
-                }
-                return null;
-            }
-        }
-
+        /**
+         * Bind the summaries of EditText/List/Dialog/Ringtone preferences
+         * to their values. When their values change, their summaries are
+         * updated to reflect the new value, per the Android Design
+         * guidelines.
+         */
         private void setupProfilePreferences(final String profile) {
             Preference profileGroup = parent.findPreference("profile_" + profile);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
             Preference ringtonePref = parent.findPreference(profile + "_ringtone");
-            bindPreferenceSummaryToValue(ringtonePref);
+            bindPreferenceToSummary(ringtonePref);
+
+            Preference notificationSoundPref = parent.findPreference(profile + "_notification_sound");
+            bindPreferenceToSummary(notificationSoundPref);
+
             Preference ssidsPref = parent.findPreference(profile + "_ssids");
             if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
-
-            Preference wallpaperPref = parent.findPreference(profile + "_wallpaper");
-            wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    Toast.makeText(preference.getContext(), "Select Wallpaper", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("image/*");
-                    ProfilesSettingsFragment.this.startActivityForResult(intent, OPEN_WALLPAPER_CODES.getCodeForProfile(profile));
-                    return true;
-                }
-            });
         }
-
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-            if (resultCode == RESULT_OK) {
-                String profile = OPEN_WALLPAPER_CODES.getProfileFromCode(requestCode);
-                if (profile != null && resultData != null && resultData.getData() != null) {
-                    // this is the image selected by the user
-                    Uri imageUri = resultData.getData();
-                    Preference wallpaperPref = parent.findPreference(profile + "_wallpaper");
-                    Toast.makeText(wallpaperPref.getContext(), "Wallpaper URI: " + imageUri, Toast.LENGTH_SHORT).show();
-                    wallpaperPref.getEditor().putString(wallpaperPref.getKey(), imageUri.toString()).apply();
-                    wallpaperPref.
-                            getPreferenceManager().getSharedPreferences()
-                            .edit().putString(wallpaperPref.getKey(), imageUri.toString()).apply();
-
-                    //TODO this is a workaround, normally the binding should work and update the summary!
-                    wallpaperPref.setSummary(imageUri.toString());
-                }
-            }
-            super.onActivityResult(requestCode, resultCode, resultData);
-        }
-
 
         /**
          * Binds a preference's summary to its value. More specifically, when the
@@ -181,7 +123,7 @@ public class ProfilesActivity extends Activity {
          *
          * @see #sBindPreferenceSummaryToValueListener
          */
-        private void bindPreferenceSummaryToValue(Preference preference) {
+        private void bindPreferenceToSummary(Preference preference) {
             // Set the listener to watch for value changes.
             preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
@@ -240,8 +182,9 @@ public class ProfilesActivity extends Activity {
                         preference.setSummary(R.string.profile_pref_ringtone_silent);
 
                     } else {
+                        Uri ringtoneUri = Uri.parse(stringValue);
                         Ringtone ringtone = RingtoneManager.getRingtone(
-                                preference.getContext(), Uri.parse(stringValue));
+                                preference.getContext(), ringtoneUri);
 
                         if (ringtone == null) {
                             // Clear the summary if there was a lookup error.
@@ -251,6 +194,14 @@ public class ProfilesActivity extends Activity {
                             // name.
                             String name = ringtone.getTitle(preference.getContext());
                             preference.setSummary(name);
+
+                            // Set ringtone
+                            String profile = preference.getKey().split("_")[0];
+                            String current_profile = preference.getSharedPreferences().getString("current_profile", "");
+                            if (current_profile.equals(profile)) {
+                                int type = ((RingtonePreference) preference).getRingtoneType();
+                                Launcher.setRingtone(ringtoneUri, (Activity) preference.getContext(), type);
+                            }
                         }
                     }
 

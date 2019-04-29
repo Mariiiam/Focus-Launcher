@@ -20,9 +20,7 @@ import android.Manifest;
 import android.animation.*;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.ActivityOptions;
-import android.app.AlertDialog;
-import android.app.SearchManager;
+import android.app.*;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
@@ -30,15 +28,20 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.graphics.*;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.RingtoneManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Process;
 import android.os.*;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -90,11 +93,11 @@ import com.android.launcher3.util.*;
 import com.android.launcher3.widget.*;
 import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.Executor;
 
+import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static com.android.launcher3.util.RunnableWithId.RUNNABLE_ID_BIND_APPS;
 import static com.android.launcher3.util.RunnableWithId.RUNNABLE_ID_BIND_WIDGETS;
 
@@ -432,7 +435,7 @@ public class Launcher extends BaseActivity
         filter.addAction("android.net.wifi.supplicant.CONNECTION_CHANGE");
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
-        updateProfile(mSharedPrefs.getString("current_profile", "default"));
+        updateProfileDisplay(mSharedPrefs.getString("current_profile", "default"));
 
         getSystemUiController().updateUiState(SystemUiController.UI_STATE_BASE_WINDOW,
                 Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText));
@@ -663,6 +666,9 @@ public class Launcher extends BaseActivity
             return;
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
             if (resultCode == RESULT_OK && mWorkspace.isInOverviewMode()) {
+                Bitmap wallpaper = extractWallpaper();
+                String currentProfile = mSharedPrefs.getString("current_profile", "default");
+                saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
                 // User could have free-scrolled between pages before picking a wallpaper; make sure
                 // we move to the closest one now.
                 mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
@@ -747,6 +753,98 @@ public class Launcher extends BaseActivity
             }
         }
         mDragLayer.clearAnimatedView();
+    }
+
+    private Bitmap extractWallpaper() {
+        //final int MAX_WALLPAPER_EXTRACTION_AREA = 112 * 112;
+        Drawable drawable = null;
+        Bitmap bitmap = null;
+
+        WallpaperManager wm = WallpaperManager.getInstance(this);
+        WallpaperInfo info = wm.getWallpaperInfo();
+        if (info != null) {
+            Log.i("WALLPAPER INFO", info.toString());
+            // For live wallpaper, extract colors from thumbnail
+            drawable = info.loadThumbnail(getPackageManager());
+        } else {
+            if (Utilities.ATLEAST_NOUGAT) {
+                try (ParcelFileDescriptor fd = wm.getWallpaperFile(FLAG_SYSTEM)) {
+                    bitmap = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
+                    /*
+                    BitmapRegionDecoder decoder = BitmapRegionDecoder
+                            .newInstance(fd.getFileDescriptor(), false);
+
+                    int requestedArea = decoder.getWidth() * decoder.getHeight();
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+
+                    if (requestedArea > MAX_WALLPAPER_EXTRACTION_AREA) {
+                        double areaRatio =
+                                (double) requestedArea / MAX_WALLPAPER_EXTRACTION_AREA;
+                        double nearestPowOf2 =
+                                Math.floor(Math.log(areaRatio) / (2 * Math.log(2)));
+                        options.inSampleSize = (int) Math.pow(2, nearestPowOf2);
+                    }
+                    Rect region = new Rect(0, 0, decoder.getWidth(), decoder.getHeight());
+                    bitmap = decoder.decodeRegion(region, options);
+                    decoder.recycle();
+                    */
+                } catch (IOException | RuntimeException e) {
+                    Log.e(TAG, "Fetching partial bitmap failed, trying old method", e);
+                }
+            }
+            if(bitmap == null) {
+                try {
+                    drawable = wm.getDrawable();
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Failed to extract the wallpaper drawable", e);
+                }
+            }
+        }
+
+        if (drawable != null && drawable.getIntrinsicWidth() > 0 && drawable.getIntrinsicHeight() > 0) {
+            if (drawable instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                bitmap = bitmapDrawable.getBitmap();
+                if(bitmap != null) return bitmap;
+            }
+
+            if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+                bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+            } else {
+                bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            }
+
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        }
+
+        return bitmap;
+    }
+
+    private void saveImageToAppPrivateFile(Bitmap imageToSave, String filename) {
+        try {
+            FileOutputStream out = openFileOutput(filename, Context.MODE_PRIVATE);
+            imageToSave.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Bitmap getImageFromAppPrivateFile(String filename) {
+        Bitmap bitmap = null;
+        try {
+            //TODO check if file exists
+            FileInputStream in = openFileInput(filename);
+            bitmap =  BitmapFactory.decodeStream(in);
+            in.close();
+        } catch (Exception e) {
+            System.err.println("This is expected if no wallpaper was set for this profile");
+            e.printStackTrace();
+        }
+        return bitmap;
     }
 
     @Override
@@ -1526,12 +1624,13 @@ public class Launcher extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             String newWifiConnection = null;
+            String toastMsg = null;
 
             if (intent.getAction().equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
                 boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
                 if(!connected) {
                     //Start service for disconnected state here
-                    Toast.makeText(context, "WiFi disconnected", Toast.LENGTH_LONG).show();
+                    toastMsg = "WiFi disconnected";
                     newWifiConnection = "disconnected";
                 }
             } else if(intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
@@ -1542,7 +1641,7 @@ public class Launcher extends BaseActivity
                     if (wifiManager != null) {
                         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                         String ssid = wifiInfo.getSSID().replaceAll("\"", "");
-                        Toast.makeText(context, "SSID: " + ssid, Toast.LENGTH_LONG).show();
+                        toastMsg = "SSID: " + ssid;
                         //TODO multiple SSIDs per profile possible!
                         newWifiConnection = ssid;
                     }
@@ -1551,6 +1650,7 @@ public class Launcher extends BaseActivity
 
             if (newWifiConnection != null && context instanceof Launcher) {
                 changeProfile(newWifiConnection);
+                if (toastMsg != null && !((Launcher) context).isFinishing()) Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
             }
 
             /*
@@ -1578,16 +1678,18 @@ public class Launcher extends BaseActivity
 
     public boolean changeProfile(String newSSID) {
         if (newSSID == null) return false;
+        newSSID = newSSID.trim();
+        Log.d("NEW SSID", newSSID);
 
         //TODO disconnected should only fire if no connection to the internet exists (no LTE!!)
         if (newSSID.equals("disconnected")) return updateProfile("disconnected");
 
-        String[] work_ssids = mSharedPrefs.getString("work_ssids", "").split("\\s+");
+        String[] work_ssids = mSharedPrefs.getString("work_ssids", "").split("\\n");
         for (String ssid : work_ssids) {
-            if (ssid.equals(newSSID)) return updateProfile("work");
+            if (ssid.trim().equals(newSSID)) return updateProfile("work");
         }
 
-        String[] home_ssids = mSharedPrefs.getString("home_ssids", "").split("\\s+");
+        String[] home_ssids = mSharedPrefs.getString("home_ssids", "").split("\\n");
         for (String ssid : home_ssids) {
             if (ssid.equals(newSSID)) return updateProfile("home");
         }
@@ -1595,17 +1697,87 @@ public class Launcher extends BaseActivity
         return updateProfile("default");
     }
 
+    private String lastProfileUpdate = null;
+
     private boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
         if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
         mSharedPrefs.edit().putString("current_profile", profile).apply();
+        Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
+        if (profile.equals(lastProfileUpdate)) return true; /* abort updating */
+        else lastProfileUpdate = profile;
+        Log.d("UPDATE PROFILE", profile);
 
+        updateProfileDisplay(profile);
+        updateWallpaper(profile);
+        updateRingtone(profile);
+        updateNotificationSound(profile);
+
+        return true;
+    }
+
+    private void updateProfileDisplay(String profile) {
         String capitalizedProfileName = profile.substring(0, 1).toUpperCase() + profile.substring(1).toLowerCase();
 
         TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
         if (profileDisplay != null) profileDisplay.setText(capitalizedProfileName);
+    }
 
-        return true;
+    private void updateWallpaper(String profile) {
+        try {
+            Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
+            if(wallpaper != null) WallpaperManager.getInstance(this).setBitmap(wallpaper);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateRingtone(String profile) {
+        Uri ringtoneUri = Uri.parse(mSharedPrefs.getString(profile + "_ringtone", null));
+        setRingtone(ringtoneUri, this, RingtoneManager.TYPE_RINGTONE);
+    }
+
+    private void updateNotificationSound(String profile) {
+        Uri notificationSoundUri = Uri.parse(mSharedPrefs.getString(profile + "_notification_sound", null));
+        setRingtone(notificationSoundUri, this, RingtoneManager.TYPE_NOTIFICATION);
+    }
+
+    public static void setRingtone(Uri soundUri, Activity context, int type) {
+        if (soundUri == null) {
+            Log.e("SET RINGTONE", "No URI provided!");
+            return;
+        }
+        try {
+            boolean permission = hasWritePermission(context);
+            if (permission) {
+                RingtoneManager.setActualDefaultRingtoneUri(context, type, soundUri);
+            }
+        } catch(Exception e) {
+            Log.e("SET RINGTONE", "Failed:");
+            e.printStackTrace();
+        }
+    }
+
+    public static final int CODE_WRITE_SETTINGS_PERMISSION = 42;
+    public static boolean hasWritePermission(Activity context){
+        boolean permission;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            permission = Settings.System.canWrite(context);
+        } else {
+            permission = ContextCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_SETTINGS) == PackageManager.PERMISSION_GRANTED;
+        }
+        if (permission) {
+            return true;
+        }  else {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + context.getPackageName()));
+                context.startActivityForResult(intent, CODE_WRITE_SETTINGS_PERMISSION);
+            } else {
+                ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.WRITE_SETTINGS}, CODE_WRITE_SETTINGS_PERMISSION);
+            }
+        }
+        return false;
     }
 
     public void updateIconBadges(final Set<PackageUserKey> updatedBadges) {

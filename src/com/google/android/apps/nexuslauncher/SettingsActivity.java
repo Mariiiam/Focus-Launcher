@@ -70,6 +70,7 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
             findPreference(ENABLE_MINUS_ONE_PREF).setOnPreferenceChangeListener(this);
             findPreference(ENABLE_MINUS_ONE_PREF).setTitle(getDisplayGoogleTitle());
 
+            /*
             PackageManager packageManager = mContext.getPackageManager();
             try {
                 PackageInfo packageInfo = packageManager.getPackageInfo(mContext.getPackageName(), 0);
@@ -77,6 +78,7 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
             } catch (PackageManager.NameNotFoundException ex) {
                 Log.e("SettingsActivity", "Unable to load my own package info", ex);
             }
+            */
 
             try {
                 ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(GOOGLE_APP, 0);
