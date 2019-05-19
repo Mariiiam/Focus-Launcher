@@ -50,11 +50,13 @@
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
 
+        <!--
         <Preference
                 android:persistent="false"
                 android:title="@string/pref_open_source_licenses_title"
                 android:key="open_source_licenses"
                 android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
+        -->
 
     </PreferenceScreen>
 
@@ -87,12 +89,6 @@
                 android:title="@string/profile_pref_notification_sound"
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
-
-        <Preference
-                android:persistent="false"
-                android:title="@string/pref_open_source_licenses_title"
-                android:key="open_source_licenses"
-                android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
 
     </PreferenceScreen>
 
@@ -128,12 +124,6 @@
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
 
-        <Preference
-                android:persistent="false"
-                android:title="@string/pref_open_source_licenses_title"
-                android:key="open_source_licenses"
-                android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
-
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -167,12 +157,6 @@
                 android:title="@string/profile_pref_notification_sound"
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
-
-        <Preference
-                android:persistent="false"
-                android:title="@string/pref_open_source_licenses_title"
-                android:key="open_source_licenses"
-                android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
 
     </PreferenceScreen>
 
