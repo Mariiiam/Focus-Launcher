@@ -296,6 +296,7 @@ public class Launcher extends BaseActivity
     }
 
     private RotationPrefChangeHandler mRotationPrefChangeHandler;
+    private SSIDPrefChangeHandler mSSIDPrefChangeHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -436,6 +437,9 @@ public class Launcher extends BaseActivity
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
         updateProfileDisplay(mSharedPrefs.getString("current_profile", "default"));
+
+        mSSIDPrefChangeHandler = new SSIDPrefChangeHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
 
         getSystemUiController().updateUiState(SystemUiController.UI_STATE_BASE_WINDOW,
                 Themes.getAttrBoolean(this, R.attr.isWorkspaceDarkText));
@@ -1637,6 +1641,8 @@ public class Launcher extends BaseActivity
                 NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 if (netInfo != null && netInfo.isConnected()) {
                     //Start service for connected state here.
+                    newWifiConnection = getCurrentSSID(context);
+                    /*
                     WifiManager wifiManager = (WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                     if (wifiManager != null) {
                         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -1645,6 +1651,7 @@ public class Launcher extends BaseActivity
                         //TODO multiple SSIDs per profile possible!
                         newWifiConnection = ssid;
                     }
+                    */
                 }
             }
 
@@ -1675,6 +1682,20 @@ public class Launcher extends BaseActivity
             */
         }
     };
+
+    private String getCurrentSSID(Context context) {
+        try {
+            WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            if (wifiManager != null) {
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                return wifiInfo.getSSID().replaceAll("\"", "");
+            }
+        } catch (Exception e) {
+            Log.e("Get Wifi Manager", "Something went wrong while fetching current SSID:");
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public boolean changeProfile(String newSSID) {
         if (newSSID == null) return false;
@@ -2085,6 +2106,10 @@ public class Launcher extends BaseActivity
 
         if (mRotationPrefChangeHandler != null) {
             mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mRotationPrefChangeHandler);
+        }
+
+        if (mSSIDPrefChangeHandler != null) {
+            mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
         }
 
         try {
@@ -4313,6 +4338,18 @@ public class Launcher extends BaseActivity
             if (Utilities.ALLOW_ROTATION_PREFERENCE_KEY.equals(key)) {
                 // Recreate the activity so that it initializes the rotation preference again.
                 recreate();
+            }
+        }
+    }
+
+    private class SSIDPrefChangeHandler implements OnSharedPreferenceChangeListener {
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+            final String[] keyParts = key.split("_");
+            if (keyParts.length >= 2 && keyParts[1].equals("ssids")) {
+                final String ssid = getCurrentSSID(Launcher.this);
+                changeProfile(ssid);
             }
         }
     }
