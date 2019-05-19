@@ -1624,13 +1624,13 @@ public class Launcher extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             String newWifiConnection = null;
-            String toastMsg = null;
+            //String toastMsg = null;
 
             if (intent.getAction().equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
                 boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
                 if(!connected) {
                     //Start service for disconnected state here
-                    toastMsg = "WiFi disconnected";
+                    //toastMsg = "WiFi disconnected";
                     newWifiConnection = "disconnected";
                 }
             } else if(intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
@@ -1641,7 +1641,7 @@ public class Launcher extends BaseActivity
                     if (wifiManager != null) {
                         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                         String ssid = wifiInfo.getSSID().replaceAll("\"", "");
-                        toastMsg = "SSID: " + ssid;
+                        //toastMsg = "SSID: " + ssid;
                         //TODO multiple SSIDs per profile possible!
                         newWifiConnection = ssid;
                     }
@@ -1650,7 +1650,7 @@ public class Launcher extends BaseActivity
 
             if (newWifiConnection != null && context instanceof Launcher) {
                 changeProfile(newWifiConnection);
-                if (toastMsg != null && !((Launcher) context).isFinishing()) Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
+                //if (toastMsg != null && !((Launcher) context).isFinishing()) Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
             }
 
             /*
