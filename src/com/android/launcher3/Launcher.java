@@ -1732,7 +1732,12 @@ public class Launcher extends BaseActivity
     private void updateWallpaper(String profile) {
         try {
             Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
-            if(wallpaper != null) WallpaperManager.getInstance(this).setBitmap(wallpaper);
+            if(wallpaper != null) {
+                WallpaperManager.getInstance(this).setBitmap(wallpaper);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    WallpaperManager.getInstance(this).setBitmap(wallpaper, null, true, WallpaperManager.FLAG_LOCK);
+                }
+            }
         } catch(Exception e) {
             e.printStackTrace();
         }
