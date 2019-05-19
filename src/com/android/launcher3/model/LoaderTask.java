@@ -148,7 +148,7 @@ public class LoaderTask implements Runnable {
 
             verifyNotStopped();
             if (DEBUG_LOADERS) Log.d(TAG, "step 1.2: bind workspace workspace");
-            mResults.bindWorkspace();
+            mResults.bindWorkspace(mApp.getContext());
 
             // Take a break
             if (DEBUG_LOADERS) {
@@ -835,7 +835,7 @@ public class LoaderTask implements Runnable {
 
         mBgAllAppsList.added = new ArrayList<>();
         if (DEBUG_LOADERS) {
-            Log.d(TAG, "All apps loaded in in "
+            Log.d(TAG, "All apps loaded in "
                     + (SystemClock.uptimeMillis() - loadTime) + "ms");
         }
     }

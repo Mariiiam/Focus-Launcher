@@ -478,7 +478,7 @@ public class LauncherModel extends BroadcastReceiver
                 if (mModelLoaded && !mIsLoaderTaskRunning) {
                     // Divide the set of loaded items into those that we are binding synchronously,
                     // and everything else that is to be bound normally (asynchronously).
-                    loaderResults.bindWorkspace();
+                    loaderResults.bindWorkspace(mApp.getContext());
                     // For now, continue posting the binding of AllApps as there are other
                     // issues that arise from that.
                     loaderResults.bindAllApps();

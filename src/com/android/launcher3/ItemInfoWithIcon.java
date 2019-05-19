@@ -35,8 +35,8 @@ public abstract class ItemInfoWithIcon extends ItemInfo {
 
     protected ItemInfoWithIcon() { }
 
-    protected ItemInfoWithIcon(ItemInfoWithIcon info) {
-        super(info);
+    protected ItemInfoWithIcon(ItemInfoWithIcon info, String profile) {
+        super(info, profile);
         iconBitmap = info.iconBitmap;
         usingLowResIcon = info.usingLowResIcon;
     }

@@ -84,6 +84,12 @@ public class LauncherSettings {
          * <P>Type: BLOB</P>
          */
         public static final String ICON = "icon";
+
+        /**
+         * The profile this info is connected to..
+         * <P>Type: TEXT</P>
+         */
+        public static final String PROFILE = "profile";
     }
 
     /**
@@ -251,6 +257,13 @@ public class LauncherSettings {
          */
         public static final String RANK = "rank";
 
+
+        /**
+         * The profile this info is connected to..
+         * <P>Type: STRING</P>
+         */
+        public static final String PROFILE = "profile";
+
         /**
          * Stores general flag based options for {@link ItemInfo}s.
          * <p>Type: INTEGER</p>
@@ -275,6 +288,7 @@ public class LauncherSettings {
                     "iconResource TEXT," +
                     "icon BLOB," +
                     "appWidgetProvider TEXT," +
+                    "profile TEXT," +
                     "modified INTEGER NOT NULL DEFAULT 0," +
                     "restored INTEGER NOT NULL DEFAULT 0," +
                     "profileId INTEGER DEFAULT " + myProfileId + "," +

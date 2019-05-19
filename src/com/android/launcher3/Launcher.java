@@ -1698,7 +1698,6 @@ public class Launcher extends BaseActivity
     }
 
     private String lastProfileUpdate = null;
-
     private boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
         if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
@@ -1712,8 +1711,15 @@ public class Launcher extends BaseActivity
         updateWallpaper(profile);
         updateRingtone(profile);
         updateNotificationSound(profile);
+        updateApps(profile);
 
         return true;
+    }
+
+    private void updateApps(String profile) {
+        //mModel.refreshAndBindWidgetsAndShortcuts(null);
+        Log.e("UPDATE APPS", "With profile "+ profile);
+        mModel.forceReload();
     }
 
     private void updateProfileDisplay(String profile) {
@@ -1733,13 +1739,21 @@ public class Launcher extends BaseActivity
     }
 
     private void updateRingtone(String profile) {
-        Uri ringtoneUri = Uri.parse(mSharedPrefs.getString(profile + "_ringtone", null));
-        setRingtone(ringtoneUri, this, RingtoneManager.TYPE_RINGTONE);
+        try {
+            Uri ringtoneUri = Uri.parse(mSharedPrefs.getString(profile + "_ringtone", null));
+            if(ringtoneUri != null) setRingtone(ringtoneUri, this, RingtoneManager.TYPE_RINGTONE);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateNotificationSound(String profile) {
-        Uri notificationSoundUri = Uri.parse(mSharedPrefs.getString(profile + "_notification_sound", null));
-        setRingtone(notificationSoundUri, this, RingtoneManager.TYPE_NOTIFICATION);
+        try {
+            Uri notificationSoundUri = Uri.parse(mSharedPrefs.getString(profile + "_notification_sound", null));
+            if(notificationSoundUri != null) setRingtone(notificationSoundUri, this, RingtoneManager.TYPE_NOTIFICATION);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void setRingtone(Uri soundUri, Activity context, int type) {
@@ -2052,6 +2066,7 @@ public class Launcher extends BaseActivity
         super.onDestroy();
 
         unregisterReceiver(mReceiver);
+        unregisterReceiver(mWiFiReceiver);
         mWorkspace.removeCallbacks(mBuildLayersRunnable);
         mWorkspace.removeFolderListeners();
 

@@ -377,6 +377,10 @@
     <string name="theme_transparent">Transparent</string>
     <string name="pref_open_source_licenses_title">Open source licenses</string>
 
+    <!-- Notifications -->
+    <string name="channel_name">Focus Launcher</string>
+    <string name="channel_description">Interactive notifications to measure detachment</string>
+
     <!-- Custom -->
     <string name="app_name_rootless_pixel_launcher">Focus Launcher</string>
     <string name="about_donate">Donate</string>

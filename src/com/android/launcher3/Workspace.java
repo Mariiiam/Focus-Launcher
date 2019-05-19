@@ -3269,7 +3269,7 @@ public class Workspace extends PagedView
             case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT:
                 if (info.container == NO_ID && info instanceof AppInfo) {
                     // Came from all apps -- make a copy
-                    info = ((AppInfo) info).makeShortcut();
+                    info = ((AppInfo) info).makeShortcut(mLauncher);
                     d.dragInfo = info;
                 }
                 view = mLauncher.createShortcut(cellLayout, (ShortcutInfo) info);

@@ -136,7 +136,7 @@ public class ShortcutInfo extends ItemInfoWithIcon {
     }
 
     public ShortcutInfo(ShortcutInfo info) {
-        super(info);
+        super(info, normalizeProfile(info.profile));
         title = info.title;
         intent = new Intent(info.intent);
         iconResource = info.iconResource;
@@ -151,6 +151,19 @@ public class ShortcutInfo extends ItemInfoWithIcon {
         title = Utilities.trim(info.title);
         intent = new Intent(info.intent);
         isDisabled = info.isDisabled;
+        //TODO profile = getCurrentProfile()
+        Log.e("Shortcut CONSTRUCTOR", "from AppInfo");
+    }
+    */
+
+    /** TODO: Remove this.  It's only called by ApplicationInfo.makeShortcut. */
+    public ShortcutInfo(AppInfo info, String profile) {
+        super(info, normalizeProfile(profile));
+        title = Utilities.trim(info.title);
+        intent = new Intent(info.intent);
+        isDisabled = info.isDisabled;
+        //this.profile = normalizeProfile(profile);
+        //Log.e("Shortcut CONSTRUCTOR", "from AppInfo");
     }
 
     /**
@@ -161,6 +174,9 @@ public class ShortcutInfo extends ItemInfoWithIcon {
         user = shortcutInfo.getUserHandle();
         itemType = LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT;
         updateFromDeepShortcutInfo(shortcutInfo, context);
+        profile = getProfile(context);
+        //Log.e("Shortcut CONSTRUCTOR", "from ShortcutInfoCompat and Context");
+
     }
 
     @Override
@@ -168,7 +184,8 @@ public class ShortcutInfo extends ItemInfoWithIcon {
         super.onAddToDatabase(writer);
         writer.put(LauncherSettings.BaseLauncherColumns.TITLE, title)
                 .put(LauncherSettings.BaseLauncherColumns.INTENT, getIntent())
-                .put(LauncherSettings.Favorites.RESTORED, status);
+                .put(LauncherSettings.Favorites.RESTORED, status)
+                .put(LauncherSettings.BaseLauncherColumns.PROFILE, profile);
 
         if (!usingLowResIcon) {
             writer.putIcon(iconBitmap, user);

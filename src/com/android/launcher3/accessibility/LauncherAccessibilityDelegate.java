@@ -166,7 +166,7 @@ public class LauncherAccessibilityDelegate extends AccessibilityDelegate impleme
                 @Override
                 public void run() {
                     if (item instanceof AppInfo) {
-                        ShortcutInfo info = ((AppInfo) item).makeShortcut();
+                        ShortcutInfo info = ((AppInfo) item).makeShortcut(mLauncher);
                         mLauncher.getModelWriter().addItemToDatabase(info,
                                 LauncherSettings.Favorites.CONTAINER_DESKTOP,
                                 screenId, coordinates[0], coordinates[1]);

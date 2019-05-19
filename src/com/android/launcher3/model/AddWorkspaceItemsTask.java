@@ -87,7 +87,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
                 if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
                     if (item instanceof AppInfo) {
-                        item = ((AppInfo) item).makeShortcut();
+                        item = ((AppInfo) item).makeShortcut(context);
                     }
 
                     if (!Process.myUserHandle().equals(item.user)) {
@@ -122,7 +122,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                         item instanceof LauncherAppWidgetInfo) {
                     itemInfo = item;
                 } else if (item instanceof AppInfo) {
-                    itemInfo = ((AppInfo) item).makeShortcut();
+                    itemInfo = ((AppInfo) item).makeShortcut(context);
                 } else {
                     throw new RuntimeException("Unexpected info type");
                 }

@@ -18,6 +18,7 @@ package com.android.launcher3;
 
 import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Process;
 import android.os.UserHandle;
@@ -108,12 +109,36 @@ public class ItemInfo {
 
     public UserHandle user;
 
+    public String profile;
+
+    public static String getProfile(Context context) {
+        return Utilities.getPrefs(context).getString("current_profile", "default");
+    }
+
+    public static String normalizeProfile(String profile) {
+        if (profile == null || profile.trim().equals("")) {
+            return "default";
+        } else {
+            return profile;
+        }
+    }
+
+    public static String normalizeProfile(String profile, Context context) {
+        if (profile == null || profile.trim().equals("")) {
+            return getProfile(context);
+        } else {
+            return profile;
+        }
+    }
+
+
     public ItemInfo() {
         user = Process.myUserHandle();
     }
 
-    ItemInfo(ItemInfo info) {
+    ItemInfo(ItemInfo info, String profile) {
         copyFrom(info);
+        this.profile = profile;
         // tempdebug:
         LauncherModel.checkItemInfo(this);
     }

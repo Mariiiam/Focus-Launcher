@@ -76,6 +76,7 @@ public class LoaderCursor extends CursorWrapper {
     private final int iconResourceIndex;
     private final int iconIndex;
     public final int titleIndex;
+    public final int profileIndex;
 
     private final int idIndex;
     private final int containerIndex;
@@ -94,6 +95,7 @@ public class LoaderCursor extends CursorWrapper {
     public long container;
     public int itemType;
     public int restoreFlag;
+    public String profile;
 
     public LoaderCursor(Cursor c, LauncherAppState app) {
         super(c);
@@ -107,6 +109,7 @@ public class LoaderCursor extends CursorWrapper {
         iconPackageIndex = getColumnIndexOrThrow(LauncherSettings.Favorites.ICON_PACKAGE);
         iconResourceIndex = getColumnIndexOrThrow(LauncherSettings.Favorites.ICON_RESOURCE);
         titleIndex = getColumnIndexOrThrow(LauncherSettings.Favorites.TITLE);
+        profileIndex = getColumnIndexOrThrow(LauncherSettings.Favorites.PROFILE);
 
         idIndex = getColumnIndexOrThrow(LauncherSettings.Favorites._ID);
         containerIndex = getColumnIndexOrThrow(LauncherSettings.Favorites.CONTAINER);
@@ -152,6 +155,7 @@ public class LoaderCursor extends CursorWrapper {
         info.itemType = itemType;
         info.title = getTitle();
         info.iconBitmap = loadIcon(info);
+        info.profile = ShortcutInfo.normalizeProfile(getProfile());
         // the fallback icon
         if (info.iconBitmap == null) {
             info.iconBitmap = mIconCache.getDefaultIcon(info.user);
@@ -200,6 +204,14 @@ public class LoaderCursor extends CursorWrapper {
     private String getTitle() {
         String title = getString(titleIndex);
         return TextUtils.isEmpty(title) ? "" : Utilities.trim(title);
+    }
+
+    /**
+     * Returns the profile or default string
+     */
+    private String getProfile() {
+        String profile = getString(profileIndex);
+        return TextUtils.isEmpty(profile) ? "default" : Utilities.trim(profile);
     }
 
 
@@ -267,6 +279,7 @@ public class LoaderCursor extends CursorWrapper {
         info.itemType = LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
         info.user = user;
         info.intent = newIntent;
+        info.profile = getProfile();
 
         mIconCache.getTitleAndIcon(info, lai, useLowResIcon);
         if (mIconCache.isDefaultIcon(info.iconBitmap, user)) {
@@ -448,16 +461,19 @@ public class LoaderCursor extends CursorWrapper {
             return false;
         }
 
-        if (!occupied.containsKey(item.screenId)) {
+        final long screenKey = item.screenId + item.profile.hashCode();
+        if (!occupied.containsKey(screenKey)) {
             GridOccupancy screen = new GridOccupancy(countX + 1, countY + 1);
+            /*
             if (item.screenId == Workspace.FIRST_SCREEN_ID) {
                 // Mark the first row as occupied (if the feature is enabled)
                 // in order to account for the QSB.
                 screen.markCells(0, 0, countX + 1, 1, FeatureFlags.QSB_ON_FIRST_SCREEN);
             }
-            occupied.put(item.screenId, screen);
+            */
+            occupied.put(screenKey, screen);
         }
-        final GridOccupancy occupancy = occupied.get(item.screenId);
+        final GridOccupancy occupancy = occupied.get(screenKey);
 
         // Check if any workspace icons overlap with each other
         if (occupancy.isRegionVacant(item.cellX, item.cellY, item.spanX, item.spanY)) {

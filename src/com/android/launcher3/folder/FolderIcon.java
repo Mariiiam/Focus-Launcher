@@ -375,7 +375,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         ShortcutInfo item;
         if (d.dragInfo instanceof AppInfo) {
             // Came from all apps -- make a copy
-            item = ((AppInfo) d.dragInfo).makeShortcut();
+            item = ((AppInfo) d.dragInfo).makeShortcut(mLauncher);
         } else if (d.dragSource instanceof BaseItemDragListener){
             // Came from a different window -- make a copy
             item = new ShortcutInfo((ShortcutInfo) d.dragInfo);

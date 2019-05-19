@@ -1377,7 +1377,7 @@ public class Folder extends AbstractFloatingView implements DragSource, View.OnC
                 si = pasiSi;
             } else if (d.dragInfo instanceof AppInfo) {
                 // Came from all apps -- make a copy.
-                si = ((AppInfo) d.dragInfo).makeShortcut();
+                si = ((AppInfo) d.dragInfo).makeShortcut(mLauncher);
             } else {
                 // ShortcutInfo
                 si = (ShortcutInfo) d.dragInfo;
