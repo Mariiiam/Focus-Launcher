@@ -145,7 +145,8 @@ public class ShortcutInfo extends ItemInfoWithIcon {
         isDisabled = info.isDisabled;
     }
 
-    /** TODO: Remove this.  It's only called by ApplicationInfo.makeShortcut. */
+    /*
+    //TODO: Remove this.  It's only called by ApplicationInfo.makeShortcut.
     public ShortcutInfo(AppInfo info) {
         super(info);
         title = Utilities.trim(info.title);

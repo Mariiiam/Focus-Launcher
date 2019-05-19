@@ -16,21 +16,11 @@
 
 package com.android.launcher3.model;
 
+import android.content.Context;
 import android.os.Looper;
 import android.util.Log;
-
-import com.android.launcher3.AllAppsList;
-import com.android.launcher3.AppInfo;
-import com.android.launcher3.InvariantDeviceProfile;
-import com.android.launcher3.ItemInfo;
-import com.android.launcher3.LauncherAppState;
-import com.android.launcher3.LauncherAppWidgetInfo;
-import com.android.launcher3.LauncherModel;
+import com.android.launcher3.*;
 import com.android.launcher3.LauncherModel.Callbacks;
-import com.android.launcher3.LauncherSettings;
-import com.android.launcher3.MainThreadExecutor;
-import com.android.launcher3.PagedView;
-import com.android.launcher3.Utilities;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.LooperIdleLock;
@@ -38,12 +28,7 @@ import com.android.launcher3.util.MultiHashMap;
 import com.android.launcher3.util.ViewOnDrawExecutor;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 /**
@@ -77,7 +62,7 @@ public class LoaderResults {
     /**
      * Binds all loaded data to actual views on the main thread.
      */
-    public void bindWorkspace() {
+    public void bindWorkspace(Context context) {
         Runnable r;
 
         Callbacks callbacks = mCallbacks.get();
@@ -121,9 +106,9 @@ public class LoaderResults {
         ArrayList<LauncherAppWidgetInfo> otherAppWidgets = new ArrayList<>();
 
         filterCurrentWorkspaceItems(currentScreenId, workspaceItems, currentWorkspaceItems,
-                otherWorkspaceItems);
+                otherWorkspaceItems, context);
         filterCurrentWorkspaceItems(currentScreenId, appWidgets, currentAppWidgets,
-                otherAppWidgets);
+                otherAppWidgets, context);
         sortWorkspaceItemsSpatially(currentWorkspaceItems);
         sortWorkspaceItemsSpatially(otherWorkspaceItems);
 
@@ -208,10 +193,13 @@ public class LoaderResults {
 
     /** Filters the set of items who are directly or indirectly (via another container) on the
      * specified screen. */
-    private <T extends ItemInfo> void filterCurrentWorkspaceItems(long currentScreenId,
+    private <T extends ItemInfo> void filterCurrentWorkspaceItems(
+            long currentScreenId,
             ArrayList<T> allWorkspaceItems,
             ArrayList<T> currentScreenItems,
-            ArrayList<T> otherScreenItems) {
+            ArrayList<T> otherScreenItems,
+            Context context
+    ) {
         // Purge any null ItemInfos
         Iterator<T> iter = allWorkspaceItems.iterator();
         while (iter.hasNext()) {
@@ -231,13 +219,18 @@ public class LoaderResults {
                 return Utilities.longCompare(lhs.container, rhs.container);
             }
         });
+
+        final String currentProfile = Utilities.getPrefs(context).getString("current_profile", "default");
         for (T info : allWorkspaceItems) {
             if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
-                if (info.screenId == currentScreenId) {
-                    currentScreenItems.add(info);
-                    itemsOnScreen.add(info.id);
-                } else {
-                    otherScreenItems.add(info);
+                final boolean correctProfile = (info instanceof ShortcutInfo) && ((ShortcutInfo)info).profile != null && ((ShortcutInfo)info).profile.equals(currentProfile);
+                if(correctProfile) {
+                    if (info.screenId == currentScreenId) {
+                        currentScreenItems.add(info);
+                        itemsOnScreen.add(info.id);
+                    } else {
+                        otherScreenItems.add(info);
+                    }
                 }
             } else if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
                 currentScreenItems.add(info);

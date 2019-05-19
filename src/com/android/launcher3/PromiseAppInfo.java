@@ -37,7 +37,7 @@ public class PromiseAppInfo extends AppInfo {
 
     @Override
     public ShortcutInfo makeShortcut() {
-        ShortcutInfo shortcut = new ShortcutInfo(this);
+        ShortcutInfo shortcut = new ShortcutInfo(this, "default");
         shortcut.setInstallProgress(level);
         // We need to update the component name when the apk is installed
         shortcut.status |= ShortcutInfo.FLAG_AUTOINSTALL_ICON;

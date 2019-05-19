@@ -23,6 +23,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.os.UserHandle;
 
+import android.util.Log;
 import com.android.launcher3.compat.UserManagerCompat;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.PackageManagerHelper;
@@ -88,7 +89,7 @@ public class AppInfo extends ItemInfoWithIcon {
     }
 
     public AppInfo(AppInfo info) {
-        super(info);
+        super(info, "DUMMY");
         componentName = info.componentName;
         title = Utilities.trim(info.title);
         intent = new Intent(info.intent);
@@ -101,8 +102,20 @@ public class AppInfo extends ItemInfoWithIcon {
         return super.dumpProperties() + " componentName=" + componentName;
     }
 
+    public ShortcutInfo makeShortcut(Context context) {
+        Log.d("AppInfo", "makeShortcut(context)");
+        final String currentProfile = Utilities.getPrefs(context).getString("current_profile", "default");
+        return this.makeShortcut(currentProfile);
+    }
+
     public ShortcutInfo makeShortcut() {
-        return new ShortcutInfo(this);
+        Log.d("AppInfo", "makeShortcut()");
+        return this.makeShortcut("default");
+    }
+
+    public ShortcutInfo makeShortcut(String profile) {
+        Log.d("AppInfo", "makeShortcut(profile = "+ profile +")");
+        return new ShortcutInfo(this, profile);
     }
 
     public ComponentKey toComponentKey() {
