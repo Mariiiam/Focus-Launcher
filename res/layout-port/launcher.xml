@@ -24,23 +24,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <TextView
-            android:id="@+id/profile_display"
-            android:text=""
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textColor="?workspaceTextColor"
-            android:textSize="16sp"
-            android:layout_gravity="center|top"
-            android:gravity="center|top"
-            android:background="@drawable/bg_smartspace"
-            android:layout_weight="1.0"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="-23dp"
-            android:layout_marginTop="-23dp"
-            android:clickable="false"
-    />
 
     <com.android.launcher3.dragndrop.DragLayer
         android:id="@+id/drag_layer"
@@ -95,6 +78,23 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="invisible" />
+
+        <TextView
+                android:id="@+id/profile_display"
+                android:text=""
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:gravity="end"
+                android:background="@drawable/bg_smartspace"
+                android:layout_weight="1.0"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:clickable="false"
+                android:layout_marginTop="-7dp"
+        />
     </com.android.launcher3.dragndrop.DragLayer>
 
 </com.android.launcher3.LauncherRootView>

@@ -1750,6 +1750,13 @@ public class Launcher extends BaseActivity
         if (profileDisplay != null) profileDisplay.setText(capitalizedProfileName);
     }
 
+    final static int COLOR_THEME_DARK = Color.parseColor("#4f4f4f");
+    final static int COLOR_THEME_LIGHT = Color.parseColor("#ffffff");
+    public void setProfileDisplayTheme(boolean darkTheme) {
+        TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
+        profileDisplay.setTextColor(darkTheme ? COLOR_THEME_DARK : COLOR_THEME_LIGHT);
+    }
+
     private void updateWallpaper(String profile) {
         try {
             Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
