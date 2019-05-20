@@ -16,8 +16,8 @@
 
 package com.google.android.apps.nexuslauncher;
 
-import android.app.Activity;
-import android.content.SharedPreferences;
+import android.app.*;
+import android.content.*;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -26,11 +26,18 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.RingtonePreference;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
+import com.android.launcher3.SettingsActivity;
+import com.android.launcher3.notification.NotificationListener;
+import com.android.launcher3.views.ButtonPreference;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -55,6 +62,7 @@ public class ProfilesActivity extends Activity {
     public static class ProfilesSettingsFragment extends PreferenceFragment {
 
         private PreferenceFragment parent;
+        private Map<String, HideNotificationsObserver> mHideNotificationsObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
 
         public ProfilesSettingsFragment(PreferenceFragment parent) {
@@ -110,8 +118,27 @@ public class ProfilesActivity extends Activity {
             Preference notificationSoundPref = parent.findPreference(profile + "_notification_sound");
             bindPreferenceToSummary(notificationSoundPref);
 
+            Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
+            if (notificationBlockingPref != null) {
+                observeNotificationBlockingPref(profile, (ButtonPreference) notificationBlockingPref);
+            }
+
             Preference ssidsPref = parent.findPreference(profile + "_ssids");
             if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+        }
+
+        private void observeNotificationBlockingPref(final String profile, ButtonPreference notificationBlockingPref) {
+            if (!parent.getResources().getBoolean(R.bool.notification_badging_enabled)) {
+                parent.getPreferenceScreen().removePreference(notificationBlockingPref);
+            } else {
+                ContentResolver resolver = parent.getActivity().getContentResolver();
+                // Listen to system notification badge settings while this UI is active.
+                HideNotificationsObserver hideNotificationsObserver = new HideNotificationsObserver(
+                        notificationBlockingPref, resolver, parent.getFragmentManager(),
+                        parent.getPreferenceManager().getSharedPreferences(), notificationBlockingPref.getKey());
+                hideNotificationsObserver.register(SettingsActivity.NOTIFICATION_BADGING, SettingsActivity.NOTIFICATION_ENABLED_LISTENERS);
+                mHideNotificationsObservers.put(profile, hideNotificationsObserver);
+            }
         }
 
         /**
@@ -221,6 +248,51 @@ public class ProfilesActivity extends Activity {
                 mCurrentProfileListener = null;
             }
             if(this.parent == this) super.onDestroy();
+        }
+    }
+
+    /**
+     * Content observer which listens for system badging setting changes,
+     * and updates the launcher badging setting subtext accordingly.
+     */
+    private static class HideNotificationsObserver extends SettingsActivity.IconBadgingObserver {
+        public HideNotificationsObserver(
+                ButtonPreference badgingPref,
+                ContentResolver resolver,
+                FragmentManager fragmentManager,
+                SharedPreferences sharedPrefs,
+                String prefKey) {
+            super(badgingPref, resolver, fragmentManager, sharedPrefs, prefKey);
+        }
+
+        protected void showAccessConfirmation(FragmentManager fragmentManager) {
+            new NotificationAccessConfirmation().show(fragmentManager, "notification_access");
+        }
+    }
+
+    public static class NotificationAccessConfirmation
+            extends DialogFragment implements DialogInterface.OnClickListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Context context = getActivity();
+            String msg = context.getString(R.string.msg_missing_notification_access_for_blocking,
+                    context.getString(R.string.derived_app_name));
+            return new AlertDialog.Builder(context)
+                    .setTitle(R.string.title_missing_notification_access)
+                    .setMessage(msg)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.title_change_settings, this)
+                    .create();
+        }
+
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            ComponentName cn = new ComponentName(getActivity(), NotificationListener.class);
+            Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .putExtra(":settings:fragment_args_key", cn.flattenToString());
+            getActivity().startActivity(intent);
         }
     }
 }

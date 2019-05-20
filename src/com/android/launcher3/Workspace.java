@@ -3837,7 +3837,7 @@ public class Workspace extends PagedView
      * @param recurse true: iterate over folder children. false: op get the folders themselves.
      * @param op the operator to map over the shortcuts
      */
-    void mapOverItems(boolean recurse, ItemOperator op) {
+    public void mapOverItems(boolean recurse, ItemOperator op) {
         ArrayList<ShortcutAndWidgetContainer> containers = getAllShortcutAndWidgetContainers();
         final int containerCount = containers.size();
         for (int containerIdx = 0; containerIdx < containerCount; containerIdx++) {

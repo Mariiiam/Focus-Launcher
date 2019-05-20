@@ -461,7 +461,7 @@ public class LoaderCursor extends CursorWrapper {
             return false;
         }
 
-        final long screenKey = item.screenId + item.profile.hashCode();
+        final long screenKey = item.screenId + (item.profile != null ? item.profile.hashCode() : 0);
         if (!occupied.containsKey(screenKey)) {
             GridOccupancy screen = new GridOccupancy(countX + 1, countY + 1);
             /*

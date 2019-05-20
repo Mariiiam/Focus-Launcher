@@ -21,12 +21,10 @@ import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
-
-import com.android.launcher3.ItemInfo;
-import com.android.launcher3.Launcher;
-import com.android.launcher3.R;
-import com.android.launcher3.Utilities;
+import android.view.View;
+import com.android.launcher3.*;
 import com.android.launcher3.badge.BadgeInfo;
 import com.android.launcher3.notification.NotificationInfo;
 import com.android.launcher3.notification.NotificationKeyData;
@@ -38,13 +36,7 @@ import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.MultiHashMap;
 import com.android.launcher3.util.PackageUserKey;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides data for the popup menu that appears after long-clicking on apps.
@@ -73,30 +65,155 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         };
     }
 
+    private boolean currentProfileHidesNotificationsFromAppsNotOnHomescreen() {
+        String currentProfile = mLauncher.getSharedPrefs().getString("current_profile", "default");
+        boolean pref = mLauncher.getSharedPrefs().getBoolean(currentProfile + "_hide_notifications", false);
+        Log.e("NOTIFICATIONS", currentProfile + "_hide_notifications = "+ pref);
+        return pref;
+    }
+
+    private boolean isAppOnHomescreen(final PackageUserKey packageUserKey) {
+        final boolean[] isOnHomescreen = new boolean[]{false};
+        mLauncher.getWorkspace().mapOverItems(true, new Workspace.ItemOperator() {
+            @Override
+            public boolean evaluate(ItemInfo info, View view) {
+                if (info instanceof ShortcutInfo) {
+                    ShortcutInfo si = (ShortcutInfo) info;
+                    String packageName = si.intent.getComponent() != null
+                            ? si.intent.getComponent().getPackageName()
+                            : si.intent.getPackage();
+                    if (!TextUtils.isEmpty(packageName) && packageName.equals(packageUserKey.mPackageName)) {
+                        isOnHomescreen[0] = true;
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+        return isOnHomescreen[0];
+    }
+
+    private void hideNotification(NotificationKeyData notificationKeyData) {
+        cancelNotification(notificationKeyData.notificationKey);
+
+        //disableNotifications();
+        //NotificationManager notificationManager = (NotificationManager) mLauncher.getSystemService(Context.NOTIFICATION_SERVICE);
+        //sendDummyNotification(notificationManager);
+    }
+
+    /*
+    private void enableNotifications() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NotificationManager mNotificationManager = (NotificationManager) mLauncher.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (mNotificationManager != null) {
+                mNotificationManager.setInterruptionFilter(interruptionFilterBefore);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+                    mNotificationManager.setNotificationPolicy(notificationPolicyBefore);
+                }
+                } else {
+                Log.w("ALARM", "Can't access system service NotificationManager");
+            }
+        }
+    }
+
+    private int interruptionFilterBefore;
+    private NotificationManager.Policy notificationPolicyBefore;
+
+    private void disableNotifications() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Log.e("NOTIFICATIONS", "do not disturb");
+            NotificationManager mNotificationManager = (NotificationManager) mLauncher.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (mNotificationManager != null) {
+                if (mNotificationManager.isNotificationPolicyAccessGranted()) {
+                    interruptionFilterBefore = mNotificationManager.getCurrentInterruptionFilter();
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+                        notificationPolicyBefore = mNotificationManager.getNotificationPolicy();
+                        NotificationManager.Policy policy = new NotificationManager.Policy(
+                                NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES | NotificationManager.Policy.PRIORITY_CATEGORY_REMINDERS | NotificationManager.Policy.PRIORITY_CATEGORY_EVENTS,
+                                NotificationManager.Policy.PRIORITY_SENDERS_ANY,
+                                NotificationManager.Policy.PRIORITY_SENDERS_ANY,
+                                NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON
+                        );
+                        mNotificationManager.setNotificationPolicy(policy);
+                    }
+                    mNotificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+                } else {
+                    Log.w("ALARM", "Access to Notification Policy not granted!");
+                }
+            } else {
+                Log.w("ALARM", "Can't access system service NotificationManager");
+            }
+        }
+    }
+
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
+    private void sendDummyNotification(NotificationManager notificationManager) {
+        final String channelId = "default_channel_id";
+        final String channelDescription = "Default Channel";
+        // Since android Oreo notification channel is needed.
+        //Check if notification channel exists and if not create one
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = notificationManager.getNotificationChannel(channelId);
+            if (notificationChannel == null) {
+                notificationChannel = new NotificationChannel(channelId, channelDescription, NotificationManager.IMPORTANCE_HIGH);
+                notificationChannel.enableVibration(false);
+                notificationManager.createNotificationChannel(notificationChannel);
+            }
+        }
+        Notification notification = new NotificationCompat.Builder(mLauncher, channelId)
+                .setContentTitle("")
+                .setContentText("")
+                .setSmallIcon(R.drawable.ic_mood_good_48dp)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setAutoCancel(true)
+                .setOngoing(false)
+                .setLocalOnly(true)
+                .build();
+
+        notificationManager.notify(1337, notification);
+        //notificationManager.cancel(1337); //WARNING: will create an infinite loop!
+    }
+    */
+
     @Override
     public void onNotificationPosted(PackageUserKey postedPackageUserKey,
             NotificationKeyData notificationKey, boolean shouldBeFilteredOut) {
         BadgeInfo badgeInfo = mPackageUserToBadgeInfos.get(postedPackageUserKey);
-        boolean badgeShouldBeRefreshed;
-        if (badgeInfo == null) {
-            if (!shouldBeFilteredOut) {
-                BadgeInfo newBadgeInfo = new BadgeInfo(postedPackageUserKey);
-                newBadgeInfo.addOrUpdateNotificationKey(notificationKey);
-                mPackageUserToBadgeInfos.put(postedPackageUserKey, newBadgeInfo);
-                badgeShouldBeRefreshed = true;
-            } else {
-                badgeShouldBeRefreshed = false;
-            }
-        } else {
-            badgeShouldBeRefreshed = shouldBeFilteredOut
-                    ? badgeInfo.removeNotificationKey(notificationKey)
-                    : badgeInfo.addOrUpdateNotificationKey(notificationKey);
-            if (badgeInfo.getNotificationKeys().size() == 0) {
-                mPackageUserToBadgeInfos.remove(postedPackageUserKey);
-            }
+
+        if (currentProfileHidesNotificationsFromAppsNotOnHomescreen() && !isAppOnHomescreen(postedPackageUserKey)) {
+            Log.d("NOTIFICATIONS", "Canceled " + postedPackageUserKey.mPackageName + " notification");
+            hideNotification(notificationKey);
+            shouldBeFilteredOut = true;
         }
-        updateLauncherIconBadges(Utilities.singletonHashSet(postedPackageUserKey),
-                badgeShouldBeRefreshed);
+
+        if (isBadgingEnabled()) {
+            boolean badgeShouldBeRefreshed;
+            if (badgeInfo == null) {
+                if (!shouldBeFilteredOut) {
+                    BadgeInfo newBadgeInfo = new BadgeInfo(postedPackageUserKey);
+                    newBadgeInfo.addOrUpdateNotificationKey(notificationKey);
+                    mPackageUserToBadgeInfos.put(postedPackageUserKey, newBadgeInfo);
+                    badgeShouldBeRefreshed = true;
+                } else {
+                    badgeShouldBeRefreshed = false;
+                }
+            } else {
+                badgeShouldBeRefreshed = shouldBeFilteredOut
+                        ? badgeInfo.removeNotificationKey(notificationKey)
+                        : badgeInfo.addOrUpdateNotificationKey(notificationKey);
+                if (badgeInfo.getNotificationKeys().size() == 0) {
+                    mPackageUserToBadgeInfos.remove(postedPackageUserKey);
+                }
+            }
+            updateLauncherIconBadges(Utilities.singletonHashSet(postedPackageUserKey),
+                    badgeShouldBeRefreshed);
+        }
+    }
+
+    private boolean isBadgingEnabled() {
+        return mLauncher.getSharedPrefs().getBoolean("pref_icon_badging", false);
     }
 
     @Override

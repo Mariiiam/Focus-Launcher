@@ -176,6 +176,7 @@
     <string name="allow_rotation_blocked_desc">Current Display setting doesn\'t permit rotation</string>
     <!-- Title for Notification dots setting. Tapping this will link to the system Notifications settings screen where the user can turn off notification dots globally. [CHAR LIMIT=50] -->
     <string name="icon_badging_title">Notification dots</string>
+    <string name="hide_foreign_notifications_title">Hide notifications</string>
     <!-- Text to indicate that the system icon badging setting is on [CHAR LIMIT=100] -->
     <string name="icon_badging_desc_on">On</string>
     <!-- Text to indicate that the system icon badging setting is off [CHAR LIMIT=100] -->
@@ -184,6 +185,7 @@
     <string name="title_missing_notification_access">Notification access needed</string>
     <!-- Message explaining to the user that the notification access is required by the app for showing 'Notification dots' [CHAR LIMIT=NONE] -->
     <string name="msg_missing_notification_access">To show Notification Dots, turn on app notifications for <xliff:g id="name" example="My App">%1$s</xliff:g></string>
+    <string name="msg_missing_notification_access_for_blocking">To block notifications from apps not on the homescreen, turn on app notifications for <xliff:g id="name" example="My App">%1$s</xliff:g></string>
     <!-- Button text in the confirmation dialog which would take the user to the system settings [CHAR LIMIT=50] -->
     <string name="title_change_settings">Change settings</string>
 

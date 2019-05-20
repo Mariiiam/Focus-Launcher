@@ -40,7 +40,7 @@ public class SettingsActivity extends Activity {
     /** Hidden field Settings.Secure.NOTIFICATION_BADGING */
     public static final String NOTIFICATION_BADGING = "notification_badging";
     /** Hidden field Settings.Secure.ENABLED_NOTIFICATION_LISTENERS */
-    private static final String NOTIFICATION_ENABLED_LISTENERS = "enabled_notification_listeners";
+    public static final String NOTIFICATION_ENABLED_LISTENERS = "enabled_notification_listeners";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +68,7 @@ public class SettingsActivity extends Activity {
             super.onCreate(savedInstanceState);
             getPreferenceManager().setSharedPreferencesName(LauncherFiles.SHARED_PREFERENCES_KEY);
             addPreferencesFromResource(R.xml.launcher_preferences);
-            populateProfilesPlaceholder();
+            populateProfilesPlaceholder(savedInstanceState);
 
             // No smartspace
             getPreferenceScreen().removePreference(findPreference(AT_A_GLANCE_KEY));
@@ -102,7 +102,8 @@ public class SettingsActivity extends Activity {
             } else {
                 // Listen to system notification badge settings while this UI is active.
                 mIconBadgingObserver = new IconBadgingObserver(
-                        iconBadgingPref, resolver, getFragmentManager());
+                        iconBadgingPref, resolver, getFragmentManager(),
+                        getPreferenceManager().getSharedPreferences(), iconBadgingPref.getKey());
                 mIconBadgingObserver.register(NOTIFICATION_BADGING, NOTIFICATION_ENABLED_LISTENERS);
             }
 
@@ -116,11 +117,11 @@ public class SettingsActivity extends Activity {
             }
         }
 
-        private void populateProfilesPlaceholder() {
+        private void populateProfilesPlaceholder(Bundle savedInstanceState) {
             PreferenceScreen profiles = (PreferenceScreen) findPreference("profiles_screen");
             PreferenceScreen settings = getPreferenceScreen();
             int lastSetting = settings.getPreferenceCount();
-            mProfileSettings.onCreate(null);
+            mProfileSettings.onCreate(savedInstanceState);
             while (settings.getPreferenceCount () > lastSetting) {
                 Preference p = settings.getPreference(lastSetting);
                 settings.removePreference (p); // decreases the preference count
@@ -172,20 +173,29 @@ public class SettingsActivity extends Activity {
      * Content observer which listens for system badging setting changes,
      * and updates the launcher badging setting subtext accordingly.
      */
-    private static class IconBadgingObserver extends SettingsObserver.Secure
+    public static class IconBadgingObserver extends SettingsObserver.Secure
             implements Preference.OnPreferenceClickListener {
 
         private final ButtonPreference mBadgingPref;
         private final ContentResolver mResolver;
         private final FragmentManager mFragmentManager;
+        private final SharedPreferences mSharedPrefs;
+        private final String mPrefKey;
         private boolean serviceEnabled = true;
 
-        public IconBadgingObserver(ButtonPreference badgingPref, ContentResolver resolver,
-                FragmentManager fragmentManager) {
+        public IconBadgingObserver(
+                ButtonPreference badgingPref,
+                ContentResolver resolver,
+                FragmentManager fragmentManager,
+                SharedPreferences sharedPrefs,
+                String prefKey
+        ) {
             super(resolver);
             mBadgingPref = badgingPref;
             mResolver = resolver;
             mFragmentManager = fragmentManager;
+            mSharedPrefs = sharedPrefs;
+            mPrefKey = prefKey;
         }
 
         @Override
@@ -209,6 +219,7 @@ public class SettingsActivity extends Activity {
             mBadgingPref.setOnPreferenceClickListener(serviceEnabled && Utilities.ATLEAST_OREO ? null : this);
             mBadgingPref.setSummary(summary);
 
+            mSharedPrefs.edit().putBoolean(mPrefKey, enabled).apply();
         }
 
         @Override
@@ -220,9 +231,13 @@ public class SettingsActivity extends Activity {
                         .putExtra(":settings:fragment_args_key", cn.flattenToString());
                 preference.getContext().startActivity(intent);
             } else {
-                new NotificationAccessConfirmation().show(mFragmentManager, "notification_access");
+                showAccessConfirmation(mFragmentManager);
             }
             return true;
+        }
+
+        protected void showAccessConfirmation(FragmentManager fragmentManager) {
+            new NotificationAccessConfirmation().show(fragmentManager, "notification_access");
         }
     }
 
