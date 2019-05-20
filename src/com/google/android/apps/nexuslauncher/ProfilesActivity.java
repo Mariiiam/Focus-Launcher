@@ -22,19 +22,15 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
-import android.preference.RingtonePreference;
+import android.preference.*;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import com.android.launcher3.Launcher;
-import com.android.launcher3.LauncherFiles;
-import com.android.launcher3.R;
+import com.android.launcher3.*;
 import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.notification.NotificationListener;
-import com.android.launcher3.views.ButtonPreference;
+import com.android.launcher3.util.SettingsObserver;
+import com.android.launcher3.views.DependentSwitchPreference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +58,7 @@ public class ProfilesActivity extends Activity {
     public static class ProfilesSettingsFragment extends PreferenceFragment {
 
         private PreferenceFragment parent;
-        private Map<String, HideNotificationsObserver> mHideNotificationsObservers = new HashMap<>();
+        private Map<String, NotificationAccessObserver> mNotificationAccessObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
 
         public ProfilesSettingsFragment(PreferenceFragment parent) {
@@ -119,26 +115,16 @@ public class ProfilesActivity extends Activity {
             bindPreferenceToSummary(notificationSoundPref);
 
             Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
-            if (notificationBlockingPref != null) {
-                observeNotificationBlockingPref(profile, (ButtonPreference) notificationBlockingPref);
-            }
+            observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
 
             Preference ssidsPref = parent.findPreference(profile + "_ssids");
             if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
         }
 
-        private void observeNotificationBlockingPref(final String profile, ButtonPreference notificationBlockingPref) {
-            if (!parent.getResources().getBoolean(R.bool.notification_badging_enabled)) {
-                parent.getPreferenceScreen().removePreference(notificationBlockingPref);
-            } else {
-                ContentResolver resolver = parent.getActivity().getContentResolver();
-                // Listen to system notification badge settings while this UI is active.
-                HideNotificationsObserver hideNotificationsObserver = new HideNotificationsObserver(
-                        notificationBlockingPref, resolver, parent.getFragmentManager(),
-                        parent.getPreferenceManager().getSharedPreferences(), notificationBlockingPref.getKey());
-                hideNotificationsObserver.register(SettingsActivity.NOTIFICATION_BADGING, SettingsActivity.NOTIFICATION_ENABLED_LISTENERS);
-                mHideNotificationsObservers.put(profile, hideNotificationsObserver);
-            }
+        private void observeNotificationBlockingSwitch(final String profile, DependentSwitchPreference switchPreference) {
+            NotificationAccessObserver observer = new NotificationAccessObserver(switchPreference,
+                    parent.getActivity().getContentResolver(), parent.getFragmentManager());
+            mNotificationAccessObservers.put(profile, observer);
         }
 
         /**
@@ -247,22 +233,73 @@ public class ProfilesActivity extends Activity {
                 parent.getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(mCurrentProfileListener);
                 mCurrentProfileListener = null;
             }
+            if (mNotificationAccessObservers != null) {
+                for (NotificationAccessObserver observer : mNotificationAccessObservers.values()) {
+                    observer.unregister();
+                }
+                mNotificationAccessObservers.clear();
+                mNotificationAccessObservers = null;
+            }
             if(this.parent == this) super.onDestroy();
         }
     }
 
     /**
-     * Content observer which listens for system badging setting changes,
-     * and updates the launcher badging setting subtext accordingly.
+     * Content observer which listens for system notification setting changes,
+     * and updates the launcher notification blocking setting subtext accordingly.
      */
-    private static class HideNotificationsObserver extends SettingsActivity.IconBadgingObserver {
-        public HideNotificationsObserver(
-                ButtonPreference badgingPref,
+    public static class NotificationAccessObserver extends SettingsObserver.Secure
+            implements Preference.OnPreferenceClickListener {
+
+        private final DependentSwitchPreference mSwitchPreference;
+        private final ContentResolver mResolver;
+        private final FragmentManager mFragmentManager;
+        private boolean serviceEnabled = true;
+
+        public NotificationAccessObserver(
+                DependentSwitchPreference switchPreference,
                 ContentResolver resolver,
-                FragmentManager fragmentManager,
-                SharedPreferences sharedPrefs,
-                String prefKey) {
-            super(badgingPref, resolver, fragmentManager, sharedPrefs, prefKey);
+                FragmentManager fragmentManager
+        ) {
+            super(resolver);
+            mSwitchPreference = switchPreference;
+            mResolver = resolver;
+            mFragmentManager = fragmentManager;
+            this.register(SettingsActivity.NOTIFICATION_ENABLED_LISTENERS);
+        }
+
+        @Override
+        public void onSettingChanged(boolean enabled) {
+            if (enabled) {
+                // Check if the listener is enabled or not.
+                String enabledListeners =
+                        Settings.Secure.getString(mResolver, SettingsActivity.NOTIFICATION_ENABLED_LISTENERS);
+                ComponentName myListener =
+                        new ComponentName(mSwitchPreference.getContext(), NotificationListener.class);
+                serviceEnabled = enabledListeners != null &&
+                        (enabledListeners.contains(myListener.flattenToString()) ||
+                                enabledListeners.contains(myListener.flattenToShortString()));
+            }
+
+            mSwitchPreference.setOnPreferenceClickListener(serviceEnabled ? null : this);
+            mSwitchPreference.setDependencyResolved(serviceEnabled);
+
+            int summary = serviceEnabled ? R.string.hide_foreign_notifications_summary : R.string.title_missing_notification_access;
+            mSwitchPreference.setSummary(summary);
+        }
+
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+            if (!Utilities.ATLEAST_OREO && serviceEnabled) {
+                ComponentName cn = new ComponentName(preference.getContext(), NotificationListener.class);
+                Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putExtra(":settings:fragment_args_key", cn.flattenToString());
+                preference.getContext().startActivity(intent);
+            } else {
+                showAccessConfirmation(mFragmentManager);
+            }
+            return true; // click handled
         }
 
         protected void showAccessConfirmation(FragmentManager fragmentManager) {

@@ -50,18 +50,12 @@
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
 
-        <com.android.launcher3.views.ButtonPreference
+        <com.android.launcher3.views.DependentSwitchPreference
                 android:key="work_hide_notifications"
                 android:title="@string/hide_foreign_notifications_title"
-                android:persistent="false"
-                android:widgetLayout="@layout/notification_pref_warning" >
-            <intent android:action="android.settings.NOTIFICATION_SETTINGS">
-                <!-- This extra highlights the "Allow icon badges" field in Notification settings -->
-                <extra
-                        android:name=":settings:fragment_args_key"
-                        android:value="notification_badging" />
-            </intent>
-        </com.android.launcher3.views.ButtonPreference>
+                android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
 
         <!--
         <Preference
@@ -103,6 +97,13 @@
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
 
+        <com.android.launcher3.views.DependentSwitchPreference
+                android:key="home_hide_notifications"
+                android:title="@string/hide_foreign_notifications_title"
+                android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -137,6 +138,13 @@
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
 
+        <com.android.launcher3.views.DependentSwitchPreference
+                android:key="disconnected_hide_notifications"
+                android:title="@string/hide_foreign_notifications_title"
+                android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -170,6 +178,13 @@
                 android:title="@string/profile_pref_notification_sound"
                 android:ringtoneType="notification"
                 android:defaultValue="content://settings/system/notification_sound"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+                android:key="default_hide_notifications"
+                android:title="@string/hide_foreign_notifications_title"
+                android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
 
     </PreferenceScreen>
 

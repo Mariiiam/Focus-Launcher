@@ -77,7 +77,8 @@
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Bei Drehung des Smartphones"</string>
     <string name="allow_rotation_blocked_desc" msgid="3212602545192996253">"Die aktuelle \"Display\"-Einstellung verhindert eine Drehung der Anzeige"</string>
     <string name="icon_badging_title" msgid="874121399231955394">"App-Benachrichtigungspunkte"</string>
-    <string name="hide_foreign_notifications_title">App-Benachrichtigungen ausblenden</string>
+    <string name="hide_foreign_notifications_title" msgid="874121399231955395">"App-Benachrichtigungen ausblenden"</string>
+    <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Von Apps, die Du nicht angeordnet hast"</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
     <string name="title_missing_notification_access" msgid="7503287056163941064">"Benachrichtigungszugriff erforderlich"</string>

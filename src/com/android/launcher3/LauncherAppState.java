@@ -38,7 +38,7 @@ import com.android.launcher3.util.TestingUtils;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import static com.android.launcher3.SettingsActivity.NOTIFICATION_BADGING;
+import static com.android.launcher3.SettingsActivity.NOTIFICATION_ENABLED_LISTENERS;
 
 public class LauncherAppState {
 
@@ -123,22 +123,22 @@ public class LauncherAppState {
 
         ExtractionUtils.startColorExtractionServiceIfNecessary(mContext);
 
+        /*
         if (!mContext.getResources().getBoolean(R.bool.notification_badging_enabled)) {
             mNotificationBadgingObserver = null;
-        } else {
-            // Register an observer to rebind the notification listener when badging is re-enabled.
-            mNotificationBadgingObserver = new SettingsObserver.Secure(
-                    mContext.getContentResolver()) {
-                @Override
-                public void onSettingChanged(boolean isNotificationBadgingEnabled) {
-                    if (isNotificationBadgingEnabled && Utilities.ATLEAST_NOUGAT) {
-                        NotificationListener.requestRebind(new ComponentName(
-                                mContext, NotificationListener.class));
-                    }
+        } else { */
+        // Register an observer to rebind the notification listener when notification listening is re-enabled.
+        mNotificationBadgingObserver = new SettingsObserver.Secure(
+                mContext.getContentResolver()) {
+            @Override
+            public void onSettingChanged(boolean isNotificationBadgingEnabled) {
+                if (isNotificationBadgingEnabled && Utilities.ATLEAST_NOUGAT) {
+                    NotificationListener.requestRebind(new ComponentName(
+                            mContext, NotificationListener.class));
                 }
-            };
-            mNotificationBadgingObserver.register(NOTIFICATION_BADGING);
-        }
+            }
+        };
+        mNotificationBadgingObserver.register(NOTIFICATION_ENABLED_LISTENERS);
     }
 
     /**
