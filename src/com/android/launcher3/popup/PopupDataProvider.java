@@ -191,7 +191,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         final boolean badgingDisabled = !isBadgingEnabled();
         boolean badgeShouldBeRefreshed;
         if (badgeInfo == null) {
-            if (!shouldBeFilteredOut) {
+            if (!shouldBeFilteredOut && !badgingDisabled) {
                 BadgeInfo newBadgeInfo = new BadgeInfo(postedPackageUserKey);
                 newBadgeInfo.addOrUpdateNotificationKey(notificationKey);
                 mPackageUserToBadgeInfos.put(postedPackageUserKey, newBadgeInfo);
@@ -236,6 +236,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     @Override
     public void onNotificationFullRefresh(List<StatusBarNotification> activeNotifications) {
         if (activeNotifications == null) return;
+        if (!isBadgingEnabled()) activeNotifications = Collections.emptyList();
         // This will contain the PackageUserKeys which have updated badges.
         HashMap<PackageUserKey, BadgeInfo> updatedBadges = new HashMap<>(mPackageUserToBadgeInfos);
         mPackageUserToBadgeInfos.clear();
