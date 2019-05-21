@@ -1745,10 +1745,11 @@ public class Launcher extends BaseActivity
     }
 
     private void updateProfileDisplay(String profile) {
-        String capitalizedProfileName = profile.substring(0, 1).toUpperCase() + profile.substring(1).toLowerCase();
+        Integer profileNameId = ProfilesActivity.ProfilesSettingsFragment.resourceIdForProfileName.get(profile);
+        String profileName = getString(profileNameId != null ? profileNameId : R.string.profile_default);
 
         TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
-        if (profileDisplay != null) profileDisplay.setText(capitalizedProfileName);
+        if (profileDisplay != null) profileDisplay.setText(profileName);
     }
 
     final static int COLOR_THEME_DARK = Color.parseColor("#4f4f4f");

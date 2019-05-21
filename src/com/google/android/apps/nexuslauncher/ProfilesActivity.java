@@ -66,7 +66,7 @@ public class ProfilesActivity extends Activity {
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
 
         private final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
-        private final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
+        public final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
         static {
             resourceIdForProfileName.put("home", R.string.profile_home);
             resourceIdForProfileName.put("work", R.string.profile_work);
