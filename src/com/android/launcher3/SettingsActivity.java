@@ -27,7 +27,7 @@ import android.provider.Settings;
 import com.android.launcher3.graphics.IconShapeOverride;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.util.SettingsObserver;
-import com.android.launcher3.views.ButtonPreference;
+import com.android.launcher3.views.DependentSwitchPreference;
 import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
 /**
@@ -60,7 +60,7 @@ public class SettingsActivity extends Activity {
     public static class LauncherSettingsFragment extends PreferenceFragment {
 
         private SystemDisplayRotationLockObserver mRotationLockObserver;
-        private IconBadgingObserver mIconBadgingObserver;
+        private NotificationAccessObserver mIconBadgingObserver;
         private ProfilesActivity.ProfilesSettingsFragment mProfileSettings = new ProfilesActivity.ProfilesSettingsFragment(this);
 
         @Override
@@ -91,8 +91,8 @@ public class SettingsActivity extends Activity {
                 rotationPref.setDefaultValue(Utilities.getAllowRotationDefaultValue(getActivity()));
             }
 
-            ButtonPreference iconBadgingPref =
-                    (ButtonPreference) findPreference(ICON_BADGING_PREFERENCE_KEY);
+            DependentSwitchPreference iconBadgingPref =
+                    (DependentSwitchPreference) findPreference(ICON_BADGING_PREFERENCE_KEY);
             if (!Utilities.ATLEAST_OREO) {
                 getPreferenceScreen().removePreference(
                         findPreference(SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY));
@@ -101,9 +101,8 @@ public class SettingsActivity extends Activity {
                 getPreferenceScreen().removePreference(iconBadgingPref);
             } else {
                 // Listen to system notification badge settings while this UI is active.
-                mIconBadgingObserver = new IconBadgingObserver(
-                        iconBadgingPref, resolver, getFragmentManager(),
-                        getPreferenceManager().getSharedPreferences(), iconBadgingPref.getKey());
+                mIconBadgingObserver = new NotificationAccessObserver(
+                        iconBadgingPref, resolver, getFragmentManager());
                 mIconBadgingObserver.register(NOTIFICATION_BADGING, NOTIFICATION_ENABLED_LISTENERS);
             }
 
@@ -173,53 +172,47 @@ public class SettingsActivity extends Activity {
      * Content observer which listens for system badging setting changes,
      * and updates the launcher badging setting subtext accordingly.
      */
-    public static class IconBadgingObserver extends SettingsObserver.Secure
+    public static class NotificationAccessObserver extends SettingsObserver.Secure
             implements Preference.OnPreferenceClickListener {
 
-        private final ButtonPreference mBadgingPref;
+        private final DependentSwitchPreference mSwitchPreference;
         private final ContentResolver mResolver;
         private final FragmentManager mFragmentManager;
-        private final SharedPreferences mSharedPrefs;
-        private final String mPrefKey;
         private boolean serviceEnabled = true;
 
-        public IconBadgingObserver(
-                ButtonPreference badgingPref,
+        public NotificationAccessObserver(
+                DependentSwitchPreference switchPreference,
                 ContentResolver resolver,
-                FragmentManager fragmentManager,
-                SharedPreferences sharedPrefs,
-                String prefKey
+                FragmentManager fragmentManager
         ) {
             super(resolver);
-            mBadgingPref = badgingPref;
+            mSwitchPreference = switchPreference;
             mResolver = resolver;
             mFragmentManager = fragmentManager;
-            mSharedPrefs = sharedPrefs;
-            mPrefKey = prefKey;
         }
 
         @Override
         public void onSettingChanged(boolean enabled) {
-            int summary = enabled ? R.string.icon_badging_desc_on : R.string.icon_badging_desc_off;
-
             if (enabled) {
                 // Check if the listener is enabled or not.
                 String enabledListeners =
                         Settings.Secure.getString(mResolver, NOTIFICATION_ENABLED_LISTENERS);
                 ComponentName myListener =
-                        new ComponentName(mBadgingPref.getContext(), NotificationListener.class);
+                        new ComponentName(mSwitchPreference.getContext(), NotificationListener.class);
                 serviceEnabled = enabledListeners != null &&
                         (enabledListeners.contains(myListener.flattenToString()) ||
                                 enabledListeners.contains(myListener.flattenToShortString()));
-                if (!serviceEnabled) {
-                    summary = R.string.title_missing_notification_access;
-                }
             }
-            mBadgingPref.setWidgetFrameVisible(!serviceEnabled);
-            mBadgingPref.setOnPreferenceClickListener(serviceEnabled && Utilities.ATLEAST_OREO ? null : this);
-            mBadgingPref.setSummary(summary);
 
-            mSharedPrefs.edit().putBoolean(mPrefKey, enabled).apply();
+            mSwitchPreference.setOnPreferenceClickListener(serviceEnabled ? null : this);
+            mSwitchPreference.setDependencyResolved(serviceEnabled);
+
+            mSwitchPreference.setSummary(getSummary(serviceEnabled, enabled));
+        }
+
+        protected int getSummary(boolean serviceEnabled, boolean settingEnabled) {
+            return !serviceEnabled ? R.string.title_missing_notification_access :
+                    (settingEnabled ? R.string.icon_badging_desc_on : R.string.icon_badging_desc_off);
         }
 
         @Override
@@ -233,7 +226,7 @@ public class SettingsActivity extends Activity {
             } else {
                 showAccessConfirmation(mFragmentManager);
             }
-            return true;
+            return true; // click handled
         }
 
         protected void showAccessConfirmation(FragmentManager fragmentManager) {

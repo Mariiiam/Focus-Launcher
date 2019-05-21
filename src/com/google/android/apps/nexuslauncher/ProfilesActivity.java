@@ -29,7 +29,6 @@ import android.util.Log;
 import com.android.launcher3.*;
 import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.notification.NotificationListener;
-import com.android.launcher3.util.SettingsObserver;
 import com.android.launcher3.views.DependentSwitchPreference;
 
 import java.util.HashMap;
@@ -248,60 +247,22 @@ public class ProfilesActivity extends Activity {
      * Content observer which listens for system notification setting changes,
      * and updates the launcher notification blocking setting subtext accordingly.
      */
-    public static class NotificationAccessObserver extends SettingsObserver.Secure
-            implements Preference.OnPreferenceClickListener {
-
-        private final DependentSwitchPreference mSwitchPreference;
-        private final ContentResolver mResolver;
-        private final FragmentManager mFragmentManager;
-        private boolean serviceEnabled = true;
-
+    public static class NotificationAccessObserver extends SettingsActivity.NotificationAccessObserver {
         public NotificationAccessObserver(
                 DependentSwitchPreference switchPreference,
                 ContentResolver resolver,
                 FragmentManager fragmentManager
         ) {
-            super(resolver);
-            mSwitchPreference = switchPreference;
-            mResolver = resolver;
-            mFragmentManager = fragmentManager;
+            super(switchPreference, resolver, fragmentManager);
             this.register(SettingsActivity.NOTIFICATION_ENABLED_LISTENERS);
         }
 
         @Override
-        public void onSettingChanged(boolean enabled) {
-            if (enabled) {
-                // Check if the listener is enabled or not.
-                String enabledListeners =
-                        Settings.Secure.getString(mResolver, SettingsActivity.NOTIFICATION_ENABLED_LISTENERS);
-                ComponentName myListener =
-                        new ComponentName(mSwitchPreference.getContext(), NotificationListener.class);
-                serviceEnabled = enabledListeners != null &&
-                        (enabledListeners.contains(myListener.flattenToString()) ||
-                                enabledListeners.contains(myListener.flattenToShortString()));
-            }
-
-            mSwitchPreference.setOnPreferenceClickListener(serviceEnabled ? null : this);
-            mSwitchPreference.setDependencyResolved(serviceEnabled);
-
-            int summary = serviceEnabled ? R.string.hide_foreign_notifications_summary : R.string.title_missing_notification_access;
-            mSwitchPreference.setSummary(summary);
+        protected int getSummary(boolean serviceEnabled, boolean settingEnabled) {
+            return serviceEnabled ? R.string.hide_foreign_notifications_summary : R.string.title_missing_notification_access;
         }
 
         @Override
-        public boolean onPreferenceClick(Preference preference) {
-            if (!Utilities.ATLEAST_OREO && serviceEnabled) {
-                ComponentName cn = new ComponentName(preference.getContext(), NotificationListener.class);
-                Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .putExtra(":settings:fragment_args_key", cn.flattenToString());
-                preference.getContext().startActivity(intent);
-            } else {
-                showAccessConfirmation(mFragmentManager);
-            }
-            return true; // click handled
-        }
-
         protected void showAccessConfirmation(FragmentManager fragmentManager) {
             new NotificationAccessConfirmation().show(fragmentManager, "notification_access");
         }
