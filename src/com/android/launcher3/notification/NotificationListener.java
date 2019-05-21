@@ -19,6 +19,7 @@ package com.android.launcher3.notification;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.content.ComponentName;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,19 +31,11 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.util.PackageUserKey;
-import com.android.launcher3.util.SettingsObserver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static com.android.launcher3.SettingsActivity.NOTIFICATION_BADGING;
+import java.util.*;
 
 /**
  * A {@link NotificationListenerService} that sends updates to its
@@ -68,7 +61,7 @@ public class NotificationListener extends NotificationListenerService {
     private final Handler mUiHandler;
     private final Ranking mTempRanking = new Ranking();
 
-    private SettingsObserver mNotificationBadgingObserver;
+    //private SettingsObserver mNotificationBadgingObserver;
 
     private final Handler.Callback mWorkerCallback = new Handler.Callback() {
         @Override
@@ -141,6 +134,7 @@ public class NotificationListener extends NotificationListenerService {
     public void onCreate() {
         super.onCreate();
         sIsCreated = true;
+        /*
         mNotificationBadgingObserver = new SettingsObserver.Secure(getContentResolver()) {
             @Override
             public void onSettingChanged(boolean isNotificationBadgingEnabled) {
@@ -150,13 +144,14 @@ public class NotificationListener extends NotificationListenerService {
             }
         };
         mNotificationBadgingObserver.register(NOTIFICATION_BADGING);
+        */
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         sIsCreated = false;
-        mNotificationBadgingObserver.unregister();
+        //mNotificationBadgingObserver.unregister();
     }
 
     public static @Nullable NotificationListener getInstanceIfConnected() {
@@ -196,6 +191,10 @@ public class NotificationListener extends NotificationListenerService {
     public void onListenerDisconnected() {
         super.onListenerDisconnected();
         sIsConnected = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Notification listener disconnected - requesting rebind
+            requestRebind(new ComponentName(this, NotificationListener.class));
+        }
     }
 
     @Override

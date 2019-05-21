@@ -188,28 +188,28 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             shouldBeFilteredOut = true;
         }
 
-        if (isBadgingEnabled()) {
-            boolean badgeShouldBeRefreshed;
-            if (badgeInfo == null) {
-                if (!shouldBeFilteredOut) {
-                    BadgeInfo newBadgeInfo = new BadgeInfo(postedPackageUserKey);
-                    newBadgeInfo.addOrUpdateNotificationKey(notificationKey);
-                    mPackageUserToBadgeInfos.put(postedPackageUserKey, newBadgeInfo);
-                    badgeShouldBeRefreshed = true;
-                } else {
-                    badgeShouldBeRefreshed = false;
-                }
+        final boolean badgingDisabled = !isBadgingEnabled();
+        boolean badgeShouldBeRefreshed;
+        if (badgeInfo == null) {
+            if (!shouldBeFilteredOut) {
+                BadgeInfo newBadgeInfo = new BadgeInfo(postedPackageUserKey);
+                newBadgeInfo.addOrUpdateNotificationKey(notificationKey);
+                mPackageUserToBadgeInfos.put(postedPackageUserKey, newBadgeInfo);
+                badgeShouldBeRefreshed = true;
             } else {
-                badgeShouldBeRefreshed = shouldBeFilteredOut
-                        ? badgeInfo.removeNotificationKey(notificationKey)
-                        : badgeInfo.addOrUpdateNotificationKey(notificationKey);
-                if (badgeInfo.getNotificationKeys().size() == 0) {
-                    mPackageUserToBadgeInfos.remove(postedPackageUserKey);
-                }
+                badgeShouldBeRefreshed = false;
             }
-            updateLauncherIconBadges(Utilities.singletonHashSet(postedPackageUserKey),
-                    badgeShouldBeRefreshed);
+        } else {
+            badgeShouldBeRefreshed = (shouldBeFilteredOut || badgingDisabled)
+                    ? badgeInfo.removeNotificationKey(notificationKey)
+                    : badgeInfo.addOrUpdateNotificationKey(notificationKey);
+            if (badgeInfo.getNotificationKeys().size() == 0) {
+                mPackageUserToBadgeInfos.remove(postedPackageUserKey);
+            }
         }
+        updateLauncherIconBadges(Utilities.singletonHashSet(postedPackageUserKey),
+                badgeShouldBeRefreshed);
+
     }
 
     private boolean isBadgingEnabled() {

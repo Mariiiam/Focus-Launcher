@@ -955,7 +955,8 @@ public class Launcher extends BaseActivity
             mAppWidgetHost.stopListening();
         }
 
-        NotificationListener.removeNotificationsChangedListener();
+        //Log.e("NotificationListener", "Stopped by Launcher");
+        //NotificationListener.removeNotificationsChangedListener();
     }
 
     @Override
