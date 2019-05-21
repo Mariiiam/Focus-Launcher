@@ -22,11 +22,16 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.*;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
+import android.preference.RingtonePreference;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import com.android.launcher3.*;
+import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherFiles;
+import com.android.launcher3.R;
 import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.views.DependentSwitchPreference;
@@ -60,6 +65,15 @@ public class ProfilesActivity extends Activity {
         private Map<String, NotificationAccessObserver> mNotificationAccessObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
 
+        private final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
+        private final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
+        static {
+            resourceIdForProfileName.put("home", R.string.profile_home);
+            resourceIdForProfileName.put("work", R.string.profile_work);
+            resourceIdForProfileName.put("disconnected", R.string.profile_disconnected);
+            resourceIdForProfileName.put("default", R.string.profile_default);
+        }
+
         public ProfilesSettingsFragment(PreferenceFragment parent) {
             super();
             this.parent = parent;
@@ -77,10 +91,9 @@ public class ProfilesActivity extends Activity {
             parent.addPreferencesFromResource(R.xml.profiles_preferences);
 
             // Setup profile preferences
-            setupProfilePreferences("home");
-            setupProfilePreferences("work");
-            setupProfilePreferences("default");
-            setupProfilePreferences("disconnected");
+            for (String profile : availableProfiles) {
+                setupProfilePreferences(profile);
+            }
 
             final Preference profilesGroup = parent.findPreference("profiles_screen");
             mCurrentProfileListener =
@@ -89,8 +102,14 @@ public class ProfilesActivity extends Activity {
                         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                             if (key.equals("current_profile")) {
                                 String profile = sharedPreferences.getString(key, "default");
-                                String capitalizedProfileName = profile.substring(0, 1).toUpperCase() + profile.substring(1).toLowerCase();
-                                profilesGroup.setSummary("Currently enabled: " + capitalizedProfileName);
+                                profilesGroup.setSummary(parent.getString(resourceIdForProfileName.get(profile)));
+
+                                for (String p : availableProfiles) {
+                                    final String pKey = "profile_"+p;
+                                    Preference profileGroup = parent.findPreference(pKey);
+                                    final String profileName = parent.getString(resourceIdForProfileName.get(p));
+                                    profileGroup.setTitle(p.equals(profile) ? profileName + " (" + parent.getString(R.string.profile_active) +")" : profileName);
+                                }
                             }
                         }
                     };

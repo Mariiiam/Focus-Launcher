@@ -109,7 +109,7 @@
     <PreferenceScreen
             android:key="profile_disconnected"
             android:title="@string/profile_disconnected"
-            android:summary="Enable by activating airplane mode"
+            android:summary="@string/profile_disconnected_summary"
             android:icon="@drawable/ic_profile_disconnected"
             android:persistent="false">
 
@@ -143,14 +143,14 @@
                 android:title="@string/hide_foreign_notifications_title"
                 android:summary="@string/hide_foreign_notifications_summary"
                 android:persistent="true"
-                android:defaultValue="false"/>
+                android:defaultValue="true"/>
 
     </PreferenceScreen>
 
     <PreferenceScreen
             android:key="profile_default"
             android:title="@string/profile_default"
-            android:summary="Used if no other profile is enabled"
+            android:summary="@string/profile_default_summary"
             android:icon="@drawable/ic_profiles"
             android:persistent="false">
 
