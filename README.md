@@ -1,5 +1,7 @@
-# Rootless Pixel Launcher
-By Amir Zaidi
+# FOCUS LAUNCHER
+By Jakob Niemeyer
+
+Based on Rootless Pixel Launcher by Amir Zaidi.
 
 ## Links
 
