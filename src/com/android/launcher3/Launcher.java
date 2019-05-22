@@ -1797,7 +1797,7 @@ public class Launcher extends BaseActivity
             return;
         }
         try {
-            boolean permission = hasWritePermission(context);
+            boolean permission = hasWritePermission(context, false);
             if (permission) {
                 RingtoneManager.setActualDefaultRingtoneUri(context, type, soundUri);
             }
@@ -1808,7 +1808,7 @@ public class Launcher extends BaseActivity
     }
 
     public static final int CODE_WRITE_SETTINGS_PERMISSION = 42;
-    public static boolean hasWritePermission(Activity context){
+    public static boolean hasWritePermission(Activity context, boolean ask){
         boolean permission;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             permission = Settings.System.canWrite(context);
@@ -1818,12 +1818,14 @@ public class Launcher extends BaseActivity
         if (permission) {
             return true;
         }  else {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                intent.setData(Uri.parse("package:" + context.getPackageName()));
-                context.startActivityForResult(intent, CODE_WRITE_SETTINGS_PERMISSION);
-            } else {
-                ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.WRITE_SETTINGS}, CODE_WRITE_SETTINGS_PERMISSION);
+            if (ask) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                    intent.setData(Uri.parse("package:" + context.getPackageName()));
+                    context.startActivityForResult(intent, CODE_WRITE_SETTINGS_PERMISSION);
+                } else {
+                    ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.WRITE_SETTINGS}, CODE_WRITE_SETTINGS_PERMISSION);
+                }
             }
         }
         return false;
