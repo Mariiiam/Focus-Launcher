@@ -418,6 +418,8 @@ public class Launcher extends BaseActivity
             mRotationEnabled = true;
         }
 
+        saveCurrentWallpaper();
+
         // On large interfaces, or on devices that a user has specifically enabled screen rotation,
         // we want the screen to auto-rotate based on the current orientation
         setOrientation();
@@ -757,6 +759,18 @@ public class Launcher extends BaseActivity
             }
         }
         mDragLayer.clearAnimatedView();
+    }
+
+    private void saveCurrentWallpaper(){
+        Bitmap currentWallpaper = null;
+
+        for (String profile : ProfilesActivity.ProfilesSettingsFragment.availableProfiles){
+            Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
+            if(wallpaper == null) {
+                if (currentWallpaper == null) currentWallpaper = extractWallpaper();
+                saveImageToAppPrivateFile(currentWallpaper, "wallpaper_"+profile);
+            }
+        }
     }
 
     private Bitmap extractWallpaper() {

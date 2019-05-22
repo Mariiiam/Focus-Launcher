@@ -63,7 +63,7 @@ public class ProfilesActivity extends Activity {
         private Map<String, NotificationAccessObserver> mNotificationAccessObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
 
-        private final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
+        public final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
         public final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
         static {
             resourceIdForProfileName.put("home", R.string.profile_home);
@@ -88,10 +88,7 @@ public class ProfilesActivity extends Activity {
             parent.getPreferenceManager().setSharedPreferencesName(LauncherFiles.SHARED_PREFERENCES_KEY);
             parent.addPreferencesFromResource(R.xml.profiles_preferences);
 
-            // Setup profile preferences
-            for (String profile : availableProfiles) {
-                setupProfilePreferences(profile);
-            }
+            setupProfilePreferences();
 
             final Preference profilesGroup = parent.findPreference("profiles_screen");
             mCurrentProfileListener =
@@ -123,20 +120,22 @@ public class ProfilesActivity extends Activity {
          * updated to reflect the new value, per the Android Design
          * guidelines.
          */
-        private void setupProfilePreferences(final String profile) {
-            Preference profileGroup = parent.findPreference("profile_" + profile);
+        private void setupProfilePreferences() {
+            for (String profile : availableProfiles) {
+                Preference profileGroup = parent.findPreference("profile_" + profile);
 
-            Preference ringtonePref = parent.findPreference(profile + "_ringtone");
-            bindPreferenceToSummary(ringtonePref);
+                Preference ringtonePref = parent.findPreference(profile + "_ringtone");
+                bindPreferenceToSummary(ringtonePref);
 
-            Preference notificationSoundPref = parent.findPreference(profile + "_notification_sound");
-            bindPreferenceToSummary(notificationSoundPref);
+                Preference notificationSoundPref = parent.findPreference(profile + "_notification_sound");
+                bindPreferenceToSummary(notificationSoundPref);
 
-            Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
-            observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
+                Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
+                observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
 
-            Preference ssidsPref = parent.findPreference(profile + "_ssids");
-            if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+                Preference ssidsPref = parent.findPreference(profile + "_ssids");
+                if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+            }
         }
 
         private void observeNotificationBlockingSwitch(final String profile, DependentSwitchPreference switchPreference) {
