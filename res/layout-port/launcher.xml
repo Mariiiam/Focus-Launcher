@@ -96,8 +96,7 @@
                 android:paddingBottom="1dp"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
-                android:clickable="false"
-                android:layout_marginTop="-7dp"
+                android:layout_marginTop="-5dp"
         />
     </com.android.launcher3.dragndrop.DragLayer>
 

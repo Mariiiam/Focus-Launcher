@@ -184,6 +184,7 @@
     <string name="icon_badging_desc_off">Off</string>
     <!-- Title for the dialog shown when the app does not has notification access, explaining the requirement for notification access [CHAR LIMIT=50] -->
     <string name="title_missing_notification_access">Notification access needed</string>
+    <string name="title_manually_select_profile">Manually activate profile</string>
     <!-- Message explaining to the user that the notification access is required by the app for showing 'Notification dots' [CHAR LIMIT=NONE] -->
     <string name="msg_missing_notification_access">To show Notification Dots, turn on app notifications for <xliff:g id="name" example="My App">%1$s</xliff:g></string>
     <string name="msg_missing_notification_access_for_blocking">To block notifications from apps not on the homescreen, turn on app notifications for <xliff:g id="name" example="My App">%1$s</xliff:g></string>

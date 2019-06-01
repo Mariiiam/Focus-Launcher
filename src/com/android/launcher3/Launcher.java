@@ -1438,7 +1438,56 @@ public class Launcher extends BaseActivity
             }
         }.attachTo(profilesButton);
 
+        View profileDisplay = findViewById(R.id.profile_display);
+        new OverviewButtonClickListener(ControlType.PROFILES_BUTTON) {
+            @Override
+            public void handleViewClick(View view) {
+                new ManualProfileSelection().show(getFragmentManager(), "manual_profile_selection");
+            }
+        }.attachTo(profileDisplay);
+
         mOverviewPanel.setAlpha(0f);
+    }
+
+    public static class ManualProfileSelection
+            extends DialogFragment implements DialogInterface.OnClickListener {
+
+        private String[] mItems;
+        private Launcher mLauncher;
+
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+            try {
+                mLauncher = (Launcher) context;
+                mItems = new String[]{
+                        context.getString(R.string.profile_home),
+                        context.getString(R.string.profile_work),
+                        context.getString(R.string.profile_default)
+                };
+            } catch (ClassCastException e) {
+                throw new ClassCastException(context.toString()
+                        + " must be Launcher.class");
+            }
+
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Context context = getActivity();
+            return new AlertDialog.Builder(context)
+                    .setTitle(R.string.title_manually_select_profile)
+                    .setItems(mItems, this)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .create();
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+            String[] profiles = {"home", "work", "default"};
+            mLauncher.updateProfile(profiles[which]);
+        }
     }
 
     /**
@@ -1667,7 +1716,7 @@ public class Launcher extends BaseActivity
                 }
             } else if(intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                Log.e("WIFI_RECEIVER", "Wifi state changed! Trying to retrieve network SSID...");
+                //Log.e("WIFI_RECEIVER", "Wifi state changed! Trying to retrieve network SSID...");
                 if (netInfo != null && netInfo.isConnected()) {
                     //Start service for connected state here.
                     newWifiConnection = getCurrentSSID(context);
