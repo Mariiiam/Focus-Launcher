@@ -436,6 +436,7 @@ public class Launcher extends BaseActivity
         filter = new IntentFilter();
         filter.addAction("android.net.wifi.STATE_CHANGE");
         filter.addAction("android.net.wifi.supplicant.CONNECTION_CHANGE");
+        filter.addAction("android.intent.action.AIRPLANE_MODE");
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
         updateProfileDisplay(mSharedPrefs.getString("current_profile", "default"));
@@ -1642,21 +1643,35 @@ public class Launcher extends BaseActivity
     private final BroadcastReceiver mWiFiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            //Log.e("WIFI_RECEIVER", "Receiving broadcast!");
             String newWifiConnection = null;
             //String toastMsg = null;
 
-            if (intent.getAction().equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+            boolean airplaneMode = Settings.Global.getInt(context.getContentResolver(),
+                        Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+            //Log.e("WIFI_RECEIVER", "airplane mode is "+(airplaneMode ? "on" : "off"));
+            if (airplaneMode) {
+                newWifiConnection = "disconnected";
+            } else if (intent.getAction().equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+                if (!airplaneMode) {
+                    newWifiConnection = getCurrentSSID(context);
+                    if (newWifiConnection == null) newWifiConnection = "default";
+                }
+            } else if (intent.getAction().equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
                 boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
+                //Log.e("WIFI_RECEIVER", "wifi is "+(connected ? "connected" : "disconnected"));
                 if(!connected) {
                     //Start service for disconnected state here
                     //toastMsg = "WiFi disconnected";
-                    newWifiConnection = "disconnected";
+                    newWifiConnection = "default";
                 }
             } else if(intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                Log.e("WIFI_RECEIVER", "Wifi state changed! Trying to retrieve network SSID...");
                 if (netInfo != null && netInfo.isConnected()) {
                     //Start service for connected state here.
                     newWifiConnection = getCurrentSSID(context);
+                    //Log.e("WIFI_RECEIVER", "Found network SSID "+newWifiConnection);
                     /*
                     WifiManager wifiManager = (WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                     if (wifiManager != null) {
@@ -1667,6 +1682,9 @@ public class Launcher extends BaseActivity
                         newWifiConnection = ssid;
                     }
                     */
+                } else {
+                    newWifiConnection = "default";
+                    Log.e("WIFI_RECEIVER", "Failed.");
                 }
             }
 
