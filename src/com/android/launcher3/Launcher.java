@@ -458,6 +458,8 @@ public class Launcher extends BaseActivity
     }
 
     protected void overrideTheme(boolean isDark, boolean supportsDarkText, boolean isTransparent) {
+        mColorThemeLight = Color.parseColor(isDark ? "#f8f8f8" : "#4285f4");
+        mColorThemeDark = Color.parseColor(isDark && !supportsDarkText ? "#f8f8f8" : "#4f4f4f");
         if (isDark) {
             setTheme(R.style.LauncherThemeDark);
         } else if (supportsDarkText) {
@@ -1486,6 +1488,8 @@ public class Launcher extends BaseActivity
         public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
             String[] profiles = {"home", "work", "default"};
+            Log.d("PROFILE_UPDATE", "From dialog");
+            mLauncher.mSharedPrefs.edit().putString("manual_profile", profiles[which]).commit();
             mLauncher.updateProfile(profiles[which]);
         }
     }
@@ -1692,13 +1696,13 @@ public class Launcher extends BaseActivity
     private final BroadcastReceiver mWiFiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //Log.e("WIFI_RECEIVER", "Receiving broadcast!");
+            //Log.d("WIFI_RECEIVER", "Receiving broadcast!");
             String newWifiConnection = null;
             //String toastMsg = null;
 
             boolean airplaneMode = Settings.Global.getInt(context.getContentResolver(),
                         Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
-            //Log.e("WIFI_RECEIVER", "airplane mode is "+(airplaneMode ? "on" : "off"));
+            Log.d("WIFI_RECEIVER", "airplane mode is "+(airplaneMode ? "on" : "off"));
             if (airplaneMode) {
                 newWifiConnection = "disconnected";
             } else if (intent.getAction().equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
@@ -1708,7 +1712,7 @@ public class Launcher extends BaseActivity
                 }
             } else if (intent.getAction().equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
                 boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
-                //Log.e("WIFI_RECEIVER", "wifi is "+(connected ? "connected" : "disconnected"));
+                Log.d("WIFI_RECEIVER", "wifi is "+(connected ? "connected" : "disconnected"));
                 if(!connected) {
                     //Start service for disconnected state here
                     //toastMsg = "WiFi disconnected";
@@ -1716,7 +1720,7 @@ public class Launcher extends BaseActivity
                 }
             } else if(intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                //Log.e("WIFI_RECEIVER", "Wifi state changed! Trying to retrieve network SSID...");
+                Log.d("WIFI_RECEIVER", "Wifi state changed! Trying to retrieve network SSID...");
                 if (netInfo != null && netInfo.isConnected()) {
                     //Start service for connected state here.
                     newWifiConnection = getCurrentSSID(context);
@@ -1733,7 +1737,7 @@ public class Launcher extends BaseActivity
                     */
                 } else {
                     newWifiConnection = "default";
-                    Log.e("WIFI_RECEIVER", "Failed.");
+                    Log.d("WIFI_RECEIVER", "Failed.");
                 }
             }
 
@@ -1800,9 +1804,24 @@ public class Launcher extends BaseActivity
         return updateProfile("default");
     }
 
+    private boolean firstTime = true;
     private String lastProfileUpdate = null;
     private boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
+
+        String manualProfile = mSharedPrefs.getString("manual_profile", null);
+        Log.d("UPDATE PROFILE", "First time: "+firstTime+" ; manualProfile : "+ manualProfile);
+        if(firstTime && manualProfile != null) {
+            // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
+            mSharedPrefs.edit().putString("manual_profile", null).commit();
+            firstTime = false;
+
+            //profile = manualProfile;
+            lastProfileUpdate = manualProfile;
+            return false;
+        }
+        firstTime = false;
+
         if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
         mSharedPrefs.edit().putString("current_profile", profile).apply();
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
@@ -1823,6 +1842,7 @@ public class Launcher extends BaseActivity
         //mModel.refreshAndBindWidgetsAndShortcuts(null);
         Log.e("UPDATE APPS", "With profile "+ profile);
         mModel.forceReload();
+        //TODO try recreate(); Be aware that this re-trigger the wifi receiver and might complicate things!
     }
 
     private void updateProfileDisplay(String profile) {
@@ -1833,11 +1853,11 @@ public class Launcher extends BaseActivity
         if (profileDisplay != null) profileDisplay.setText(profileName);
     }
 
-    final static int COLOR_THEME_DARK = Color.parseColor("#4f4f4f");
-    final static int COLOR_THEME_LIGHT = Color.parseColor("#4285f4");
+    int mColorThemeDark = Color.parseColor("#4f4f4f");
+    int mColorThemeLight = Color.parseColor("#4285f4");
     public void setProfileDisplayTheme(boolean darkTheme) {
         TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
-        profileDisplay.setTextColor(darkTheme ? COLOR_THEME_DARK : COLOR_THEME_LIGHT);
+        profileDisplay.setTextColor(darkTheme ? mColorThemeDark : mColorThemeLight);
     }
 
     private void updateWallpaper(String profile) {
