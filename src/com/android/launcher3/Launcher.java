@@ -29,8 +29,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.*;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.*;
 import android.media.RingtoneManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -1856,8 +1855,16 @@ public class Launcher extends BaseActivity
     int mColorThemeDark = Color.parseColor("#4f4f4f");
     int mColorThemeLight = Color.parseColor("#4285f4");
     public void setProfileDisplayTheme(boolean darkTheme) {
+        int color = darkTheme ? mColorThemeDark : mColorThemeLight;
         TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
-        profileDisplay.setTextColor(darkTheme ? mColorThemeDark : mColorThemeLight);
+        profileDisplay.setTextColor(color);
+
+        LayerDrawable background = (LayerDrawable) profileDisplay.getBackground();
+        GradientDrawable rectangle = (GradientDrawable) background.findDrawableByLayerId(R.id.indicator_menu_background);
+        rectangle.setStroke(1, color);
+
+        VectorDrawable icon = (VectorDrawable) background.findDrawableByLayerId(R.id.indicator_menu_icon);
+        icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
     private void updateWallpaper(String profile) {

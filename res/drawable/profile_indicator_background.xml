@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle" >
-    <solid android:color="#99ffffff" />
-    <stroke android:width="1dip" android:color="#994285f4"/>
-    <corners android:radius="2dp" />
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/indicator_menu_background">
+        <shape android:shape="rectangle">
+            <solid android:color="#99ffffff"/>
+            <stroke android:width="1dip" android:color="#994285f4"/>
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item   android:id="@+id/indicator_menu_icon"
+            android:drawable="@drawable/ic_arrow_dropdown_18dp"
+            android:color="#994285f4"
+            android:tint="#994285f4"
+            android:gravity="end"
+            android:right="2dp"
+    />
+</layer-list>
