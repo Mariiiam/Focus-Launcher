@@ -110,7 +110,7 @@
             android:key="profile_disconnected"
             android:title="@string/profile_disconnected"
             android:summary="@string/profile_disconnected_summary"
-            android:icon="@drawable/ic_profile_disconnected"
+            android:icon="@drawable/ic_airplane_32dp"
             android:persistent="false">
 
         <!-- NOTE: EditTextPreference accepts EditText attributes. -->
