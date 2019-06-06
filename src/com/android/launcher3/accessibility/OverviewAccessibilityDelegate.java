@@ -62,9 +62,11 @@ public class OverviewAccessibilityDelegate extends AccessibilityDelegate {
         } else if (action == WALLPAPERS) {
             launcher.onClickWallpaperPicker(host);
             return true;
+            /*
         } else if (action == WIDGETS) {
             launcher.onClickAddWidgetButton(host);
             return true;
+            */
         } else if (action == SETTINGS) {
             launcher.onClickSettingsButton(host);
             return true;

@@ -1460,6 +1460,7 @@ public class Launcher extends BaseActivity
         }.attachTo(wallpaperButton);
 
         // Bind widget button actions
+        /*
         mWidgetsButton = findViewById(R.id.widget_button);
         new OverviewButtonClickListener(ControlType.WIDGETS_BUTTON) {
             @Override
@@ -1467,6 +1468,7 @@ public class Launcher extends BaseActivity
                 onClickAddWidgetButton(view);
             }
         }.attachTo(mWidgetsButton);
+        */
 
         // Bind settings actions
         View settingsButton = findViewById(R.id.settings_button);
@@ -2950,18 +2952,19 @@ public class Launcher extends BaseActivity
         }
     }
 
-    /**
+    /*
      * Event handler for the (Add) Widgets button that appears after a long press
      * on the home screen.
-     */
+     *
     public void onClickAddWidgetButton(View view) {
         if (LOGD) Log.d(TAG, "onClickAddWidgetButton");
         if (mIsSafeModeEnabled) {
             Toast.makeText(this, R.string.safemode_widget_error, Toast.LENGTH_SHORT).show();
         } else {
-            showWidgetsView(true /* animated */, true /* resetPageToZero */);
+            showWidgetsView(true, true);
         }
     }
+    */
 
     /**
      * Event handler for the wallpaper picker button that appears after a long press

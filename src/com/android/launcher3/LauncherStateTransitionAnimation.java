@@ -170,7 +170,7 @@ public class LauncherStateTransitionAnimation {
     public void startAnimationToWidgets(final boolean animated) {
         final WidgetsContainerView toView = mLauncher.getWidgetsView();
         final View buttonView = mLauncher.getWidgetsButton();
-        startAnimationToOverlay(
+        if (buttonView != null) startAnimationToOverlay(
                 Workspace.State.OVERVIEW_HIDDEN, buttonView, toView, animated, CIRCULAR_REVEAL,
                 new PrivateTransitionCallbacks(FINAL_REVEAL_ALPHA_FOR_WIDGETS){
                     @Override
@@ -446,9 +446,10 @@ public class LauncherStateTransitionAnimation {
                 mLauncher.getUserEventDispatcher().resetElapsedContainerMillis();
             }
         };
-        startAnimationToWorkspaceFromOverlay(
+        final View widgetsButton = mLauncher.getWidgetsButton();
+        if (widgetsButton != null) startAnimationToWorkspaceFromOverlay(
                 fromWorkspaceState, toWorkspaceState,
-                mLauncher.getWidgetsButton(), widgetsView,
+                widgetsButton, widgetsView,
                 animated, CIRCULAR_REVEAL, onCompleteRunnable, cb);
     }
 

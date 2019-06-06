@@ -42,22 +42,6 @@
         android:textSize="12sp" />
 
     <TextView
-        android:id="@+id/widget_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:drawablePadding="4dp"
-        android:drawableTop="@drawable/ic_widget"
-        android:drawableTint="?attr/workspaceTextColor"
-        android:fontFamily="sans-serif-condensed"
-        android:gravity="center_horizontal"
-        android:stateListAnimator="@animator/overview_button_anim"
-        android:text="@string/widget_button_text"
-        android:textAllCaps="true"
-        android:textColor="?attr/workspaceTextColor"
-        android:textSize="12sp" />
-
-    <TextView
         android:id="@+id/settings_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
