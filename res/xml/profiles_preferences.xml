@@ -41,14 +41,12 @@
         <RingtonePreference
                 android:key="work_ringtone"
                 android:title="@string/profile_pref_ringtone"
-                android:ringtoneType="ringtone"
-                android:defaultValue="content://settings/system/ringtone"/>
+                android:ringtoneType="ringtone"/>
 
         <RingtonePreference
                 android:key="work_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
-                android:ringtoneType="notification"
-                android:defaultValue="content://settings/system/notification_sound"/>
+                android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
                 android:key="work_hide_notifications"
@@ -88,14 +86,12 @@
         <RingtonePreference
                 android:key="home_ringtone"
                 android:title="@string/profile_pref_ringtone"
-                android:ringtoneType="ringtone"
-                android:defaultValue="content://settings/system/ringtone"/>
+                android:ringtoneType="ringtone"/>
 
         <RingtonePreference
                 android:key="home_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
-                android:ringtoneType="notification"
-                android:defaultValue="content://settings/system/notification_sound"/>
+                android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
                 android:key="home_hide_notifications"
@@ -129,14 +125,12 @@
         <RingtonePreference
                 android:key="disconnected_ringtone"
                 android:title="@string/profile_pref_ringtone"
-                android:ringtoneType="ringtone"
-                android:defaultValue="content://settings/system/ringtone"/>
+                android:ringtoneType="ringtone"/>
 
         <RingtonePreference
                 android:key="disconnected_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
-                android:ringtoneType="notification"
-                android:defaultValue="content://settings/system/notification_sound"/>
+                android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
                 android:key="disconnected_hide_notifications"
@@ -170,14 +164,12 @@
         <RingtonePreference
                 android:key="default_ringtone"
                 android:title="@string/profile_pref_ringtone"
-                android:ringtoneType="ringtone"
-                android:defaultValue="content://settings/system/ringtone"/>
+                android:ringtoneType="ringtone"/>
 
         <RingtonePreference
                 android:key="default_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
-                android:ringtoneType="notification"
-                android:defaultValue="content://settings/system/notification_sound"/>
+                android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
                 android:key="default_hide_notifications"

@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.*;
 import android.graphics.drawable.*;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -418,6 +419,7 @@ public class Launcher extends BaseActivity
         }
 
         saveCurrentWallpaper();
+        saveCurrentRingtones();
 
         // On large interfaces, or on devices that a user has specifically enabled screen rotation,
         // we want the screen to auto-rotate based on the current orientation
@@ -762,6 +764,46 @@ public class Launcher extends BaseActivity
         }
         mDragLayer.clearAnimatedView();
     }
+
+    private static final String INIT_RINGTONE = "INIT_RINGTONE";
+    private static final String INIT_NOTIFICATION_SOUND = "INIT_NOTIFICATION_SOUND";
+    private void saveCurrentRingtones(){
+        Uri currentRingtone = null;
+        Uri currentNotificationSound = null;
+
+        for (String profile : ProfilesActivity.ProfilesSettingsFragment.availableProfiles){
+            String key = profile+"_ringtone";
+            String ringtonePref = mSharedPrefs.getString(key, INIT_RINGTONE);
+            if(ringtonePref.equals(INIT_RINGTONE)) {
+                if (currentRingtone == null) currentRingtone = extractRingtone(RingtoneManager.TYPE_RINGTONE);
+                mSharedPrefs.edit().putString(key, currentRingtone.toString()).apply();
+            }
+
+            key = profile+"_notification_sound";
+            ringtonePref = mSharedPrefs.getString(key, INIT_NOTIFICATION_SOUND);
+            if(ringtonePref.equals(INIT_NOTIFICATION_SOUND)) {
+                if (currentNotificationSound == null) currentNotificationSound = extractRingtone(RingtoneManager.TYPE_NOTIFICATION);
+                mSharedPrefs.edit().putString(key, currentNotificationSound.toString()).apply();
+            }
+        }
+    }
+
+    private Uri extractRingtone(int type) {
+        if (type != RingtoneManager.TYPE_RINGTONE && type != RingtoneManager.TYPE_NOTIFICATION) throw new RuntimeException("Ringtone extraction failed! Unknown type \""+type+"\"");
+
+        Uri defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, type);
+        Ringtone defaultRingtone = RingtoneManager.getRingtone(this, defaultUri);
+
+        if (defaultRingtone == null) {
+            Log.d("RINGTONE_EXTRACTION", "default "+(type == RingtoneManager.TYPE_RINGTONE ? "ringtone" : "notification sound")+" \"Silent\" with uri = " + Uri.EMPTY.getPath());
+            return Uri.EMPTY;
+        } else {
+            String defaultRingtoneTitle = defaultRingtone.getTitle(this);
+            Log.d("RINGTONE_EXTRACTION", "default "+(type == RingtoneManager.TYPE_RINGTONE ? "ringtone" : "notification sound")+" \"" + defaultRingtoneTitle + "\" with uri = " + defaultUri.getPath());
+            return defaultUri;
+        }
+    }
+
 
     private void saveCurrentWallpaper(){
         Bitmap currentWallpaper = null;
@@ -1883,8 +1925,11 @@ public class Launcher extends BaseActivity
 
     private void updateRingtone(String profile) {
         try {
-            Uri ringtoneUri = Uri.parse(mSharedPrefs.getString(profile + "_ringtone", null));
-            if(ringtoneUri != null) setRingtone(ringtoneUri, this, RingtoneManager.TYPE_RINGTONE);
+            String ringtone = mSharedPrefs.getString(profile + "_ringtone", null);
+            if(ringtone != null) {
+                Uri ringtoneUri = Uri.parse(ringtone);
+                if(ringtoneUri != null) setRingtone(ringtoneUri, this, RingtoneManager.TYPE_RINGTONE);
+            }
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -1892,8 +1937,11 @@ public class Launcher extends BaseActivity
 
     private void updateNotificationSound(String profile) {
         try {
-            Uri notificationSoundUri = Uri.parse(mSharedPrefs.getString(profile + "_notification_sound", null));
-            if(notificationSoundUri != null) setRingtone(notificationSoundUri, this, RingtoneManager.TYPE_NOTIFICATION);
+            String sound = mSharedPrefs.getString(profile + "_notification_sound", null);
+            if(sound != null) {
+                Uri notificationSoundUri = Uri.parse(sound);
+                if(notificationSoundUri != null) setRingtone(notificationSoundUri, this, RingtoneManager.TYPE_NOTIFICATION);
+            }
         } catch(Exception e) {
             e.printStackTrace();
         }
