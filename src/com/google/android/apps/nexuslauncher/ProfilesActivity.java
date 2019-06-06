@@ -205,36 +205,37 @@ public class ProfilesActivity extends Activity {
                                     : null);
 
                 } else if (preference instanceof RingtonePreference) {
+                    Uri ringtoneUri;
                     // For ringtone preferences, look up the correct display value
                     // using RingtoneManager.
                     if (TextUtils.isEmpty(stringValue)) {
                         // Empty values correspond to 'silent' (no ringtone).
                         preference.setSummary(R.string.profile_pref_ringtone_silent);
+                        ringtoneUri = null;
 
                     } else {
-                        Uri ringtoneUri = Uri.parse(stringValue);
+                        ringtoneUri = Uri.parse(stringValue);
                         Ringtone ringtone = RingtoneManager.getRingtone(
                                 preference.getContext(), ringtoneUri);
 
                         if (ringtone == null) {
                             // Clear the summary if there was a lookup error.
                             preference.setSummary(null);
+                            return true;
                         } else {
                             // Set the summary to reflect the new ringtone display
                             // name.
                             String name = ringtone.getTitle(preference.getContext());
                             preference.setSummary(name);
-
-                            // Set ringtone
-                            String profile = preference.getKey().split("_")[0];
-                            String current_profile = preference.getSharedPreferences().getString("current_profile", "");
-                            if (current_profile.equals(profile)) {
-                                int type = ((RingtonePreference) preference).getRingtoneType();
-                                Launcher.setRingtone(ringtoneUri, (Activity) preference.getContext(), type);
-                            }
                         }
                     }
-
+                    // Set ringtone
+                    String profile = preference.getKey().split("_")[0];
+                    String current_profile = preference.getSharedPreferences().getString("current_profile", "");
+                    if (current_profile.equals(profile)) {
+                        int type = ((RingtonePreference) preference).getRingtoneType();
+                        Launcher.setRingtone(ringtoneUri, (Activity) preference.getContext(), type);
+                    }
                 } else {
                     // For all other preferences, set the summary to the value's
                     // simple string representation.

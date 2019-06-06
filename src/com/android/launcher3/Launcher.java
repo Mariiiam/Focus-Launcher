@@ -1975,10 +1975,7 @@ public class Launcher extends BaseActivity
     }
 
     public static void setRingtone(Uri soundUri, Activity context, int type) {
-        if (soundUri == null) {
-            Log.e("SET RINGTONE", "No URI provided!");
-            return;
-        }
+        if (soundUri != null && TextUtils.isEmpty(soundUri.toString())) soundUri = null;
         try {
             boolean permission = hasWritePermission(context, false);
             if (permission) {

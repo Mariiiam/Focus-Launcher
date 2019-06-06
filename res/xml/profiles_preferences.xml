@@ -46,6 +46,8 @@
         <RingtonePreference
                 android:key="work_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
+                android:showSilent="true"
+                android:showDefault="false"
                 android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
@@ -91,6 +93,8 @@
         <RingtonePreference
                 android:key="home_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
+                android:showSilent="true"
+                android:showDefault="false"
                 android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
@@ -130,6 +134,8 @@
         <RingtonePreference
                 android:key="disconnected_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
+                android:showSilent="true"
+                android:showDefault="false"
                 android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
@@ -169,6 +175,8 @@
         <RingtonePreference
                 android:key="default_notification_sound"
                 android:title="@string/profile_pref_notification_sound"
+                android:showSilent="true"
+                android:showDefault="false"
                 android:ringtoneType="notification"/>
 
         <com.android.launcher3.views.DependentSwitchPreference
