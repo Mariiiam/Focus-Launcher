@@ -29,7 +29,9 @@ import android.preference.RingtonePreference;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import com.android.launcher3.*;
+import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherFiles;
+import com.android.launcher3.R;
 import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.views.DependentSwitchPreference;
@@ -111,7 +113,7 @@ public class ProfilesActivity extends Activity {
             parent.getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(mCurrentProfileListener);
             mCurrentProfileListener.onSharedPreferenceChanged(parent.getPreferenceManager().getSharedPreferences(), "current_profile");
 
-            Launcher.hasWritePermission(parent.getActivity(), true);
+            if (this.parent == this) Launcher.hasWritePermission(parent.getActivity(), true);
         }
 
         /**
