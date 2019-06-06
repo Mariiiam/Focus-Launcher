@@ -1919,42 +1919,57 @@ public class Launcher extends BaseActivity
         icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
-    private void updateWallpaper(String profile) {
-        try {
-            Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
-            if(wallpaper != null) {
-                WallpaperManager.getInstance(this).setBitmap(wallpaper);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    WallpaperManager.getInstance(this).setBitmap(wallpaper, null, true, WallpaperManager.FLAG_LOCK);
+    private void updateWallpaper(final String profile) {
+        new AsyncTask<Void, Void, Void>() {
+            public Void doInBackground(Void ... args) {
+                try {
+                    Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
+                    if(wallpaper != null) {
+                        WallpaperManager.getInstance(Launcher.this).setBitmap(wallpaper);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            WallpaperManager.getInstance(Launcher.this).setBitmap(wallpaper, null, true, WallpaperManager.FLAG_LOCK);
+                        }
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
+                return null;
             }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        }.executeOnExecutor(Utilities.THREAD_POOL_EXECUTOR);
     }
 
-    private void updateRingtone(String profile) {
-        try {
-            String ringtone = mSharedPrefs.getString(profile + "_ringtone", null);
-            if(ringtone != null) {
-                Uri ringtoneUri = Uri.parse(ringtone);
-                if(ringtoneUri != null) setRingtone(ringtoneUri, this, RingtoneManager.TYPE_RINGTONE);
+    private void updateRingtone(final String profile) {
+        new AsyncTask<Void, Void, Void>() {
+            public Void doInBackground(Void ... args) {
+                try {
+                    String ringtone = mSharedPrefs.getString(profile + "_ringtone", null);
+                    if(ringtone != null) {
+                        Uri ringtoneUri = Uri.parse(ringtone);
+                        if(ringtoneUri != null) setRingtone(ringtoneUri, Launcher.this, RingtoneManager.TYPE_RINGTONE);
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
             }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        }.executeOnExecutor(Utilities.THREAD_POOL_EXECUTOR);
     }
 
-    private void updateNotificationSound(String profile) {
-        try {
-            String sound = mSharedPrefs.getString(profile + "_notification_sound", null);
-            if(sound != null) {
-                Uri notificationSoundUri = Uri.parse(sound);
-                if(notificationSoundUri != null) setRingtone(notificationSoundUri, this, RingtoneManager.TYPE_NOTIFICATION);
+    private void updateNotificationSound(final String profile) {
+        new AsyncTask<Void, Void, Void>() {
+            public Void doInBackground(Void ... args) {
+                try {
+                    String sound = mSharedPrefs.getString(profile + "_notification_sound", null);
+                    if(sound != null) {
+                        Uri notificationSoundUri = Uri.parse(sound);
+                        if(notificationSoundUri != null) setRingtone(notificationSoundUri, Launcher.this, RingtoneManager.TYPE_NOTIFICATION);
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
             }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        }.executeOnExecutor(Utilities.THREAD_POOL_EXECUTOR);
     }
 
     public static void setRingtone(Uri soundUri, Activity context, int type) {
