@@ -809,10 +809,10 @@ public class Launcher extends BaseActivity
         Bitmap currentWallpaper = null;
 
         for (String profile : ProfilesActivity.ProfilesSettingsFragment.availableProfiles){
-            Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
-            if(wallpaper == null) {
+            String filename = "wallpaper_"+profile;
+            if(!privateFileExists(filename)) {
                 if (currentWallpaper == null) currentWallpaper = extractWallpaper();
-                saveImageToAppPrivateFile(currentWallpaper, "wallpaper_"+profile);
+                saveImageToAppPrivateFile(currentWallpaper, filename);
             }
         }
     }
@@ -882,6 +882,16 @@ public class Launcher extends BaseActivity
         }
 
         return bitmap;
+    }
+
+    private boolean privateFileExists(String filename) {
+        try {
+            File file = getFileStreamPath(filename);
+            return file.exists();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void saveImageToAppPrivateFile(Bitmap imageToSave, String filename) {
