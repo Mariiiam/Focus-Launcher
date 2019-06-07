@@ -352,8 +352,8 @@
     <string name="profile_pref_ringtone">Ringtone</string>
     <string name="profile_pref_notification_sound">Notification Sound</string>
     <string name="profile_pref_ringtone_silent">Silent</string>
-    <string name="profile_pref_ssids">Associated WiFi Names</string>
-    <string name="profile_pref_ssids_hint">This profile is active while connected to one of the provided WiFis</string>
+    <string name="profile_pref_ssids">Associated WiFi Networks</string>
+    <string name="profile_pref_ssids_hint">This profile is active while connected to one of the provided WiFis. One line per entry.</string>
     <string name="profile_pref_ssids_disconnected">WiFi</string>
     <string name="profile_pref_ssids_disconnected_summary">This profile is active when in airplane mode</string>
     <string name="profile_pref_ssids_default">WiFi</string>
