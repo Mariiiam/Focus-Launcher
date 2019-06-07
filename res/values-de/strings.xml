@@ -78,8 +78,8 @@
     <string name="allow_rotation_desc" msgid="8662546029078692509">"Bei Drehung des Smartphones"</string>
     <string name="allow_rotation_blocked_desc" msgid="3212602545192996253">"Die aktuelle \"Display\"-Einstellung verhindert eine Drehung der Anzeige"</string>
     <string name="icon_badging_title" msgid="874121399231955394">"Benachrichtigungsindikatoren"</string>
-    <string name="hide_foreign_notifications_title" msgid="874121399231955395">"App-Benachrichtigungen ausblenden"</string>
-    <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Von Apps, die Du nicht angeordnet hast"</string>
+    <string name="hide_foreign_notifications_title" msgid="874121399231955395">"Benachrichtigungen ausblenden"</string>
+    <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
     <string name="title_missing_notification_access" msgid="7503287056163941064">"Benachrichtigungszugriff erforderlich"</string>
@@ -160,8 +160,8 @@
     <string name="profile_pref_ringtone">Klingelton</string>
     <string name="profile_pref_notification_sound">Benachrichtigungston</string>
     <string name="profile_pref_ringtone_silent">Stumm</string>
-    <string name="profile_pref_ssids">Verknüpfte WLAN Namen</string>
-    <string name="profile_pref_ssids_hint">Dieses Profil ist aktiv, wenn eine Verbindung zu einem der bereitgestellten WLAN Netzwerke besteht</string>
+    <string name="profile_pref_ssids">Verknüpfte WLAN-Netzwerke</string>
+    <string name="profile_pref_ssids_hint">Dieses Profil wird aktiviert, wenn das Smartphone mit einem der angegebenen WLAN Netzwerke verbunden ist. Ein Netzwerk pro Zeile angeben.</string>
     <string name="profile_pref_ssids_disconnected">WLAN</string>
     <string name="profile_pref_ssids_disconnected_summary">Dieses Profile wird automatisch mit dem Flugmodus aktiviert</string>
     <string name="profile_pref_ssids_default">WLAN</string>
