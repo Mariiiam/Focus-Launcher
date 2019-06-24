@@ -675,7 +675,7 @@ public class Launcher extends BaseActivity
             }
             return;
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
-            if (resultCode == RESULT_OK && mWorkspace.isInOverviewMode()) {
+            if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
                 Bitmap wallpaper = extractWallpaper();
                 String currentProfile = mSharedPrefs.getString("current_profile", "default");
                 saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
