@@ -57,6 +57,12 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="work_hide_notifications"
+            android:title="@string/enable_grayscale_title"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
         <!--
         <Preference
                 android:persistent="false"

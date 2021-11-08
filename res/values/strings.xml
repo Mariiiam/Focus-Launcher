@@ -178,6 +178,8 @@
     <string name="icon_badging_title">Notification dots</string>
     <string name="hide_foreign_notifications_title">Hide notifications</string>
     <string name="hide_foreign_notifications_summary">From apps not on your homescreen</string>
+    <!--Title for Grayscale setting. Tapping this will enable or disable grayscale which is also called black and white mode-->
+    <string name="enable_grayscale_title">Enable Grayscale Mode</string>
     <!-- Text to indicate that the system icon badging setting is on [CHAR LIMIT=100] -->
     <string name="icon_badging_desc_on">On</string>
     <!-- Text to indicate that the system icon badging setting is off [CHAR LIMIT=100] -->
@@ -343,8 +345,8 @@
     <string name="profile_display_default">Profile</string>
     <string name="profile_work">Work</string>
     <string name="profile_home">Home</string>
-    <string name="profile_disconnected">Airplane</string>
-    <string name="profile_disconnected_summary">Enable by activating airplane mode</string>
+    <string name="profile_disconnected">Offline Mode</string>
+    <string name="profile_disconnected_summary">Enable by activating offline mode</string>
     <string name="profile_default">Default</string>
     <string name="profile_default_summary">Used if no other profile is enabled</string>
     <string name="profile_pref_wallpaper">Wallpaper</string>
@@ -355,7 +357,7 @@
     <string name="profile_pref_ssids">Associated WiFi Networks</string>
     <string name="profile_pref_ssids_hint">This profile is active while connected to one of the provided WiFis. One line per entry.</string>
     <string name="profile_pref_ssids_disconnected">WiFi</string>
-    <string name="profile_pref_ssids_disconnected_summary">This profile is active when in airplane mode</string>
+    <string name="profile_pref_ssids_disconnected_summary">This profile is active when in offline mode</string>
     <string name="profile_pref_ssids_default">WiFi</string>
     <string name="profile_pref_ssids_default_summary">This profile is active if the requirements of no other profile are met</string>
     <string name="title_google_app">Google app</string>
