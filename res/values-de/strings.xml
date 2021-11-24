@@ -80,10 +80,13 @@
     <string name="icon_badging_title" msgid="874121399231955394">"Benachrichtigungsindikatoren"</string>
     <string name="hide_foreign_notifications_title" msgid="874121399231955395">"Benachrichtigungen ausblenden"</string>
     <string name="enable_grayscale_title" msgid="9029271080007984542">"Graustufen-Modus aktivieren"</string>
+    <string name="grayscale_tile">Graustufen</string>
     <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
+    <string name="grayscale_summary">Aktiviert Graustufen-Modus</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
     <string name="title_missing_notification_access" msgid="7503287056163941064">"Benachrichtigungszugriff erforderlich"</string>
+    <string name="title_missing_grayscale_access">Berechtigung erforderlich</string>
     <string name="title_manually_select_profile" msgid="7503287056163941061">"Profil manuell aktivieren"</string>
     <string name="title_missing_write_access" msgid="7503287056163941068">"Schreibzugriff erforderlich"</string>
     <string name="msg_missing_notification_access" msgid="281113995110910548">"Um dir für jede App Punkte als Indikator für Benachrichtigungen anzeigen zu lassen, aktiviere den Zugriff auf Benachrichtigungen für die App \"<xliff:g id="NAME">%1$s</xliff:g>\""</string>
