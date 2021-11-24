@@ -79,10 +79,14 @@
     <string name="allow_rotation_blocked_desc" msgid="3212602545192996253">"Die aktuelle \"Display\"-Einstellung verhindert eine Drehung der Anzeige"</string>
     <string name="icon_badging_title" msgid="874121399231955394">"Benachrichtigungsindikatoren"</string>
     <string name="hide_foreign_notifications_title" msgid="874121399231955395">"Benachrichtigungen ausblenden"</string>
+    <string name="enable_grayscale_title" msgid="9029271080007984542">"Graustufen-Modus aktivieren"</string>
+    <string name="grayscale_tile">Graustufen</string>
     <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
+    <string name="grayscale_summary">Aktiviert Graustufen-Modus</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
     <string name="title_missing_notification_access" msgid="7503287056163941064">"Benachrichtigungszugriff erforderlich"</string>
+    <string name="title_missing_grayscale_access">Berechtigung erforderlich</string>
     <string name="title_manually_select_profile" msgid="7503287056163941061">"Profil manuell aktivieren"</string>
     <string name="title_missing_write_access" msgid="7503287056163941068">"Schreibzugriff erforderlich"</string>
     <string name="msg_missing_notification_access" msgid="281113995110910548">"Um dir für jede App Punkte als Indikator für Benachrichtigungen anzeigen zu lassen, aktiviere den Zugriff auf Benachrichtigungen für die App \"<xliff:g id="NAME">%1$s</xliff:g>\""</string>
@@ -151,8 +155,8 @@
     <string name="profile_display_default">Profil</string>
     <string name="profile_work">Arbeit</string>
     <string name="profile_home">Zu Hause</string>
-    <string name="profile_disconnected">Flugzeugmodus</string>
-    <string name="profile_disconnected_summary">Aktiv im Flugzeugmodus</string>
+    <string name="profile_disconnected">Offline Modus</string>
+    <string name="profile_disconnected_summary">Aktiv im Offline Modus</string>
     <string name="profile_default">Standard</string>
     <string name="profile_default_summary">Aktiv wenn kein anderes Profil passt</string>
     <string name="profile_pref_wallpaper">Wallpaper</string>
@@ -163,7 +167,7 @@
     <string name="profile_pref_ssids">Verknüpfte WLAN-Netzwerke</string>
     <string name="profile_pref_ssids_hint">Dieses Profil wird aktiviert, wenn das Smartphone mit einem der angegebenen WLAN Netzwerke verbunden ist. Ein Netzwerk pro Zeile angeben.</string>
     <string name="profile_pref_ssids_disconnected">WLAN</string>
-    <string name="profile_pref_ssids_disconnected_summary">Dieses Profile wird automatisch mit dem Flugmodus aktiviert</string>
+    <string name="profile_pref_ssids_disconnected_summary">Dieses Profile wird automatisch mit dem Offline Modus aktiviert</string>
     <string name="profile_pref_ssids_default">WLAN</string>
     <string name="profile_pref_ssids_default_summary">Dieses Profil wird aktiviert, wenn das WLAN mit keinem anderen Profil übereinstimmt</string>
     <string name="title_google_app">Google App</string>

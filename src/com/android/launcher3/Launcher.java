@@ -17,6 +17,8 @@
 package com.android.launcher3;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.*;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -27,6 +29,7 @@ import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.*;
 import android.graphics.drawable.*;
@@ -62,6 +65,7 @@ import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.allapps.AllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.anim.AnimationLayerSet;
+import com.android.launcher3.color.OverlayService;
 import com.android.launcher3.compat.AppWidgetManagerCompat;
 import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.LauncherAppsCompatVO;
@@ -128,7 +132,12 @@ public class Launcher extends BaseActivity
 
     private static final int REQUEST_PERMISSION_CALL_PHONE = 14;
 
+    private static final int REQUEST_PERMISSION_EXTERNAL_STORAGE = 15;
+
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
+
+    private static final String DISPLAY_DALTONIZER_ENABLED = "accessibility_display_daltonizer_enabled";
+    private static final String DISPLAY_DALTONIZER         = "accessibility_display_daltonizer";
 
     /**
      * IntentStarter uses request codes starting with this. This must be greater than all activity
@@ -782,8 +791,13 @@ public class Launcher extends BaseActivity
             key = profile+"_notification_sound";
             ringtonePref = mSharedPrefs.getString(key, INIT_NOTIFICATION_SOUND);
             if(ringtonePref.equals(INIT_NOTIFICATION_SOUND)) {
-                if (currentNotificationSound == null) currentNotificationSound = extractRingtone(RingtoneManager.TYPE_NOTIFICATION);
-                mSharedPrefs.edit().putString(key, currentNotificationSound.toString()).apply();
+                if(hasExternalStoragePermission()){
+                    if (currentNotificationSound == null) currentNotificationSound = extractRingtone(RingtoneManager.TYPE_NOTIFICATION);
+                    mSharedPrefs.edit().putString(key, currentNotificationSound.toString()).apply();
+                }
+                else {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_EXTERNAL_STORAGE);
+                }
             }
         }
     }
@@ -793,7 +807,7 @@ public class Launcher extends BaseActivity
 
         Uri defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, type);
         Ringtone defaultRingtone = RingtoneManager.getRingtone(this, defaultUri);
-
+        
         if (defaultRingtone == null) {
             Log.d("RINGTONE_EXTRACTION", "default "+(type == RingtoneManager.TYPE_RINGTONE ? "ringtone" : "notification sound")+" \"Silent\" with uri = " + Uri.EMPTY.getPath());
             return Uri.EMPTY;
@@ -804,6 +818,19 @@ public class Launcher extends BaseActivity
         }
     }
 
+    public boolean hasExternalStoragePermission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
 
     private void saveCurrentWallpaper(){
         Bitmap currentWallpaper = null;
@@ -949,6 +976,37 @@ public class Launcher extends BaseActivity
             } else {
                 // TODO: Show a snack bar with link to settings
                 Toast.makeText(this, getString(R.string.msg_no_phone_permission,
+                        getString(R.string.derived_app_name)), Toast.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == REQUEST_PERMISSION_EXTERNAL_STORAGE && pendingArgs != null
+                && pendingArgs.getRequestCode() == REQUEST_PERMISSION_EXTERNAL_STORAGE){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                saveCurrentRingtones();
+            }
+            else {
+                Toast.makeText(this, getString(R.string.msg_no_external_storage_permission,
+                        getString(R.string.derived_app_name)), Toast.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == CODE_WRITE_SETTINGS_PERMISSION && pendingArgs != null
+                && pendingArgs.getRequestCode() == CODE_WRITE_SETTINGS_PERMISSION) {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //hier on request
+                Log.d("-----", "on request permission");
+            }
+            else {
+                Toast.makeText(this, getString(R.string.msg_no_write_settings_permission,
+                        getString(R.string.derived_app_name)), Toast.LENGTH_SHORT).show();
+            }
+        }
+        if (requestCode == CODE_OVERLAY_PERMISSION && pendingArgs != null
+                && pendingArgs.getRequestCode() == CODE_OVERLAY_PERMISSION) {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("-----", "on request permission");
+            }
+            else {
+                Toast.makeText(this, getString(R.string.msg_no_overlay_permission,
                         getString(R.string.derived_app_name)), Toast.LENGTH_SHORT).show();
             }
         }
@@ -1985,6 +2043,65 @@ public class Launcher extends BaseActivity
             Log.e("SET RINGTONE", "Failed:");
             e.printStackTrace();
         }
+    }
+
+    public static boolean isAccessibilityEnabled(Context context) {
+        int color_correction_enabled = 0;
+        try { color_correction_enabled = Settings.Secure.getInt(context.getContentResolver(), "accessibility_display_daltonizer_enabled");
+
+        } catch (Exception e) {
+            color_correction_enabled = 0; // means default false
+        }
+        if(color_correction_enabled == 0 ){
+            Log.d("####", "color correction disabled");
+            return false;
+        }
+        else {
+            Log.d("####", "color correction enabled");
+            return true;
+        }
+    }
+
+    /** Opens the accessibility settings for manually enabling or disabling grayscale mode
+     * Accessibility > Vision > Colour Adjustment > ON > Greyscale */
+    public static void changeGrayscaleSetting(Activity context) {
+        try {
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            context.startActivity(intent);
+            /**
+             * Solution to draw a gray semi-transparent overlay
+             * boolean permission = hasOverlayPermission(context, true);
+             * if (permission) {
+             *      Log.d("-----", "enable grayscale in launcher");
+             *      context.startService(new Intent(context, OverlayService.class));
+            } */
+        } catch(Exception e) {
+            Log.e("SET GRAYSCALE MODE", "Failed:");
+            e.printStackTrace();
+        }
+    }
+
+    public static final int CODE_OVERLAY_PERMISSION = 43;
+    private static boolean hasOverlayPermission(Activity context, boolean b) {
+        boolean permission;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            permission = Settings.canDrawOverlays(context);
+        } else {
+            permission = ContextCompat.checkSelfPermission(context, Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED;
+        }
+        if(permission){
+            return true;
+        } else {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                intent.setData(Uri.parse("package:" + context.getPackageName()));
+                context.startActivityForResult(intent, CODE_OVERLAY_PERMISSION);
+            }
+            else {
+                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW}, CODE_OVERLAY_PERMISSION);
+            }
+        }
+        return false;
     }
 
     public static final int CODE_WRITE_SETTINGS_PERMISSION = 42;

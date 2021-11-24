@@ -24,6 +24,9 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
+import android.util.Log;
+import android.widget.Toast;
+
 import com.android.launcher3.graphics.IconShapeOverride;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.util.SettingsObserver;
@@ -41,6 +44,8 @@ public class SettingsActivity extends Activity {
     public static final String NOTIFICATION_BADGING = "notification_badging";
     /** Hidden field Settings.Secure.ENABLED_NOTIFICATION_LISTENERS */
     public static final String NOTIFICATION_ENABLED_LISTENERS = "enabled_notification_listeners";
+    /** Hidden field Settings.Secure.ENABLED_GRAYSCALE_LISTENERS */
+    public static final String ENABLED_GRAYSCALE_LISTENERS = "enabled_grayscale_listeners";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -234,6 +239,50 @@ public class SettingsActivity extends Activity {
         }
     }
 
+    /**
+     * Content observer which listens for system badging setting changes,
+     * and updates the launcher badging setting subtext accordingly.
+     */
+    public static class GrayscaleAccessObserver extends SettingsObserver.Secure 
+        implements Preference.OnPreferenceChangeListener {
+
+        private final DependentSwitchPreference mSwitchPreference;
+        private final ContentResolver mResolver;
+        private final FragmentManager mFragmentManager;
+
+        public GrayscaleAccessObserver(
+                DependentSwitchPreference switchPreference,
+                ContentResolver resolver,
+                FragmentManager fragmentManager
+        ) {
+            super(resolver);
+            mSwitchPreference = switchPreference;
+            mResolver = resolver;
+            mFragmentManager = fragmentManager;
+        }
+
+        @Override
+        public void onSettingChanged(boolean enabled) {
+            /*if (enabled) {
+                // Check if the listener is enabled or not.
+                String enabledListeners = Settings.Secure.getString(mResolver, ENABLED_GRAYSCALE_LISTENERS);
+            }
+            mSwitchPreference.setOnPreferenceClickListener(null);
+            mSwitchPreference.setDependencyResolved(true);
+            mSwitchPreference.setSummary(getSummary(enabled));*/
+        }
+
+        protected int getSummary(boolean settingEnabled) {
+            return settingEnabled ? R.string.icon_badging_desc_on : R.string.icon_badging_desc_off;
+        }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object value) {
+            
+            return true;
+        }
+    }
+
     public static class NotificationAccessConfirmation
             extends DialogFragment implements DialogInterface.OnClickListener {
 
@@ -257,6 +306,6 @@ public class SettingsActivity extends Activity {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     .putExtra(":settings:fragment_args_key", cn.flattenToString());
             getActivity().startActivity(intent);
-        }
+        }  
     }
 }

@@ -112,6 +112,12 @@
     <!-- Toast shown on clicking a direct call shortcut. [CHAR_LIMIT=80] -->
     <string name="msg_no_phone_permission"><xliff:g id="app_name" example="Launcher3">%1$s</xliff:g> is not allowed to make phone calls</string>
 
+    <string name="msg_no_external_storage_permission"><xliff:g id="app_name" example="Launcher3">%1$s</xliff:g> is not allowed to access external storage</string>
+    
+    <string name="msg_no_write_settings_permission"><xliff:g id="app_name" example="Launcher3">%1$s</xliff:g> is not allowed to write settings</string>
+
+    <string name="msg_no_overlay_permission"><xliff:g id="app_name" example="Launcher3">%1$s</xliff:g> is not allowed to draw an overlay on top of other apps</string>
+
     <!-- Widgets: -->
     <skip />    
 
@@ -178,15 +184,20 @@
     <string name="icon_badging_title">Notification dots</string>
     <string name="hide_foreign_notifications_title">Hide notifications</string>
     <string name="hide_foreign_notifications_summary">From apps not on your homescreen</string>
+    <string name="grayscale_summary">Turns screen to grayscale mode</string>
+    <!--Title for Grayscale setting. Tapping this will enable or disable grayscale which is also called black and white mode-->
+    <string name="enable_grayscale_title">Enable Grayscale Mode</string>
     <!-- Text to indicate that the system icon badging setting is on [CHAR LIMIT=100] -->
     <string name="icon_badging_desc_on">On</string>
     <!-- Text to indicate that the system icon badging setting is off [CHAR LIMIT=100] -->
     <string name="icon_badging_desc_off">Off</string>
     <!-- Title for the dialog shown when the app does not has notification access, explaining the requirement for notification access [CHAR LIMIT=50] -->
     <string name="title_missing_notification_access">Notification access needed</string>
+    <string name="title_missing_grayscale_access">Grayscale access needed </string>
     <string name="title_manually_select_profile">Manually activate profile</string>
     <!-- Message explaining to the user that the notification access is required by the app for showing 'Notification dots' [CHAR LIMIT=NONE] -->
     <string name="msg_missing_notification_access">To show Notification Dots, <xliff:g id="name" example="My App">%1$s</xliff:g> needs access to notifications</string>
+    <string name="msg_missing_grayscale_access">To enable Grayscale Mode, <xliff:g id="name" example="My App">%1$s</xliff:g> needs access to grayscale</string>
     <string name="msg_missing_notification_access_for_blocking">To be able to block notifications from apps not on this profile\'s homescreen, <xliff:g id="name" example="My App">%1$s</xliff:g> needs access to notifications</string>
     <!-- Button text in the confirmation dialog which would take the user to the system settings [CHAR LIMIT=50] -->
     <string name="title_change_settings">Change settings</string>
@@ -343,8 +354,8 @@
     <string name="profile_display_default">Profile</string>
     <string name="profile_work">Work</string>
     <string name="profile_home">Home</string>
-    <string name="profile_disconnected">Airplane</string>
-    <string name="profile_disconnected_summary">Enable by activating airplane mode</string>
+    <string name="profile_disconnected">Offline Mode</string>
+    <string name="profile_disconnected_summary">Enable by activating offline mode</string>
     <string name="profile_default">Default</string>
     <string name="profile_default_summary">Used if no other profile is enabled</string>
     <string name="profile_pref_wallpaper">Wallpaper</string>
@@ -355,7 +366,7 @@
     <string name="profile_pref_ssids">Associated WiFi Networks</string>
     <string name="profile_pref_ssids_hint">This profile is active while connected to one of the provided WiFis. One line per entry.</string>
     <string name="profile_pref_ssids_disconnected">WiFi</string>
-    <string name="profile_pref_ssids_disconnected_summary">This profile is active when in airplane mode</string>
+    <string name="profile_pref_ssids_disconnected_summary">This profile is active when in offline mode</string>
     <string name="profile_pref_ssids_default">WiFi</string>
     <string name="profile_pref_ssids_default_summary">This profile is active if the requirements of no other profile are met</string>
     <string name="title_google_app">Google app</string>
@@ -396,4 +407,5 @@
         The bridge to connect to the Google Feed could not be found,
         or needs to be updated.
     </string>
+    <string name="grayscale_tile">Grayscale</string>
 </resources>

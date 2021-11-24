@@ -57,6 +57,13 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+        <Preference
+            android:key="work_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+
         <!--
         <Preference
                 android:persistent="false"
@@ -104,6 +111,14 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+        <Preference
+            android:key="home_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+        
+
+
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -145,6 +160,13 @@
                 android:persistent="true"
                 android:defaultValue="true"/>
 
+        <Preference
+            android:key="disconnected_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="false"/>
+
+
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -185,6 +207,13 @@
                 android:summary="@string/hide_foreign_notifications_summary"
                 android:persistent="true"
                 android:defaultValue="false"/>
+
+        <Preference
+            android:key="default_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
 
     </PreferenceScreen>
 

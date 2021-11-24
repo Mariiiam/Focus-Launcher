@@ -18,6 +18,7 @@ package com.google.android.apps.nexuslauncher;
 
 import android.app.*;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -63,6 +64,7 @@ public class ProfilesActivity extends Activity {
 
         private PreferenceFragment parent;
         private Map<String, NotificationAccessObserver> mNotificationAccessObservers = new HashMap<>();
+        private Map<String, GrayscaleAccessObserver> mGrayscaleAccessObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
 
         public final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
@@ -135,6 +137,17 @@ public class ProfilesActivity extends Activity {
                 Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
                 observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
 
+                /** 4 x grayscalePref = Graustufen-Modus aktivieren Aktiviert 
+                 *  profile = home
+                 *  profile = work
+                 *  profile = default
+                 *  profile = disconnected
+                */
+                //Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
+                //observeGrayscaleSwitch(profile, (DependentSwitchPreference) grayscalePref);
+                Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
+                observeGrayscalePref(profile, (Preference) grayscalePref);
+
                 Preference ssidsPref = parent.findPreference(profile + "_ssids");
                 if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
             }
@@ -145,7 +158,41 @@ public class ProfilesActivity extends Activity {
                     parent.getActivity().getContentResolver(), parent.getFragmentManager());
             mNotificationAccessObservers.put(profile, observer);
         }
+/*
+        private void observeGrayscaleSwitch(final String profile, final DependentSwitchPreference switchPreference) {
+            switchPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+                        if(switchPreference.isChecked()){
+                            Log.d("-------", "disable grayscale");
+                            switchPreference.setChecked(false);
+                            Launcher.changeGrayscaleSetting((Activity) preference.getContext());
+                        }
+                        else{
+                            Log.d("-------", "enable grayscale");
+                            switchPreference.setChecked(true);
+                            Launcher.changeGrayscaleSetting((Activity) preference.getContext());
+                        }
 
+                    return false;
+                }
+            });
+            GrayscaleAccessObserver observer = new GrayscaleAccessObserver(switchPreference, 
+                    parent.getActivity().getContentResolver(), parent.getFragmentManager());
+            mGrayscaleAccessObservers.put(profile, observer);
+        }
+*/
+        private void observeGrayscalePref(final String profile, final Preference gPreference){
+            gPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Launcher.changeGrayscaleSetting((Activity) preference.getContext());
+                    return true;
+                }
+            });
+            boolean isColorCorrectionEnabled = Launcher.isAccessibilityEnabled(getActivity());
+            Log.d("####", isColorCorrectionEnabled+"");
+        }
         /**
          * Binds a preference's summary to its value. More specifically, when the
          * preference's value is changed, its summary (line of text below the
@@ -193,7 +240,7 @@ public class ProfilesActivity extends Activity {
             public boolean onPreferenceChange(Preference preference, Object value) {
                 String stringValue = value.toString();
                 Log.i(ProfilesActivity.class.getSimpleName(), preference.getKey() + " has changed to " + stringValue);
-
+                
                 if (preference instanceof ListPreference) {
                     // For list preferences, look up the correct display value in
                     // the preference's 'entries' list.
@@ -260,6 +307,13 @@ public class ProfilesActivity extends Activity {
                 mNotificationAccessObservers.clear();
                 mNotificationAccessObservers = null;
             }
+            if (mGrayscaleAccessObservers != null) {
+                for (GrayscaleAccessObserver observer : mGrayscaleAccessObservers.values()) {
+                    observer.unregister();
+                }
+                mGrayscaleAccessObservers.clear();
+                mGrayscaleAccessObservers = null;
+            }
             if(this.parent == this) super.onDestroy();
         }
     }
@@ -286,6 +340,17 @@ public class ProfilesActivity extends Activity {
         @Override
         protected void showAccessConfirmation(FragmentManager fragmentManager) {
             new NotificationAccessConfirmation().show(fragmentManager, "notification_access");
+        }
+    }
+
+    public static class GrayscaleAccessObserver extends SettingsActivity.GrayscaleAccessObserver {
+        public GrayscaleAccessObserver(
+                DependentSwitchPreference switchPreference,
+                ContentResolver resolver,
+                FragmentManager fragmentManager
+        ) {
+            super(switchPreference, resolver, fragmentManager);
+            this.register(SettingsActivity.ENABLED_GRAYSCALE_LISTENERS);
         }
     }
 
