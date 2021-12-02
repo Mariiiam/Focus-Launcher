@@ -109,7 +109,17 @@
         <intent-filter>
             <action android:name="android.service.quicksettings.action.QS_TILE"/>
         </intent-filter>
-    </service>
+        </service>
+
+        <service
+        android:name="com.android.launcher3.util.ProfileTileService"
+        android:icon="@drawable/ic_focus_launcher_48dp"
+        android:label="@string/profile_display_default"
+        android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+        <intent-filter>
+            <action android:name="android.service.quicksettings.action.QS_TILE"/>
+        </intent-filter>
+        </service>
 
         <meta-data android:name="android.nfc.disable_beam_default"
                        android:value="true" />

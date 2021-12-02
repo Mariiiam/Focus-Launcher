@@ -369,11 +369,11 @@ public class AllAppsTransitionController implements TouchController, SwipeDetect
         if (forceChange) {
             mLauncher.getSystemUiController().updateUiState(
                     SystemUiController.UI_STATE_ALL_APPS, !mIsDarkTheme);
-            mLauncher.setProfileDisplayTheme(!mIsDarkTheme);
+            //mLauncher.setProfileDisplayTheme(!mIsDarkTheme);
         } else {
             mLauncher.getSystemUiController().updateUiState(
                     SystemUiController.UI_STATE_ALL_APPS, 0);
-            mLauncher.setProfileDisplayTheme(false);
+            //mLauncher.setProfileDisplayTheme(false);
         }
     }
 
