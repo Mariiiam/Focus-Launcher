@@ -73,6 +73,8 @@
             android:layout_height="match_parent"
             android:visibility="invisible" />
 
+        <!-- Old version: text view for displaying current profile
+             new version: see ProfileTileService
         <TextView
                 android:id="@+id/profile_display"
                 android:text=""
@@ -92,7 +94,7 @@
                 android:paddingEnd="24dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="-7dp"
-        />
+        />-->
 
         <com.android.launcher3.pageindicators.PageIndicatorCaretLandscape
             android:id="@+id/page_indicator"

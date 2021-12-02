@@ -191,7 +191,6 @@ public class ProfilesActivity extends Activity {
                 }
             });
             boolean isColorCorrectionEnabled = Launcher.isAccessibilityEnabled(getActivity());
-            Log.d("####", isColorCorrectionEnabled+"");
         }
         /**
          * Binds a preference's summary to its value. More specifically, when the

@@ -79,6 +79,8 @@
             android:layout_height="match_parent"
             android:visibility="invisible" />
 
+        <!-- Old version: text view for displaying current profile
+             new version: see ProfileTileService
         <TextView
                 android:id="@+id/profile_display"
                 android:text=""
@@ -97,7 +99,8 @@
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
                 android:layout_marginTop="-5dp"
-        />
+        />-->
+
     </com.android.launcher3.dragndrop.DragLayer>
 
 </com.android.launcher3.LauncherRootView>

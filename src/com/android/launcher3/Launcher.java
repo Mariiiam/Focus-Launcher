@@ -42,7 +42,9 @@ import android.net.wifi.WifiManager;
 import android.os.Process;
 import android.os.*;
 import android.provider.Settings;
+import android.service.quicksettings.TileService;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.Selection;
@@ -138,6 +140,8 @@ public class Launcher extends BaseActivity
 
     private static final String DISPLAY_DALTONIZER_ENABLED = "accessibility_display_daltonizer_enabled";
     private static final String DISPLAY_DALTONIZER         = "accessibility_display_daltonizer";
+
+    public static String[] allProfiles = new String[]{"Home", "Work", "Default"};
 
     /**
      * IntentStarter uses request codes starting with this. This must be greater than all activity
@@ -251,7 +255,7 @@ public class Launcher extends BaseActivity
 
     // We only want to get the SharedPreferences once since it does an FS stat each time we get
     // it from the context.
-    private SharedPreferences mSharedPrefs;
+    public static SharedPreferences mSharedPrefs;
 
     private boolean mMoveToDefaultScreenFromNewIntent;
 
@@ -449,7 +453,7 @@ public class Launcher extends BaseActivity
         filter.addAction("android.intent.action.AIRPLANE_MODE");
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
-        updateProfileDisplay(mSharedPrefs.getString("current_profile", "default"));
+        //updateProfileDisplay(mSharedPrefs.getString("current_profile", "default"));
 
         mSSIDPrefChangeHandler = new SSIDPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
@@ -993,7 +997,6 @@ public class Launcher extends BaseActivity
                 && pendingArgs.getRequestCode() == CODE_WRITE_SETTINGS_PERMISSION) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             //hier on request
-                Log.d("-----", "on request permission");
             }
             else {
                 Toast.makeText(this, getString(R.string.msg_no_write_settings_permission,
@@ -1003,7 +1006,6 @@ public class Launcher extends BaseActivity
         if (requestCode == CODE_OVERLAY_PERMISSION && pendingArgs != null
                 && pendingArgs.getRequestCode() == CODE_OVERLAY_PERMISSION) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("-----", "on request permission");
             }
             else {
                 Toast.makeText(this, getString(R.string.msg_no_overlay_permission,
@@ -1541,7 +1543,11 @@ public class Launcher extends BaseActivity
         } else {
             settingsButton.setVisibility(View.GONE);
         }
-
+        /***
+         * Old version: text view for displaying current profile
+         * new version: see ProfileTileService
+         *
+         *
         // Bind profiles button actions
         View profilesButton = findViewById(R.id.profiles_button);
         new OverviewButtonClickListener(ControlType.PROFILES_BUTTON) {
@@ -1557,9 +1563,13 @@ public class Launcher extends BaseActivity
             public void handleViewClick(View view) {
                 new ManualProfileSelection().show(getFragmentManager(), "manual_profile_selection");
             }
-        }.attachTo(profileDisplay);
+        }.attachTo(profileDisplay);*/
 
         mOverviewPanel.setAlpha(0f);
+    }
+
+    public static String[] getAllProfiles() {
+        return allProfiles;
     }
 
     public static class ManualProfileSelection
@@ -1603,6 +1613,11 @@ public class Launcher extends BaseActivity
             mLauncher.mSharedPrefs.edit().putString("manual_profile", profiles[which]).commit();
             mLauncher.updateProfile(profiles[which]);
         }
+    }
+
+    public static void updateSharedPrefsProfile(String profile){
+        mSharedPrefs.edit().putString("manual_profile", profile).commit();
+        mSharedPrefs.edit().putString("current_profile", profile).commit();
     }
 
     /**
@@ -1917,7 +1932,7 @@ public class Launcher extends BaseActivity
 
     private boolean firstTime = true;
     private String lastProfileUpdate = null;
-    private boolean updateProfile(String profile) {
+    public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
 
         String manualProfile = mSharedPrefs.getString("manual_profile", null);
@@ -1940,7 +1955,7 @@ public class Launcher extends BaseActivity
         else lastProfileUpdate = profile;
         Log.d("UPDATE PROFILE", profile);
 
-        updateProfileDisplay(profile);
+        //updateProfileDisplay(profile);
         updateWallpaper(profile);
         updateRingtone(profile);
         updateNotificationSound(profile);
@@ -1956,28 +1971,35 @@ public class Launcher extends BaseActivity
         //TODO try recreate(); Be aware that this re-trigger the wifi receiver and might complicate things!
     }
 
-    private void updateProfileDisplay(String profile) {
-        Integer profileNameId = ProfilesActivity.ProfilesSettingsFragment.resourceIdForProfileName.get(profile);
-        String profileName = getString(profileNameId != null ? profileNameId : R.string.profile_default);
+    /**
+     *
+     * @param profile
+     * private void updateProfileDisplay(String profile) {
+     *         Integer profileNameId = ProfilesActivity.ProfilesSettingsFragment.resourceIdForProfileName.get(profile);
+     *         String profileName = getString(profileNameId != null ? profileNameId : R.string.profile_default);
+     *
+     *         TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
+     *         if (profileDisplay != null) profileDisplay.setText(profileName);
+     *     }
+     */
+        int mColorThemeDark = Color.parseColor("#4f4f4f");
+        int mColorThemeLight = Color.parseColor("#4285f4");
+    /**
+     *
+     *     public void setProfileDisplayTheme(boolean darkTheme) {
+     *         int color = darkTheme ? mColorThemeDark : mColorThemeLight;
+     *         TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
+     *         profileDisplay.setTextColor(color);
+     *
+     *         LayerDrawable background = (LayerDrawable) profileDisplay.getBackground();
+     *         GradientDrawable rectangle = (GradientDrawable) background.findDrawableByLayerId(R.id.indicator_menu_background);
+     *         rectangle.setStroke(1, color);
+     *
+     *         VectorDrawable icon = (VectorDrawable) background.findDrawableByLayerId(R.id.indicator_menu_icon);
+     *         icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+     *     }
+     */
 
-        TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
-        if (profileDisplay != null) profileDisplay.setText(profileName);
-    }
-
-    int mColorThemeDark = Color.parseColor("#4f4f4f");
-    int mColorThemeLight = Color.parseColor("#4285f4");
-    public void setProfileDisplayTheme(boolean darkTheme) {
-        int color = darkTheme ? mColorThemeDark : mColorThemeLight;
-        TextView profileDisplay = mLauncherView.findViewById(R.id.profile_display);
-        profileDisplay.setTextColor(color);
-
-        LayerDrawable background = (LayerDrawable) profileDisplay.getBackground();
-        GradientDrawable rectangle = (GradientDrawable) background.findDrawableByLayerId(R.id.indicator_menu_background);
-        rectangle.setStroke(1, color);
-
-        VectorDrawable icon = (VectorDrawable) background.findDrawableByLayerId(R.id.indicator_menu_icon);
-        icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-    }
 
     private void updateWallpaper(final String profile) {
         new AsyncTask<Void, Void, Void>() {
@@ -2053,11 +2075,9 @@ public class Launcher extends BaseActivity
             color_correction_enabled = 0; // means default false
         }
         if(color_correction_enabled == 0 ){
-            Log.d("####", "color correction disabled");
             return false;
         }
         else {
-            Log.d("####", "color correction enabled");
             return true;
         }
     }
@@ -4647,6 +4667,9 @@ public class Launcher extends BaseActivity
             if (Utilities.ALLOW_ROTATION_PREFERENCE_KEY.equals(key)) {
                 // Recreate the activity so that it initializes the rotation preference again.
                 recreate();
+            }
+            if(key.equals("current_profile")){
+                updateProfile(mSharedPrefs.getString("current_profile", ""));
             }
         }
     }
