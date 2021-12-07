@@ -30,13 +30,13 @@ public class ProfileTileService extends TileService {
             current_profile = Launcher.mSharedPrefs.getString("current_profile", "");
         }
         if(current_profile.equals("Work")){
-            icon = Icon.createWithResource(this, R.drawable.ic_profile_work);
+            icon = Icon.createWithResource(this, R.drawable.ic_work);
         }
         else if(current_profile.equals("Home")){
-            icon = Icon.createWithResource(this, R.drawable.ic_profile_home);
+            icon = Icon.createWithResource(this, R.drawable.ic_home);
         }
         else if(current_profile.equals("disconnected")){
-            icon = Icon.createWithResource(this, R.drawable.ic_profile_disconnected);
+            icon = Icon.createWithResource(this, R.drawable.ic_offline);
             current_profile = getString(R.string.profile_disconnected);
         }
         else if(current_profile.equals("Default")){
