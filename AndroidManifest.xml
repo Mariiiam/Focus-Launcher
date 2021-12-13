@@ -85,7 +85,8 @@
             android:resizeableActivity="true"
             android:resumeWhilePausing="true"
             android:taskAffinity=""
-            android:enabled="true">
+            android:enabled="true"
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
@@ -103,7 +104,7 @@
             android:name="com.google.android.apps.nexuslauncher.SettingsActivity"
             android:label="@string/settings_button_text"
             android:theme="@style/SettingsTheme"
-            android:autoRemoveFromRecents="true">
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -117,7 +118,7 @@
             android:name="com.google.android.apps.nexuslauncher.ProfilesActivity"
             android:label="@string/profiles_button_text"
             android:theme="@style/SettingsTheme"
-            android:autoRemoveFromRecents="true">
+            android:excludeFromRecents="true">
             <!--
             <intent-filter>
                 <action android:name="android.intent.action.SHOW_APP_INFO" />
@@ -130,10 +131,8 @@
             android:name="com.android.launcher3.util.ManualProfileSelectionActivity"
             android:label="@string/profiles_button_text"
             android:theme="@style/Theme.Transparent"
-            android:autoRemoveFromRecents="true">
+            android:excludeFromRecents="true">
         </activity>
-
-
 
         <!--
         The settings provider contains Home's data, like the workspace favorites. The permissions
@@ -152,7 +151,8 @@
         -->
         <activity
             android:name="com.google.android.apps.nexuslauncher.search.AppLaunchActivity"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true">
             <intent-filter android:priority="1">
                 <action android:name="com.google.android.apps.nexuslauncher.search.APP_LAUNCH"/>
                 <category android:name="android.intent.category.DEFAULT"/>

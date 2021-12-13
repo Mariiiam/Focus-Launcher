@@ -18,89 +18,135 @@
 <com.android.launcher3.LauncherRootView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:launcher="http://schemas.android.com/apk/res-auto"
-
     android:id="@+id/launcher"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-
-    <com.android.launcher3.dragndrop.DragLayer
-        android:id="@+id/drag_layer"
-        android:clipChildren="false"
-        android:importantForAccessibility="no"
-        android:clipToPadding="false"
-        android:background="?attr/workspaceStatusBarScrim"
+    <ViewFlipper
+        android:id="@+id/launcher_view_flipper"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <!-- The workspace contains 5 screens of cells -->
-        <!-- DO NOT CHANGE THE ID -->
-        <com.android.launcher3.Workspace
-            android:theme="@style/HomeScreenElementTheme"
-            android:id="@+id/workspace"
+        android:layout_height="match_parent" >
+        <com.android.launcher3.dragndrop.DragLayer
+            android:id="@+id/drag_layer"
+            android:clipChildren="false"
+            android:importantForAccessibility="no"
+            android:clipToPadding="false"
             android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- The workspace contains 5 screens of cells -->
+            <!-- DO NOT CHANGE THE ID -->
+            <com.android.launcher3.Workspace
+                android:theme="@style/HomeScreenElementTheme"
+                android:id="@+id/workspace"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                launcher:pageIndicator="@+id/page_indicator">
+            </com.android.launcher3.Workspace>
+
+            <include layout="@layout/gradient_bg" />
+
+            <!-- DO NOT CHANGE THE ID -->
+            <include layout="@layout/hotseat"
+                android:id="@+id/hotseat"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                launcher:layout_ignoreInsets="true" />
+
+            <include layout="@layout/overview_panel"
+                android:id="@+id/overview_panel"
+                android:visibility="gone" />
+
+            <!-- Keep these behind the workspace so that they are not visible when
+                 we go into AllApps -->
+            <include layout="@layout/page_indicator"
+                android:id="@+id/page_indicator" />
+
+            <include
+                android:id="@+id/drop_target_bar"
+                layout="@layout/drop_target_bar_horz" />
+
+            <include layout="@layout/widgets_view"
+                android:id="@+id/widgets_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible" />
+
+            <include layout="@layout/all_apps"
+                android:id="@+id/apps_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible" />
+
+            <!-- Old version: text view for displaying current profile
+                 new version: see ProfileTileService
+            <TextView
+                    android:id="@+id/profile_display"
+                    android:text=""
+                    android:minWidth="150dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#4285f4"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/profile_indicator_background"
+                    android:layout_weight="1.0"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    android:layout_marginTop="-5dp"
+            />-->
+
+        </com.android.launcher3.dragndrop.DragLayer>
+        <RelativeLayout
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            launcher:pageIndicator="@+id/page_indicator">
-        </com.android.launcher3.Workspace>
-
-        <include layout="@layout/gradient_bg" />
-
-        <!-- DO NOT CHANGE THE ID -->
-        <include layout="@layout/hotseat"
-            android:id="@+id/hotseat"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            launcher:layout_ignoreInsets="true" />
-
-        <include layout="@layout/overview_panel"
-            android:id="@+id/overview_panel"
-            android:visibility="gone" />
-
-        <!-- Keep these behind the workspace so that they are not visible when
-             we go into AllApps -->
-        <include layout="@layout/page_indicator"
-            android:id="@+id/page_indicator" />
-
-        <include
-            android:id="@+id/drop_target_bar"
-            layout="@layout/drop_target_bar_horz" />
-
-        <include layout="@layout/widgets_view"
-            android:id="@+id/widgets_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible" />
-
-        <include layout="@layout/all_apps"
-            android:id="@+id/apps_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible" />
-
-        <!-- Old version: text view for displaying current profile
-             new version: see ProfileTileService
-        <TextView
-                android:id="@+id/profile_display"
-                android:text=""
-                android:minWidth="150dp"
-                android:layout_width="wrap_content"
+            android:id="@+id/launcher_minimalist_layout">
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#4285f4"
-                android:textStyle="bold"
-                android:textSize="15sp"
-                android:gravity="center_horizontal"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/profile_indicator_background"
-                android:layout_weight="1.0"
-                android:paddingTop="1dp"
-                android:paddingBottom="1dp"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:layout_marginTop="-5dp"
-        />-->
-
-    </com.android.launcher3.dragndrop.DragLayer>
+                android:id="@+id/relative_layout">
+                <Button
+                    android:id="@+id/minimal_settings_button"
+                    android:layout_width="130dp"
+                    android:layout_height="55dp"
+                    android:drawableStart="@drawable/ic_setting"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/settings"
+                    android:textSize="12sp"
+                    android:backgroundTint="@color/transparent"
+                    style="?android:attr/borderlessButtonStyle"/>
+                <Button
+                    android:id="@+id/minimal_apps_button"
+                    android:layout_width="130dp"
+                    android:layout_height="55dp"
+                    android:drawableEnd="@drawable/ic_allapps_black"
+                    android:layout_alignParentEnd="true"
+                    android:text="@string/all_apps"
+                    android:textSize="12sp"
+                    android:backgroundTint="@color/transparent"
+                    style="?android:attr/borderlessButtonStyle"/>
+            </RelativeLayout>
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/launcher_list_view"
+                android:layout_below="@+id/relative_layout"
+                android:paddingLeft="20dp">
+            </ListView>
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/all_app_list_view"
+                android:layout_below="@+id/relative_layout"
+                android:paddingLeft="20dp"
+                android:visibility="invisible"/>
+        </RelativeLayout>
+    </ViewFlipper>
 
 </com.android.launcher3.LauncherRootView>

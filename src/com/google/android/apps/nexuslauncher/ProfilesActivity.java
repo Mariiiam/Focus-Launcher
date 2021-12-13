@@ -27,6 +27,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.RingtonePreference;
+import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -44,6 +45,11 @@ import java.util.Map;
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
  */
 public class ProfilesActivity extends Activity {
+
+    public final static String MINIMAL_DESIGN_PREF = "_minimal_design";
+    public static boolean minimalDesignON;
+    private static Preference minimalDesignPref;
+    private static boolean firstTime = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,16 +143,12 @@ public class ProfilesActivity extends Activity {
                 Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
                 observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
 
-                /** 4 x grayscalePref = Graustufen-Modus aktivieren Aktiviert 
-                 *  profile = home
-                 *  profile = work
-                 *  profile = default
-                 *  profile = disconnected
-                */
                 //Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
                 //observeGrayscaleSwitch(profile, (DependentSwitchPreference) grayscalePref);
                 Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
                 observeGrayscalePref(profile, (Preference) grayscalePref);
+
+                minimalDesignPref = parent.findPreference(profile + "_minimal_design");
 
                 Preference ssidsPref = parent.findPreference(profile + "_ssids");
                 if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
@@ -164,12 +166,10 @@ public class ProfilesActivity extends Activity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
                         if(switchPreference.isChecked()){
-                            Log.d("-------", "disable grayscale");
                             switchPreference.setChecked(false);
                             Launcher.changeGrayscaleSetting((Activity) preference.getContext());
                         }
                         else{
-                            Log.d("-------", "enable grayscale");
                             switchPreference.setChecked(true);
                             Launcher.changeGrayscaleSetting((Activity) preference.getContext());
                         }

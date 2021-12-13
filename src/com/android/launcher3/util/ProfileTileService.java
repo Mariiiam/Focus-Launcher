@@ -26,25 +26,31 @@ public class ProfileTileService extends TileService {
     public void onStartListening(){
         String current_profile = getString(R.string.profile_display_default);
         Icon icon = Icon.createWithResource(this, R.drawable.ic_focus_launcher_24dp);
+        String label;
         if (Launcher.mSharedPrefs != null){
             current_profile = Launcher.mSharedPrefs.getString("current_profile", "");
         }
-        if(current_profile.equals("Work")){
+        if(current_profile.equals("work")){
             icon = Icon.createWithResource(this, R.drawable.ic_work);
+            label = "Work";
         }
-        else if(current_profile.equals("Home")){
+        else if(current_profile.equals("home")){
             icon = Icon.createWithResource(this, R.drawable.ic_home);
+            label = "Home";
         }
         else if(current_profile.equals("disconnected")){
             icon = Icon.createWithResource(this, R.drawable.ic_offline);
-            current_profile = getString(R.string.profile_disconnected);
+            label = "Disconnected";
         }
-        else if(current_profile.equals("Default")){
-            icon = Icon.createWithResource(this, R.drawable.ic_focus_launcher_24dp);
+        else if(current_profile.equals("default")){
+            label = "Default";
+        }
+        else {
+            label = current_profile;
         }
 
         Tile tile = getQsTile();
-        tile.setLabel(current_profile);
+        tile.setLabel(label);
         tile.setIcon(icon);
         tile.setContentDescription(getString(R.string.app_name));
         tile.updateTile();

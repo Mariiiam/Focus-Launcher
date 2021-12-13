@@ -37,6 +37,18 @@ public class ManualProfileSelectionActivity extends Activity {
                         finish();
                     }
                 })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        finish();
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        finish();
+                    }
+                })
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
         builder.show();

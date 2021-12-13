@@ -44,7 +44,8 @@
         </receiver>
 
         <activity
-            android:name="com.android.launcher3.testcomponent.WidgetConfigActivity">
+            android:name="com.android.launcher3.testcomponent.WidgetConfigActivity"
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
@@ -52,7 +53,8 @@
         <activity
             android:name="com.android.launcher3.testcomponent.RequestPinItemActivity"
             android:label="Test Pin Item"
-            android:icon="@drawable/test_drawable_pin_item">
+            android:icon="@drawable/test_drawable_pin_item"
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
