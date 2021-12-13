@@ -80,6 +80,10 @@
     <string name="icon_badging_title" msgid="874121399231955394">"Benachrichtigungsindikatoren"</string>
     <string name="hide_foreign_notifications_title" msgid="874121399231955395">"Benachrichtigungen ausblenden"</string>
     <string name="enable_grayscale_title" msgid="9029271080007984542">"Graustufen-Modus aktivieren"</string>
+    <string name="add_new_profile">"Neues Profil hinzufügen"</string>
+    <string name="profile_name_summary">Gebe dem Profil einen Namen</string>
+    <string name="profile_name">"Profilname"</string>
+    <string name="save">"Speichern"</string>
     <string name="grayscale_tile">Graustufen</string>
     <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
     <string name="grayscale_summary">Aktiviert Graustufen-Modus</string>

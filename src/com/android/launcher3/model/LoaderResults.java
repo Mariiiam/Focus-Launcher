@@ -304,6 +304,7 @@ public class LoaderResults {
             };
             executor.execute(r);
         }
+        Launcher.getAppItemsFromLoaderResults(workspaceItems);
 
         // Bind the widgets, one at a time
         N = appWidgets.size();

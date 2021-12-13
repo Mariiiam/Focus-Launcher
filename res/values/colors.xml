@@ -64,4 +64,7 @@
     <color name="qsb_background_drawer_default">#ccffffff</color>
     <color name="qsb_background_drawer_dark">#ebffffff</color>
     <color name="qsb_drawer_text_color">#ff212121</color>
+    <color name="light_white">#23FFFFFF</color>
+    <color name="primary_white">#5BFFFFFF</color>
+    <color name="transparent">#00FFFFFF</color>
 </resources>

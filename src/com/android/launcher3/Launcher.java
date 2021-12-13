@@ -17,8 +17,6 @@
 package com.android.launcher3;
 
 import android.Manifest;
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.*;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -28,8 +26,9 @@ import android.appwidget.AppWidgetManager;
 import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
+import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.*;
 import android.graphics.drawable.*;
@@ -41,8 +40,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Process;
 import android.os.*;
+import android.preference.SwitchPreference;
 import android.provider.Settings;
-import android.service.quicksettings.TileService;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
@@ -58,16 +57,21 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
+
 import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace.ItemOperator;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
 import com.android.launcher3.allapps.AllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
+import com.android.launcher3.allapps.AlphabeticalAppsList;
 import com.android.launcher3.anim.AnimationLayerSet;
-import com.android.launcher3.color.OverlayService;
 import com.android.launcher3.compat.AppWidgetManagerCompat;
 import com.android.launcher3.compat.LauncherAppsCompat;
 import com.android.launcher3.compat.LauncherAppsCompatVO;
@@ -96,14 +100,17 @@ import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ControlType;
 import com.android.launcher3.util.*;
+import com.android.launcher3.views.DoubleShadowBubbleTextView;
 import com.android.launcher3.widget.*;
 import com.google.android.apps.nexuslauncher.ProfilesActivity;
+import com.google.android.apps.nexuslauncher.SettingsActivity;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Executor;
 
 import static android.app.WallpaperManager.FLAG_SYSTEM;
+import static com.android.launcher3.R.color.primary_white;
 import static com.android.launcher3.util.RunnableWithId.RUNNABLE_ID_BIND_APPS;
 import static com.android.launcher3.util.RunnableWithId.RUNNABLE_ID_BIND_WIDGETS;
 
@@ -141,7 +148,9 @@ public class Launcher extends BaseActivity
     private static final String DISPLAY_DALTONIZER_ENABLED = "accessibility_display_daltonizer_enabled";
     private static final String DISPLAY_DALTONIZER         = "accessibility_display_daltonizer";
 
-    public static String[] allProfiles = new String[]{"Home", "Work", "Default"};
+    public static String[] allProfiles = new String[]{"home", "work", "default"};
+
+    public static boolean isMinimalDesignON;
 
     /**
      * IntentStarter uses request codes starting with this. This must be greater than all activity
@@ -310,6 +319,22 @@ public class Launcher extends BaseActivity
 
     private RotationPrefChangeHandler mRotationPrefChangeHandler;
     private SSIDPrefChangeHandler mSSIDPrefChangeHandler;
+    private MinimalDesignPrefChangeHandler mMinimalDesignPrefChangeHandler;
+
+    private ListView launcherListView;
+    private ListView allAppsListView;
+    private PackageManager packageManager;
+    private ArrayList<String> allPackageNames;
+    private ArrayList<String> homescreenPackageNames;
+    private ArrayAdapter<String> adapterAll;
+    private ArrayAdapter<String> adapterHomescreen;
+    public ViewFlipper viewFlipper;
+    private Button settingsButton;
+    private Button allAppsButton;
+    private static Set<String> set = new HashSet<String>();
+
+    private final static String APPS_ON_HOMESCREEN = "apps_on_homescreen";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -431,6 +456,10 @@ public class Launcher extends BaseActivity
             mRotationEnabled = true;
         }
 
+        mMinimalDesignPrefChangeHandler = new MinimalDesignPrefChangeHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(mMinimalDesignPrefChangeHandler);
+
+
         saveCurrentWallpaper();
         saveCurrentRingtones();
 
@@ -453,7 +482,6 @@ public class Launcher extends BaseActivity
         filter.addAction("android.intent.action.AIRPLANE_MODE");
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
-        //updateProfileDisplay(mSharedPrefs.getString("current_profile", "default"));
 
         mSSIDPrefChangeHandler = new SSIDPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
@@ -464,6 +492,191 @@ public class Launcher extends BaseActivity
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onCreate(savedInstanceState);
         }
+
+
+        viewFlipper = (ViewFlipper) findViewById(R.id.launcher_view_flipper);
+
+        settingsButton = (Button) findViewById(R.id.minimal_settings_button);
+        allAppsButton = (Button) findViewById(R.id.minimal_apps_button);
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        allAppsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                allAppsListView.setVisibility(View.VISIBLE);
+                launcherListView.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        launcherListView = findViewById(R.id.launcher_list_view);
+        launcherListView.setVerticalScrollBarEnabled(false);
+        launcherListView.setDivider(null);
+
+        allAppsListView = findViewById(R.id.all_app_list_view);
+        allAppsListView.setVerticalScrollBarEnabled(false);
+        allAppsListView.setDivider(null);
+        allAppsListView.setBackgroundColor(getColor(primary_white));
+
+        // Get a list of all the apps installed
+        packageManager = getPackageManager();
+        adapterAll = new ArrayAdapter<String>(
+                this, R.layout.launcher_list_item, new ArrayList<String>());
+        adapterHomescreen = new ArrayAdapter<String>(
+                this, R.layout.launcher_list_item, new ArrayList<String>());
+        allPackageNames = new ArrayList<>();
+        homescreenPackageNames = new ArrayList<>();
+
+        // Tap on an item in the list to launch the app
+        launcherListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    startActivity(packageManager.getLaunchIntentForPackage(homescreenPackageNames.get(position)));
+                } catch (Exception e) {
+                    fetchHomescreenAppList();
+                }
+            }
+        });
+
+        allAppsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    startActivity(packageManager.getLaunchIntentForPackage(allPackageNames.get(position)));
+                } catch (Exception e) {
+                    fetchAllAppList();
+                }
+            }
+        });
+
+        // Long press on an item in the list to open the app settings
+        launcherListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    // Attempt to launch the app with the package name
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.parse("package:" + homescreenPackageNames.get(position)));
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    fetchHomescreenAppList();
+                }
+                return false;
+            }
+        });
+
+        allAppsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    // Attempt to launch the app with the package name
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    intent.setData(Uri.parse("package:" + allPackageNames.get(position)));
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    fetchAllAppList();
+                }
+                return false;
+            }
+        });
+
+        //set.clear();
+
+        fetchAllAppList();
+        fetchHomescreenAppList();
+
+    }
+
+    public void switchToMinimalLayout(boolean value){
+        if(value){
+            //findViewById(R.id.launcher_minimalist_layout).setVisibility(View.VISIBLE);
+            viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(findViewById(R.id.launcher_minimalist_layout)));
+        }
+        else {
+            //findViewById(R.id.launcher_minimalist_layout).setVisibility(View.INVISIBLE);
+            viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(findViewById(R.id.drag_layer)));
+        }
+    }
+
+    public static void getAppItemsFromLoaderResults(List<ItemInfo> workspaceItems){
+        if(!workspaceItems.isEmpty()) {
+            Set<String> set = new HashSet<String>();
+            for(ItemInfo info : workspaceItems) {
+                if(info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
+                    set.add(info.title.toString());
+                }
+            }
+            mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
+        }
+    }
+
+    private void updateHomeScreenAdapter(Set<String> newSet) {
+        adapterHomescreen.clear();
+        adapterHomescreen.addAll(newSet);
+        adapterHomescreen.notifyDataSetChanged();
+    }
+
+    private void fetchHomescreenAppList() {
+        // Start from a clean adapter when refreshing the list
+        adapterHomescreen.clear();
+        homescreenPackageNames.clear();
+
+        // Query the package manager for all apps
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(
+                new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
+
+        // Sort the applications by alphabetical order and add them to the list
+        Collections.sort(activities, new ResolveInfo.DisplayNameComparator(packageManager));
+        Set<String> appsOnHomescreen = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
+        for (ResolveInfo resolver : activities) {
+            // Exclude the settings app and this launcher from the list of apps shown
+            String appName = (String) resolver.loadLabel(packageManager);
+            if (appName.equals("Focus Launcher")) continue;
+            if (appsOnHomescreen != null) {
+                for (String homescreenAppName : appsOnHomescreen) {
+                    if(appName.equals(homescreenAppName)){
+                        adapterHomescreen.add(appName);
+                        homescreenPackageNames.add(resolver.activityInfo.packageName);
+                    }
+                }
+            } else {
+                adapterHomescreen.add(appName);
+                homescreenPackageNames.add(resolver.activityInfo.packageName);
+            }
+
+        }
+        launcherListView.setAdapter(adapterHomescreen);
+    }
+
+    private void fetchAllAppList() {
+        // Start from a clean adapter when refreshing the list
+        adapterAll.clear();
+        allPackageNames.clear();
+
+        // Query the package manager for all apps
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(
+                new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
+
+        // Sort the applications by alphabetical order and add them to the list
+        Collections.sort(activities, new ResolveInfo.DisplayNameComparator(packageManager));
+        for (ResolveInfo resolver : activities) {
+
+            // Exclude the settings app and this launcher from the list of apps shown
+            String appName = (String) resolver.loadLabel(packageManager);
+            if (appName.equals("Focus Launcher"))
+                continue;
+
+            adapterAll.add(appName);
+            allPackageNames.add(resolver.activityInfo.packageName);
+        }
+        allAppsListView.setAdapter(adapterAll);
     }
 
     @Override
@@ -591,7 +804,7 @@ public class Launcher extends BaseActivity
         return !isWorkspaceLoading();
     }
 
-    public int getViewIdForItem(ItemInfo info) {
+    public int getViewIdForItem(ItemInfo info) { //hier hotseat und shortcuts
         // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
         // This cast is safe as long as the id < 0x00FFFFFF
         // Since we jail all the dynamically generated views, there should be no clashes
@@ -1240,7 +1453,6 @@ public class Launcher extends BaseActivity
         if (mLauncherCallbacks != null) {
             mLauncherCallbacks.onResume();
         }
-
     }
 
     @Override
@@ -1543,11 +1755,7 @@ public class Launcher extends BaseActivity
         } else {
             settingsButton.setVisibility(View.GONE);
         }
-        /***
-         * Old version: text view for displaying current profile
-         * new version: see ProfileTileService
-         *
-         *
+
         // Bind profiles button actions
         View profilesButton = findViewById(R.id.profiles_button);
         new OverviewButtonClickListener(ControlType.PROFILES_BUTTON) {
@@ -1556,7 +1764,11 @@ public class Launcher extends BaseActivity
                 onClickProfilesButton(view);
             }
         }.attachTo(profilesButton);
-
+         /***
+         * Old version: text view for displaying current profile
+         * new version: see ProfileTileService
+         *
+         *
         View profileDisplay = findViewById(R.id.profile_display);
         new OverviewButtonClickListener(ControlType.PROFILES_BUTTON) {
             @Override
@@ -1659,6 +1871,13 @@ public class Launcher extends BaseActivity
         favorite.applyFromShortcutInfo(info);
         favorite.setOnClickListener(this);
         favorite.setOnFocusChangeListener(mFocusHandler);
+        Set<String> appsOnHomescreen = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
+        if(!appsOnHomescreen.contains(info.title.toString())){
+            appsOnHomescreen.add(info.title.toString());
+            mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, appsOnHomescreen).apply();
+            //updateHomeScreenAdapter(appsOnHomescreen);
+            fetchHomescreenAppList();
+        }
         return favorite;
     }
 
@@ -1687,7 +1906,6 @@ public class Launcher extends BaseActivity
             // Legacy shortcuts are only supported for primary profile.
             info = Process.myUserHandle().equals(args.user)
                     ? InstallShortcutReceiver.fromShortcutIntent(this, data) : null;
-
             if (info == null) {
                 Log.e(TAG, "Unable to parse a valid custom shortcut result");
                 return;
@@ -1960,6 +2178,7 @@ public class Launcher extends BaseActivity
         updateRingtone(profile);
         updateNotificationSound(profile);
         updateApps(profile);
+        updateLayoutDesign(profile);
 
         return true;
     }
@@ -2000,6 +2219,10 @@ public class Launcher extends BaseActivity
      *     }
      */
 
+    private void updateLayoutDesign(final String profile) {
+        boolean b = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+        switchToMinimalLayout(b);
+    }
 
     private void updateWallpaper(final String profile) {
         new AsyncTask<Void, Void, Void>() {
@@ -2092,7 +2315,6 @@ public class Launcher extends BaseActivity
              * Solution to draw a gray semi-transparent overlay
              * boolean permission = hasOverlayPermission(context, true);
              * if (permission) {
-             *      Log.d("-----", "enable grayscale in launcher");
              *      context.startService(new Intent(context, OverlayService.class));
             } */
         } catch(Exception e) {
@@ -2436,6 +2658,10 @@ public class Launcher extends BaseActivity
             mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mRotationPrefChangeHandler);
         }
 
+        if(mMinimalDesignPrefChangeHandler != null) {
+            mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mMinimalDesignPrefChangeHandler);
+        }
+
         if (mSSIDPrefChangeHandler != null) {
             mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
         }
@@ -2738,6 +2964,17 @@ public class Launcher extends BaseActivity
                 ((FolderInfo) folderIcon.getTag()).remove((ShortcutInfo) itemInfo, true);
             } else {
                 mWorkspace.removeWorkspaceItem(v);
+                Set<String> appsOnHomescreen = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
+                Set<String> updatedAppsOnHomescreen = new HashSet<String>();
+                for (String app : appsOnHomescreen) {
+                    if(!app.equals(itemInfo.title.toString())){
+                        updatedAppsOnHomescreen.add(app);
+                    }
+                }
+                mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, updatedAppsOnHomescreen).apply();
+                //updateHomeScreenAdapter(mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null));
+                fetchHomescreenAppList();
+
             }
             if (deleteFromDb) {
                 getModelWriter().deleteItemFromDatabase(itemInfo);
@@ -2827,6 +3064,13 @@ public class Launcher extends BaseActivity
             // TODO: Log this case.
             mWorkspace.exitWidgetResizeMode();
         }
+        String currentProfile = mSharedPrefs.getString("current_profile", "default");
+        isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+        if(isMinimalDesignON){
+            allAppsListView.setVisibility(View.INVISIBLE);
+            launcherListView.setVisibility(View.VISIBLE);
+        }
+
     }
 
     /**
@@ -3006,7 +3250,7 @@ public class Launcher extends BaseActivity
 
         // Open shortcut
         final ShortcutInfo shortcut = (ShortcutInfo) tag;
-
+        
         if (shortcut.isDisabled != 0) {
             if ((shortcut.isDisabled &
                     ~ShortcutInfo.FLAG_DISABLED_SUSPENDED &
@@ -3931,6 +4175,7 @@ public class Launcher extends BaseActivity
             switch (item.itemType) {
                 case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
+                //hier
                 case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
                     ShortcutInfo info = (ShortcutInfo) item;
                     view = createShortcut(info);
@@ -4657,6 +4902,21 @@ public class Launcher extends BaseActivity
             return (Launcher) context;
         }
         return ((Launcher) ((ContextWrapper) context).getBaseContext());
+    }
+
+    private class MinimalDesignPrefChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            for (String profile : ProfilesActivity.ProfilesSettingsFragment.availableProfiles) {
+                if(key.equals(profile+ProfilesActivity.MINIMAL_DESIGN_PREF)){
+                    String currentProfile = mSharedPrefs.getString("current_profile", "default");
+                    if (profile.equals(currentProfile)) {
+                        isMinimalDesignON = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                        switchToMinimalLayout(isMinimalDesignON);
+                    }
+                }
+            }
+        }
     }
 
     private class RotationPrefChangeHandler implements OnSharedPreferenceChangeListener {
