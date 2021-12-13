@@ -358,7 +358,7 @@
     <string name="profile_display_default">Profile</string>
     <string name="profile_work">Work</string>
     <string name="profile_home">Home</string>
-    <string name="profile_disconnected">Offline Mode</string>
+    <string name="profile_disconnected">Disconnected</string>
     <string name="profile_disconnected_summary">Enable by activating offline mode</string>
     <string name="profile_default">Default</string>
     <string name="profile_default_summary">Used if no other profile is enabled</string>

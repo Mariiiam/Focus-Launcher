@@ -159,7 +159,7 @@
     <string name="profile_display_default">Profil</string>
     <string name="profile_work">Arbeit</string>
     <string name="profile_home">Zu Hause</string>
-    <string name="profile_disconnected">Offline Modus</string>
+    <string name="profile_disconnected">Abschalten</string>
     <string name="profile_disconnected_summary">Aktiv im Offline Modus</string>
     <string name="profile_default">Standard</string>
     <string name="profile_default_summary">Aktiv wenn kein anderes Profil passt</string>

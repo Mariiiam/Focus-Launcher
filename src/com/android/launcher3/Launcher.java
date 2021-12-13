@@ -335,6 +335,8 @@ public class Launcher extends BaseActivity
 
     private final static String APPS_ON_HOMESCREEN = "apps_on_homescreen";
 
+    public final static String CURRENT_PROFILE_PREF = "current_profile";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -903,7 +905,7 @@ public class Launcher extends BaseActivity
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
             if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
                 Bitmap wallpaper = extractWallpaper();
-                String currentProfile = mSharedPrefs.getString("current_profile", "default");
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
                 saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
                 // User could have free-scrolled between pages before picking a wallpaper; make sure
                 // we move to the closest one now.
@@ -1828,8 +1830,8 @@ public class Launcher extends BaseActivity
     }
 
     public static void updateSharedPrefsProfile(String profile){
-        mSharedPrefs.edit().putString("manual_profile", profile).commit();
-        mSharedPrefs.edit().putString("current_profile", profile).commit();
+        mSharedPrefs.edit().putString("manual_profile", profile).apply();
+        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
     }
 
     /**
@@ -2166,8 +2168,8 @@ public class Launcher extends BaseActivity
         }
         firstTime = false;
 
-        if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
-        mSharedPrefs.edit().putString("current_profile", profile).apply();
+        //if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
+        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
         if (profile.equals(lastProfileUpdate)) return true; /* abort updating */
         else lastProfileUpdate = profile;
@@ -3064,7 +3066,7 @@ public class Launcher extends BaseActivity
             // TODO: Log this case.
             mWorkspace.exitWidgetResizeMode();
         }
-        String currentProfile = mSharedPrefs.getString("current_profile", "default");
+        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
         isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
         if(isMinimalDesignON){
             allAppsListView.setVisibility(View.INVISIBLE);
@@ -4909,7 +4911,7 @@ public class Launcher extends BaseActivity
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             for (String profile : ProfilesActivity.ProfilesSettingsFragment.availableProfiles) {
                 if(key.equals(profile+ProfilesActivity.MINIMAL_DESIGN_PREF)){
-                    String currentProfile = mSharedPrefs.getString("current_profile", "default");
+                    String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
                     if (profile.equals(currentProfile)) {
                         isMinimalDesignON = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
                         switchToMinimalLayout(isMinimalDesignON);
@@ -4928,8 +4930,8 @@ public class Launcher extends BaseActivity
                 // Recreate the activity so that it initializes the rotation preference again.
                 recreate();
             }
-            if(key.equals("current_profile")){
-                updateProfile(mSharedPrefs.getString("current_profile", ""));
+            if(key.equals(CURRENT_PROFILE_PREF)){
+                updateProfile(mSharedPrefs.getString(CURRENT_PROFILE_PREF, ""));
             }
         }
     }
