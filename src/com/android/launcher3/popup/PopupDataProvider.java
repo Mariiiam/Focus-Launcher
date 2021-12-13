@@ -66,7 +66,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     }
 
     private boolean currentProfileHidesNotificationsFromAppsNotOnHomescreen() {
-        String currentProfile = mLauncher.getSharedPrefs().getString("current_profile", "default");
+        String currentProfile = mLauncher.getSharedPrefs().getString(Launcher.CURRENT_PROFILE_PREF, "default");
         boolean pref = mLauncher.getSharedPrefs().getBoolean(currentProfile + "_hide_notifications", false);
         Log.e("NOTIFICATIONS", currentProfile + "_hide_notifications = "+ pref);
         return pref;

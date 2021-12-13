@@ -37,7 +37,7 @@ public class ManualProfileSelectionActivity extends Activity {
         for (int j=0; j<allProfilesLabels.size(); j++) {
             allProfilesLabelsCopy[j] = allProfilesLabels.get(j);
         }
-        AlertDialog builder = new AlertDialog.Builder(this)
+        AlertDialog builder = new AlertDialog.Builder(this, R.style.DialogAlert)
                 .setTitle(R.string.title_manually_select_profile)
                 .setItems(allProfilesLabelsCopy, new DialogInterface.OnClickListener() {
                     @Override

@@ -112,7 +112,7 @@ public class ItemInfo {
     public String profile;
 
     public static String getProfile(Context context) {
-        return Utilities.getPrefs(context).getString("current_profile", "default");
+        return Utilities.getPrefs(context).getString(Launcher.CURRENT_PROFILE_PREF, "default");
     }
 
     public static String normalizeProfile(String profile) {

@@ -220,7 +220,7 @@ public class LoaderResults {
             }
         });
 
-        final String currentProfile = Utilities.getPrefs(context).getString("current_profile", "default");
+        final String currentProfile = Utilities.getPrefs(context).getString(Launcher.CURRENT_PROFILE_PREF, "default");
         for (T info : allWorkspaceItems) {
             if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
                 final boolean correctProfile = (info instanceof ShortcutInfo) && ((ShortcutInfo)info).profile != null && ((ShortcutInfo)info).profile.equals(currentProfile);

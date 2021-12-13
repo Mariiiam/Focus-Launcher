@@ -336,6 +336,7 @@ public class Launcher extends BaseActivity
     private final static String APPS_ON_HOMESCREEN = "apps_on_homescreen";
 
     public final static String CURRENT_PROFILE_PREF = "current_profile";
+    public final static String MANUAL_PROFILE_PREF = "manual_profile";
 
 
     @Override
@@ -1824,13 +1825,13 @@ public class Launcher extends BaseActivity
             dialog.dismiss();
             String[] profiles = {"home", "work", "default"};
             Log.d("PROFILE_UPDATE", "From dialog");
-            mLauncher.mSharedPrefs.edit().putString("manual_profile", profiles[which]).commit();
+            mLauncher.mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profiles[which]).commit();
             mLauncher.updateProfile(profiles[which]);
         }
     }
 
     public static void updateSharedPrefsProfile(String profile){
-        mSharedPrefs.edit().putString("manual_profile", profile).apply();
+        mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profile).apply();
         mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
     }
 
@@ -2155,11 +2156,10 @@ public class Launcher extends BaseActivity
     public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
 
-        String manualProfile = mSharedPrefs.getString("manual_profile", null);
-        Log.d("UPDATE PROFILE", "First time: "+firstTime+" ; manualProfile : "+ manualProfile);
+        String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
         if(firstTime && manualProfile != null) {
             // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
-            mSharedPrefs.edit().putString("manual_profile", null).commit();
+            mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, null).commit();
             firstTime = false;
 
             //profile = manualProfile;

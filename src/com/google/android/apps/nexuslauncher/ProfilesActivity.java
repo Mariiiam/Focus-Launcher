@@ -105,7 +105,7 @@ public class ProfilesActivity extends Activity {
                     new SharedPreferences.OnSharedPreferenceChangeListener() {
                         @Override
                         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                            if (key.equals("current_profile")) {
+                            if (key.equals(Launcher.CURRENT_PROFILE_PREF)) {
                                 String profile = sharedPreferences.getString(key, "default");
                                 profilesGroup.setSummary(parent.getString(resourceIdForProfileName.get(profile)));
 
@@ -119,7 +119,7 @@ public class ProfilesActivity extends Activity {
                         }
                     };
             parent.getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(mCurrentProfileListener);
-            mCurrentProfileListener.onSharedPreferenceChanged(parent.getPreferenceManager().getSharedPreferences(), "current_profile");
+            mCurrentProfileListener.onSharedPreferenceChanged(parent.getPreferenceManager().getSharedPreferences(), Launcher.CURRENT_PROFILE_PREF);
 
             if (this.parent == this) Launcher.hasWritePermission(parent.getActivity(), true);
         }
@@ -279,7 +279,7 @@ public class ProfilesActivity extends Activity {
                     }
                     // Set ringtone
                     String profile = preference.getKey().split("_")[0];
-                    String current_profile = preference.getSharedPreferences().getString("current_profile", "");
+                    String current_profile = preference.getSharedPreferences().getString(Launcher.CURRENT_PROFILE_PREF, "");
                     if (current_profile.equals(profile)) {
                         int type = ((RingtonePreference) preference).getRingtoneType();
                         Launcher.setRingtone(ringtoneUri, (Activity) preference.getContext(), type);
