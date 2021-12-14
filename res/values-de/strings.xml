@@ -160,9 +160,9 @@
     <string name="profile_work">Arbeit</string>
     <string name="profile_home">Zu Hause</string>
     <string name="profile_disconnected">Abschalten</string>
-    <string name="profile_disconnected_summary">Aktiv im Offline Modus</string>
+    <string name="profile_disconnected_summary">Aktiv im Flugmodus</string>
     <string name="profile_default">Standard</string>
-    <string name="profile_default_summary">Aktiv wenn kein anderes Profil passt</string>
+    <string name="profile_default_summary">Aktiv, wenn kein anderes Profil passt</string>
     <string name="profile_pref_wallpaper">Wallpaper</string>
     <string name="profile_pref_wallpaper_hint">Wallpaper</string>
     <string name="profile_pref_ringtone">Klingelton</string>
@@ -196,4 +196,7 @@
     <string name="theme_transparent">Transparent</string>
     <string name="pref_open_source_licenses_title">Open Source-Lizenzen</string>
     <string name="about_donate">Spenden</string>
+    <string name="switch_minimal_design">Minimalistisches Design anwenden</string>
+    <string name="settings">Einstellungen</string>
+    <string name="all_apps">Alle Apps</string>
 </resources>

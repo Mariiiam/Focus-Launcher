@@ -16,7 +16,7 @@ public class ManualProfileSelectionActivity extends Activity {
     String[] allProfiles = Launcher.getAllProfiles();
     ArrayList<String> allProfilesLabels = new ArrayList<String>();
     String chosenProfile;
-    final static String ACTIVE_LABEL = " (Active)";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +26,7 @@ public class ManualProfileSelectionActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        final String ACTIVE_LABEL = " ("+getString(R.string.profile_active)+")";
         for(int i = 0; i< allProfiles.length; i++){
             if(allProfiles[i].equals(Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default"))){
                 allProfilesLabels.add(allProfiles[i] + ACTIVE_LABEL);
@@ -35,7 +36,26 @@ public class ManualProfileSelectionActivity extends Activity {
         }
         String[] allProfilesLabelsCopy = new String[allProfilesLabels.size()];
         for (int j=0; j<allProfilesLabels.size(); j++) {
-            allProfilesLabelsCopy[j] = allProfilesLabels.get(j);
+            if(allProfilesLabels.get(j).equals("work")){
+                allProfilesLabelsCopy[j] = getString(R.string.profile_work);
+            } else if (allProfilesLabels.get(j).equals("home")){
+                allProfilesLabelsCopy[j] = getString(R.string.profile_home);
+            } else if (allProfilesLabels.get(j).equals("default")) {
+                allProfilesLabelsCopy[j] = getString(R.string.profile_default);
+            } else if (allProfilesLabels.get(j).equals("disconnected")) {
+                allProfilesLabelsCopy[j] = getString(R.string.profile_disconnected);
+            } else if(allProfilesLabels.get(j).equals("work"+ACTIVE_LABEL)){
+                allProfilesLabelsCopy[j] = getString(R.string.profile_work)+ACTIVE_LABEL;
+            } else if(allProfilesLabels.get(j).equals("home"+ACTIVE_LABEL)){
+                allProfilesLabelsCopy[j] = getString(R.string.profile_home)+ACTIVE_LABEL;
+            } else if(allProfilesLabels.get(j).equals("default"+ACTIVE_LABEL)){
+                allProfilesLabelsCopy[j] = getString(R.string.profile_default)+ACTIVE_LABEL;
+            } else if(allProfilesLabels.get(j).equals("disconnected"+ACTIVE_LABEL)){
+                allProfilesLabelsCopy[j] = getString(R.string.profile_disconnected)+ACTIVE_LABEL;
+            }
+            else {
+                allProfilesLabelsCopy[j] = allProfilesLabels.get(j);
+            }
         }
         AlertDialog builder = new AlertDialog.Builder(this, R.style.DialogAlert)
                 .setTitle(R.string.title_manually_select_profile)

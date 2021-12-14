@@ -334,6 +334,7 @@ public class Launcher extends BaseActivity
     private static Set<String> set = new HashSet<String>();
 
     private final static String APPS_ON_HOMESCREEN = "apps_on_homescreen";
+    private final static String ALL_APPS = "all_apps";
 
     public final static String CURRENT_PROFILE_PREF = "current_profile";
     public final static String MANUAL_PROFILE_PREF = "manual_profile";
@@ -620,12 +621,6 @@ public class Launcher extends BaseActivity
         }
     }
 
-    private void updateHomeScreenAdapter(Set<String> newSet) {
-        adapterHomescreen.clear();
-        adapterHomescreen.addAll(newSet);
-        adapterHomescreen.notifyDataSetChanged();
-    }
-
     private void fetchHomescreenAppList() {
         // Start from a clean adapter when refreshing the list
         adapterHomescreen.clear();
@@ -673,11 +668,9 @@ public class Launcher extends BaseActivity
 
             // Exclude the settings app and this launcher from the list of apps shown
             String appName = (String) resolver.loadLabel(packageManager);
-            if (appName.equals("Focus Launcher"))
-                continue;
-
-            adapterAll.add(appName);
-            allPackageNames.add(resolver.activityInfo.packageName);
+                if (appName.equals("Focus Launcher")) continue;
+                adapterAll.add(appName);
+                allPackageNames.add(resolver.activityInfo.packageName);
         }
         allAppsListView.setAdapter(adapterAll);
     }
@@ -1878,7 +1871,6 @@ public class Launcher extends BaseActivity
         if(!appsOnHomescreen.contains(info.title.toString())){
             appsOnHomescreen.add(info.title.toString());
             mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, appsOnHomescreen).apply();
-            //updateHomeScreenAdapter(appsOnHomescreen);
             fetchHomescreenAppList();
         }
         return favorite;
@@ -2974,7 +2966,6 @@ public class Launcher extends BaseActivity
                     }
                 }
                 mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, updatedAppsOnHomescreen).apply();
-                //updateHomeScreenAdapter(mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null));
                 fetchHomescreenAppList();
 
             }
@@ -4590,6 +4581,7 @@ public class Launcher extends BaseActivity
         if (mAppsView != null) {
             mAppsView.addOrUpdateApps(apps);
         }
+        fetchAllAppList();
     }
 
     @Override
@@ -4658,7 +4650,7 @@ public class Launcher extends BaseActivity
         if (waitUntilResume(r)) {
             return;
         }
-
+        
         mWorkspace.updateRestoreItems(updates);
     }
 
@@ -4693,7 +4685,7 @@ public class Launcher extends BaseActivity
         if (waitUntilResume(r)) {
             return;
         }
-
+        fetchAllAppList();
         // Update AllApps
         if (mAppsView != null) {
             mAppsView.removeApps(appInfos);
