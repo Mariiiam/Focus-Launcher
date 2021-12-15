@@ -40,6 +40,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Process;
 import android.os.*;
+import android.preference.Preference;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -320,6 +321,8 @@ public class Launcher extends BaseActivity
     private RotationPrefChangeHandler mRotationPrefChangeHandler;
     private SSIDPrefChangeHandler mSSIDPrefChangeHandler;
     private MinimalDesignPrefChangeHandler mMinimalDesignPrefChangeHandler;
+    private ProfileChangeHandler profileChangeHandler;
+    private WallpaperButtonClickedHandler wallpaperButtonClickedHandler;
 
     private ListView launcherListView;
     private ListView allAppsListView;
@@ -463,6 +466,11 @@ public class Launcher extends BaseActivity
         mMinimalDesignPrefChangeHandler = new MinimalDesignPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mMinimalDesignPrefChangeHandler);
 
+        profileChangeHandler = new ProfileChangeHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(profileChangeHandler);
+
+        wallpaperButtonClickedHandler = new WallpaperButtonClickedHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(wallpaperButtonClickedHandler);
 
         saveCurrentWallpaper();
         saveCurrentRingtones();
@@ -623,8 +631,12 @@ public class Launcher extends BaseActivity
 
     private void fetchHomescreenAppList() {
         // Start from a clean adapter when refreshing the list
-        adapterHomescreen.clear();
-        homescreenPackageNames.clear();
+        if(adapterHomescreen!=null){
+            adapterHomescreen.clear();
+        }
+        if(homescreenPackageNames!=null){
+            homescreenPackageNames.clear();
+        }
 
         // Query the package manager for all apps
         List<ResolveInfo> activities = packageManager.queryIntentActivities(
@@ -897,7 +909,7 @@ public class Launcher extends BaseActivity
             }
             return;
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
-            if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
+            //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
                 Bitmap wallpaper = extractWallpaper();
                 String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
                 saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
@@ -905,7 +917,7 @@ public class Launcher extends BaseActivity
                 // we move to the closest one now.
                 mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
                 showWorkspace(false);
-            }
+            //}
             return;
         }
 
@@ -4896,6 +4908,25 @@ public class Launcher extends BaseActivity
             return (Launcher) context;
         }
         return ((Launcher) ((ContextWrapper) context).getBaseContext());
+    }
+
+    private class ProfileChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(CURRENT_PROFILE_PREF)){
+                ProfilesActivity.bindWallpaperPreference(mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default"));
+            }
+        }
+    }
+
+    private class WallpaperButtonClickedHandler implements OnSharedPreferenceChangeListener {
+        View view = findViewById(R.id.launcher);
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(ProfilesActivity.WALLPAPER_BTN_CLICKED)){
+                onClickWallpaperPicker(view);
+            }
+        }
     }
 
     private class MinimalDesignPrefChangeHandler implements OnSharedPreferenceChangeListener {

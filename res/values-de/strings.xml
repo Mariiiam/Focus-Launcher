@@ -199,4 +199,6 @@
     <string name="switch_minimal_design">Minimalistisches Design anwenden</string>
     <string name="settings">Einstellungen</string>
     <string name="all_apps">Alle Apps</string>
+    <string name="wallpaper_pref_active">Hintergrund wählen</string>
+    <string name="wallpaper_pref_not_active">Profil muss aktiv sein, um Hintergrund ändern zu können</string>
 </resources>

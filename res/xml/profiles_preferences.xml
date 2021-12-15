@@ -119,6 +119,11 @@
             android:defaultValue="false"
             android:persistent="true"/>
 
+        <Preference
+            android:key="work_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
 
         <!--
         <Preference
@@ -179,6 +184,11 @@
             android:defaultValue="false"
             android:persistent="true"/>
 
+        <Preference
+            android:key="home_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -232,7 +242,10 @@
             android:defaultValue="false"
             android:persistent="true"/>
 
-
+        <Preference
+            android:key="disconnected_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
     </PreferenceScreen>
 
     <PreferenceScreen
@@ -286,6 +299,10 @@
             android:defaultValue="false"
             android:persistent="true"/>
 
+        <Preference
+            android:key="default_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
 
     </PreferenceScreen>
 

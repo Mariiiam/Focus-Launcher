@@ -415,4 +415,6 @@
     <string name="switch_minimal_design">Switch to minimal design</string>
     <string name="settings">Settings</string>
     <string name="all_apps">All Apps</string>
+    <string name="wallpaper_pref_active">Select wallpaper</string>
+    <string name="wallpaper_pref_not_active">Profile must be active to change wallpaper</string>
 </resources>

@@ -31,6 +31,8 @@ import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
@@ -47,9 +49,10 @@ import java.util.Map;
 public class ProfilesActivity extends Activity {
 
     public final static String MINIMAL_DESIGN_PREF = "_minimal_design";
-    public static boolean minimalDesignON;
     private static Preference minimalDesignPref;
-    private static boolean firstTime = true;
+    private static Preference wallpaperPref;
+    public final static String WALLPAPER_BTN_CLICKED = "wallpaper_btn_clicked";
+    static boolean changeWallpaper = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +63,18 @@ public class ProfilesActivity extends Activity {
             getFragmentManager().beginTransaction()
                     .replace(android.R.id.content, new ProfilesSettingsFragment())
                     .commit();
+        }
+    }
+
+    public static void bindWallpaperPreference(String profile){
+        if(wallpaperPref!=null){
+            if(Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default").equals(profile)){
+                wallpaperPref.setEnabled(true);
+                wallpaperPref.setSummary(R.string.wallpaper_pref_active);
+            } else {
+                wallpaperPref.setEnabled(false);
+                wallpaperPref.setSummary(R.string.wallpaper_pref_not_active);
+            }
         }
     }
 
@@ -149,6 +164,22 @@ public class ProfilesActivity extends Activity {
                 observeGrayscalePref(profile, (Preference) grayscalePref);
 
                 minimalDesignPref = parent.findPreference(profile + "_minimal_design");
+
+                wallpaperPref = parent.findPreference(profile+"_choose_wallpaper");
+                bindWallpaperPreference(profile);
+                wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        if(changeWallpaper){
+                            Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
+                            changeWallpaper = false;
+                        } else {
+                            Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
+                            changeWallpaper = true;
+                        }
+                        return true;
+                    }
+                });
 
                 Preference ssidsPref = parent.findPreference(profile + "_ssids");
                 if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
