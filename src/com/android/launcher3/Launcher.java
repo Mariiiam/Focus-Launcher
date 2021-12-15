@@ -40,6 +40,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Process;
 import android.os.*;
+import android.preference.Preference;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -320,6 +321,8 @@ public class Launcher extends BaseActivity
     private RotationPrefChangeHandler mRotationPrefChangeHandler;
     private SSIDPrefChangeHandler mSSIDPrefChangeHandler;
     private MinimalDesignPrefChangeHandler mMinimalDesignPrefChangeHandler;
+    private ProfileChangeHandler profileChangeHandler;
+    private WallpaperButtonClickedHandler wallpaperButtonClickedHandler;
 
     private ListView launcherListView;
     private ListView allAppsListView;
@@ -334,6 +337,10 @@ public class Launcher extends BaseActivity
     private static Set<String> set = new HashSet<String>();
 
     private final static String APPS_ON_HOMESCREEN = "apps_on_homescreen";
+    private final static String ALL_APPS = "all_apps";
+
+    public final static String CURRENT_PROFILE_PREF = "current_profile";
+    public final static String MANUAL_PROFILE_PREF = "manual_profile";
 
 
     @Override
@@ -459,6 +466,11 @@ public class Launcher extends BaseActivity
         mMinimalDesignPrefChangeHandler = new MinimalDesignPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mMinimalDesignPrefChangeHandler);
 
+        profileChangeHandler = new ProfileChangeHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(profileChangeHandler);
+
+        wallpaperButtonClickedHandler = new WallpaperButtonClickedHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(wallpaperButtonClickedHandler);
 
         saveCurrentWallpaper();
         saveCurrentRingtones();
@@ -617,16 +629,14 @@ public class Launcher extends BaseActivity
         }
     }
 
-    private void updateHomeScreenAdapter(Set<String> newSet) {
-        adapterHomescreen.clear();
-        adapterHomescreen.addAll(newSet);
-        adapterHomescreen.notifyDataSetChanged();
-    }
-
     private void fetchHomescreenAppList() {
         // Start from a clean adapter when refreshing the list
-        adapterHomescreen.clear();
-        homescreenPackageNames.clear();
+        if(adapterHomescreen!=null){
+            adapterHomescreen.clear();
+        }
+        if(homescreenPackageNames!=null){
+            homescreenPackageNames.clear();
+        }
 
         // Query the package manager for all apps
         List<ResolveInfo> activities = packageManager.queryIntentActivities(
@@ -670,11 +680,9 @@ public class Launcher extends BaseActivity
 
             // Exclude the settings app and this launcher from the list of apps shown
             String appName = (String) resolver.loadLabel(packageManager);
-            if (appName.equals("Focus Launcher"))
-                continue;
-
-            adapterAll.add(appName);
-            allPackageNames.add(resolver.activityInfo.packageName);
+                if (appName.equals("Focus Launcher")) continue;
+                adapterAll.add(appName);
+                allPackageNames.add(resolver.activityInfo.packageName);
         }
         allAppsListView.setAdapter(adapterAll);
     }
@@ -901,15 +909,15 @@ public class Launcher extends BaseActivity
             }
             return;
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
-            if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
+            //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
                 Bitmap wallpaper = extractWallpaper();
-                String currentProfile = mSharedPrefs.getString("current_profile", "default");
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
                 saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
                 // User could have free-scrolled between pages before picking a wallpaper; make sure
                 // we move to the closest one now.
                 mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
                 showWorkspace(false);
-            }
+            //}
             return;
         }
 
@@ -1822,14 +1830,14 @@ public class Launcher extends BaseActivity
             dialog.dismiss();
             String[] profiles = {"home", "work", "default"};
             Log.d("PROFILE_UPDATE", "From dialog");
-            mLauncher.mSharedPrefs.edit().putString("manual_profile", profiles[which]).commit();
+            mLauncher.mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profiles[which]).commit();
             mLauncher.updateProfile(profiles[which]);
         }
     }
 
     public static void updateSharedPrefsProfile(String profile){
-        mSharedPrefs.edit().putString("manual_profile", profile).commit();
-        mSharedPrefs.edit().putString("current_profile", profile).commit();
+        mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profile).apply();
+        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
     }
 
     /**
@@ -1875,7 +1883,6 @@ public class Launcher extends BaseActivity
         if(!appsOnHomescreen.contains(info.title.toString())){
             appsOnHomescreen.add(info.title.toString());
             mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, appsOnHomescreen).apply();
-            //updateHomeScreenAdapter(appsOnHomescreen);
             fetchHomescreenAppList();
         }
         return favorite;
@@ -2153,11 +2160,10 @@ public class Launcher extends BaseActivity
     public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
 
-        String manualProfile = mSharedPrefs.getString("manual_profile", null);
-        Log.d("UPDATE PROFILE", "First time: "+firstTime+" ; manualProfile : "+ manualProfile);
+        String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
         if(firstTime && manualProfile != null) {
             // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
-            mSharedPrefs.edit().putString("manual_profile", null).commit();
+            mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, null).commit();
             firstTime = false;
 
             //profile = manualProfile;
@@ -2166,8 +2172,8 @@ public class Launcher extends BaseActivity
         }
         firstTime = false;
 
-        if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
-        mSharedPrefs.edit().putString("current_profile", profile).apply();
+        //if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
+        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
         if (profile.equals(lastProfileUpdate)) return true; /* abort updating */
         else lastProfileUpdate = profile;
@@ -2972,7 +2978,6 @@ public class Launcher extends BaseActivity
                     }
                 }
                 mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, updatedAppsOnHomescreen).apply();
-                //updateHomeScreenAdapter(mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null));
                 fetchHomescreenAppList();
 
             }
@@ -3064,7 +3069,7 @@ public class Launcher extends BaseActivity
             // TODO: Log this case.
             mWorkspace.exitWidgetResizeMode();
         }
-        String currentProfile = mSharedPrefs.getString("current_profile", "default");
+        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
         isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
         if(isMinimalDesignON){
             allAppsListView.setVisibility(View.INVISIBLE);
@@ -4588,6 +4593,7 @@ public class Launcher extends BaseActivity
         if (mAppsView != null) {
             mAppsView.addOrUpdateApps(apps);
         }
+        fetchAllAppList();
     }
 
     @Override
@@ -4656,7 +4662,7 @@ public class Launcher extends BaseActivity
         if (waitUntilResume(r)) {
             return;
         }
-
+        
         mWorkspace.updateRestoreItems(updates);
     }
 
@@ -4691,7 +4697,7 @@ public class Launcher extends BaseActivity
         if (waitUntilResume(r)) {
             return;
         }
-
+        fetchAllAppList();
         // Update AllApps
         if (mAppsView != null) {
             mAppsView.removeApps(appInfos);
@@ -4904,12 +4910,31 @@ public class Launcher extends BaseActivity
         return ((Launcher) ((ContextWrapper) context).getBaseContext());
     }
 
+    private class ProfileChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(CURRENT_PROFILE_PREF)){
+                ProfilesActivity.bindWallpaperPreference(mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default"));
+            }
+        }
+    }
+
+    private class WallpaperButtonClickedHandler implements OnSharedPreferenceChangeListener {
+        View view = findViewById(R.id.launcher);
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(ProfilesActivity.WALLPAPER_BTN_CLICKED)){
+                onClickWallpaperPicker(view);
+            }
+        }
+    }
+
     private class MinimalDesignPrefChangeHandler implements OnSharedPreferenceChangeListener {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             for (String profile : ProfilesActivity.ProfilesSettingsFragment.availableProfiles) {
                 if(key.equals(profile+ProfilesActivity.MINIMAL_DESIGN_PREF)){
-                    String currentProfile = mSharedPrefs.getString("current_profile", "default");
+                    String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
                     if (profile.equals(currentProfile)) {
                         isMinimalDesignON = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
                         switchToMinimalLayout(isMinimalDesignON);
@@ -4928,8 +4953,8 @@ public class Launcher extends BaseActivity
                 // Recreate the activity so that it initializes the rotation preference again.
                 recreate();
             }
-            if(key.equals("current_profile")){
-                updateProfile(mSharedPrefs.getString("current_profile", ""));
+            if(key.equals(CURRENT_PROFILE_PREF)){
+                updateProfile(mSharedPrefs.getString(CURRENT_PROFILE_PREF, ""));
             }
         }
     }

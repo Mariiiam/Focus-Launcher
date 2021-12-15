@@ -10,8 +10,8 @@
     <string-array translatable="false" name="theme_override_names">
         <item>@string/theme_automatic</item>
         <item>@string/theme_default</item>
-        <item>@string/theme_light</item>
         <item>@string/theme_dark</item>
+        <item>@string/theme_light</item>
         <item>@string/theme_transparent</item>
     </string-array>
 </resources>

@@ -104,7 +104,7 @@ public class AppInfo extends ItemInfoWithIcon {
 
     public ShortcutInfo makeShortcut(Context context) {
         Log.d("AppInfo", "makeShortcut(context)");
-        final String currentProfile = Utilities.getPrefs(context).getString("current_profile", "default");
+        final String currentProfile = Utilities.getPrefs(context).getString(Launcher.CURRENT_PROFILE_PREF, "default");
         return this.makeShortcut(currentProfile);
     }
 

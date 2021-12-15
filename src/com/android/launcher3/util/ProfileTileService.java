@@ -24,26 +24,26 @@ public class ProfileTileService extends TileService {
      * callback any time the tile becomes visible */
     @Override
     public void onStartListening(){
-        String current_profile = getString(R.string.profile_display_default);
+        String current_profile = getString(R.string.app_name_rootless_pixel_launcher);
         Icon icon = Icon.createWithResource(this, R.drawable.ic_focus_launcher_24dp);
         String label;
         if (Launcher.mSharedPrefs != null){
-            current_profile = Launcher.mSharedPrefs.getString("current_profile", "");
+            current_profile = Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default");
         }
         if(current_profile.equals("work")){
             icon = Icon.createWithResource(this, R.drawable.ic_work);
-            label = "Work";
+            label = getString(R.string.profile_work);
         }
         else if(current_profile.equals("home")){
             icon = Icon.createWithResource(this, R.drawable.ic_home);
-            label = "Home";
+            label = getString(R.string.profile_home);
         }
         else if(current_profile.equals("disconnected")){
             icon = Icon.createWithResource(this, R.drawable.ic_offline);
-            label = "Disconnected";
+            label = getString(R.string.profile_disconnected);
         }
         else if(current_profile.equals("default")){
-            label = "Default";
+            label = getString(R.string.profile_default);
         }
         else {
             label = current_profile;

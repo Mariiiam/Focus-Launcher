@@ -358,8 +358,8 @@
     <string name="profile_display_default">Profile</string>
     <string name="profile_work">Work</string>
     <string name="profile_home">Home</string>
-    <string name="profile_disconnected">Offline Mode</string>
-    <string name="profile_disconnected_summary">Enable by activating offline mode</string>
+    <string name="profile_disconnected">Disconnected</string>
+    <string name="profile_disconnected_summary">Enable by activating flightmode</string>
     <string name="profile_default">Default</string>
     <string name="profile_default_summary">Used if no other profile is enabled</string>
     <string name="profile_pref_wallpaper">Wallpaper</string>
@@ -415,4 +415,6 @@
     <string name="switch_minimal_design">Switch to minimal design</string>
     <string name="settings">Settings</string>
     <string name="all_apps">All Apps</string>
+    <string name="wallpaper_pref_active">Select wallpaper</string>
+    <string name="wallpaper_pref_not_active">Profile must be active to change wallpaper</string>
 </resources>
