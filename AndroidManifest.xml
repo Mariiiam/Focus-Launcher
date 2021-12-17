@@ -108,7 +108,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES"/>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERFENCES"/>
             </intent-filter>
         </activity>
 
@@ -131,6 +131,18 @@
         <activity
             android:name="com.android.launcher3.util.ManualProfileSelectionActivity"
             android:label="@string/profiles_button_text"
+            android:theme="@style/Theme.Transparent"
+            android:excludeFromRecents="true">
+        </activity>
+
+        <activity
+            android:name="com.android.launcher3.AddProfileDialogActivity"
+            android:theme="@style/Theme.Transparent"
+            android:excludeFromRecents="true">
+        </activity>
+
+        <activity
+            android:name="com.android.launcher3.ChangeProfileNameDialogActivity"
             android:theme="@style/Theme.Transparent"
             android:excludeFromRecents="true">
         </activity>

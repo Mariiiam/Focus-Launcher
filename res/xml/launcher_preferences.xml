@@ -16,11 +16,11 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceScreen
+    <!--<PreferenceScreen
             android:key="profiles_screen"
             android:title="@string/profiles"
             android:icon="@drawable/ic_profiles"
-            android:persistent="false"/>
+            android:persistent="false"/>-->
 
     <com.android.launcher3.views.DependentSwitchPreference
             android:key="pref_icon_badging"

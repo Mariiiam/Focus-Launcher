@@ -79,19 +79,22 @@
     <string name="allow_rotation_blocked_desc" msgid="3212602545192996253">"Die aktuelle \"Display\"-Einstellung verhindert eine Drehung der Anzeige"</string>
     <string name="icon_badging_title" msgid="874121399231955394">"Benachrichtigungsindikatoren"</string>
     <string name="hide_foreign_notifications_title" msgid="874121399231955395">"Benachrichtigungen ausblenden"</string>
-    <string name="enable_grayscale_title" msgid="9029271080007984542">"Graustufen-Modus aktivieren"</string>
+    <string name="enable_grayscale_title" msgid="9029271080007984542">"Graustufen-Modus"</string>
     <string name="add_new_profile">"Neues Profil hinzufügen"</string>
     <string name="profile_name_summary">Gebe dem Profil einen Namen</string>
     <string name="profile_name">"Profilname"</string>
     <string name="save">"Speichern"</string>
+    <string name="cancel">"Abbrechen"</string>
+    <string name="delete">"Löschen"</string>
     <string name="grayscale_tile">Graustufen</string>
     <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
-    <string name="grayscale_summary">Aktiviert Graustufen-Modus</string>
+    <string name="grayscale_summary">"Link zu den Eingabehilfen Einstellungen. Sehhilfe > Farbanpassung > Graustufe"</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
     <string name="title_missing_notification_access" msgid="7503287056163941064">"Benachrichtigungszugriff erforderlich"</string>
     <string name="title_missing_grayscale_access">Berechtigung erforderlich</string>
     <string name="title_manually_select_profile" msgid="7503287056163941061">"Profil manuell aktivieren"</string>
+    <string name="title_add_profile_name">Name des neuen Profils speichern</string>
     <string name="title_missing_write_access" msgid="7503287056163941068">"Schreibzugriff erforderlich"</string>
     <string name="msg_missing_notification_access" msgid="281113995110910548">"Um dir für jede App Punkte als Indikator für Benachrichtigungen anzeigen zu lassen, aktiviere den Zugriff auf Benachrichtigungen für die App \"<xliff:g id="NAME">%1$s</xliff:g>\""</string>
     <string name="msg_missing_notification_access_for_blocking" msgid="281113995110910541">"Um Benachrichtigungen von Apps zu blockieren, die du nicht auf deinem Startbildschirm angeordnet hast, aktiviere den Zugriff auf Benachrichtigungen für die App \"<xliff:g id="NAME">%1$s</xliff:g>\""</string>
@@ -198,7 +201,15 @@
     <string name="about_donate">Spenden</string>
     <string name="switch_minimal_design">Minimalistisches Design anwenden</string>
     <string name="settings">Einstellungen</string>
-    <string name="all_apps">Alle Apps</string>
+    <string name="all_apps">Alle</string>
     <string name="wallpaper_pref_active">Hintergrund wählen</string>
     <string name="wallpaper_pref_not_active">Profil muss aktiv sein, um Hintergrund ändern zu können</string>
+    <string name="warning_max_number_profiles_reached">Maximale Anzahl der Profile ist erreicht</string>
+    <string name="delete_profile">Dieses Profil löschen</string>
+    <string name="change_profile_name">Profilnamen ändern</string>
+    <string name="change_profile_name_question">Wie soll dieses Profil heißen?</string>
+    <string name="delete_profile_question">Dieses Profil löschen?</string>
+    <string name="change_name_pref_not_active">Profil muss inaktiv sein, um den Namen ändern zu können</string>
+    <string name="error_change_profile_name_too_short">Name muss mindestens drei Zeichen enthalten</string>
+    <string name="error_change_profile_name_already_exists">Dieser Name existiert bereits</string>
 </resources>

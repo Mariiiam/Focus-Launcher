@@ -4,55 +4,12 @@
     android:key="profiles_screen"
     android:title="@string/profiles">
 
-    <PreferenceScreen
+    <Preference
         android:key="add_profile"
         android:title="@string/add_new_profile"
-        android:persistent="false">
-        <EditTextPreference
-            android:key="profile_name"
-            android:title="@string/profile_name"
-            android:hint="@string/profile_name_summary"
-            android:selectAllOnFocus="false"
-            android:inputType="text"/>
-        <EditTextPreference
-            android:key="home_ssids"
-            android:title="@string/profile_pref_ssids"
-            android:hint="@string/profile_pref_ssids_hint"
-            android:selectAllOnFocus="false"
-            android:inputType="textMultiLine"
-            />
-
-        <!-- Allows the user to choose a ringtone. -->
-        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
-        <RingtonePreference
-            android:key="disconnected_ringtone"
-            android:title="@string/profile_pref_ringtone"
-            android:ringtoneType="ringtone"/>
-
-        <RingtonePreference
-            android:key="disconnected_notification_sound"
-            android:title="@string/profile_pref_notification_sound"
-            android:showSilent="true"
-            android:showDefault="false"
-            android:ringtoneType="notification"/>
-
-        <com.android.launcher3.views.DependentSwitchPreference
-            android:key="disconnected_hide_notifications"
-            android:title="@string/hide_foreign_notifications_title"
-            android:summary="@string/hide_foreign_notifications_summary"
-            android:persistent="true"
-            android:defaultValue="true"/>
-
-        <Preference
-            android:key="disconnected_enable_grayscale"
-            android:title="@string/enable_grayscale_title"
-            android:summary="@string/hide_foreign_notifications_summary"
-            android:persistent="false"/>
-        <Preference
-            android:key="save_profile_button"
-            android:title="@string/save"
-            android:persistent="false"/>
-    </PreferenceScreen>
+        android:persistent="false"
+        android:icon="@drawable/ic_plus">
+    </Preference>
 
     <PreferenceScreen
             android:key="profile_work"
@@ -302,6 +259,486 @@
         <Preference
             android:key="default_choose_wallpaper"
             android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_1"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="1_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="1_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="1_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="1_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="1_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="1_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="1_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="1_change_name"
+            android:title="@string/change_profile_name"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_2"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="2_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="2_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="2_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="2_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="2_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="2_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="2_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="2_change_name"
+            android:title="@string/change_profile_name"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_3"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="3_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="3_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="3_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="3_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="3_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="3_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="3_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="3_change_name"
+            android:title="@string/change_profile_name"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_4"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="4_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="4_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="4_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="4_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="4_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="4_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="4_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="4_change_name"
+            android:title="@string/change_profile_name"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_5"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="5_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="5_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="5_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="5_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="5_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="5_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="5_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="5_change_name"
+            android:title="@string/change_profile_name"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_6"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="6_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="6_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="6_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="6_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="6_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="6_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="6_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="6_change_name"
+            android:title="@string/change_profile_name"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_7"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="7_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="7_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="7_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="7_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="7_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="7_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="7_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="7_change_name"
+            android:title="@string/change_profile_name"
+            android:persistent="false"/>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="profile_8"
+        android:persistent="false"
+        android:enabled="false">
+
+        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+        <EditTextPreference
+            android:key="8_ssids"
+            android:title="@string/profile_pref_ssids"
+            android:hint="@string/profile_pref_ssids_hint"
+            android:selectAllOnFocus="false"
+            android:inputType="textMultiLine"
+            />
+
+        <!-- Allows the user to choose a ringtone. -->
+        <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
+        <RingtonePreference
+            android:key="8_ringtone"
+            android:title="@string/profile_pref_ringtone"
+            android:ringtoneType="ringtone"/>
+
+        <RingtonePreference
+            android:key="8_notification_sound"
+            android:title="@string/profile_pref_notification_sound"
+            android:showSilent="true"
+            android:showDefault="false"
+            android:ringtoneType="notification"/>
+
+        <com.android.launcher3.views.DependentSwitchPreference
+            android:key="8_hide_notifications"
+            android:title="@string/hide_foreign_notifications_title"
+            android:summary="@string/hide_foreign_notifications_summary"
+            android:persistent="true"
+            android:defaultValue="false"/>
+
+        <Preference
+            android:key="8_enable_grayscale"
+            android:title="@string/enable_grayscale_title"
+            android:summary="@string/grayscale_summary"
+            android:persistent="false"/>
+
+        <SwitchPreference
+            android:key="8_minimal_design"
+            android:title="@string/switch_minimal_design"
+            android:defaultValue="false"
+            android:persistent="true"/>
+
+        <Preference
+            android:key="8_choose_wallpaper"
+            android:title="@string/wallpaper_button_text"
+            android:persistent="false"/>
+
+        <Preference
+            android:key="8_change_name"
+            android:title="@string/change_profile_name"
             android:persistent="false"/>
 
     </PreferenceScreen>

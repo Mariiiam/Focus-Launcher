@@ -66,7 +66,7 @@ public class SettingsActivity extends Activity {
 
         private SystemDisplayRotationLockObserver mRotationLockObserver;
         private NotificationAccessObserver mIconBadgingObserver;
-        private ProfilesActivity.ProfilesSettingsFragment mProfileSettings = new ProfilesActivity.ProfilesSettingsFragment(this);
+        //private ProfilesActivity.ProfilesSettingsFragment mProfileSettings = new ProfilesActivity.ProfilesSettingsFragment(this);
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -125,7 +125,7 @@ public class SettingsActivity extends Activity {
             PreferenceScreen profiles = (PreferenceScreen) findPreference("profiles_screen");
             PreferenceScreen settings = getPreferenceScreen();
             int lastSetting = settings.getPreferenceCount();
-            mProfileSettings.onCreate(savedInstanceState);
+            //mProfileSettings.onCreate(savedInstanceState);
             while (settings.getPreferenceCount () > lastSetting) {
                 Preference p = settings.getPreference(lastSetting);
                 settings.removePreference (p); // decreases the preference count
@@ -143,10 +143,11 @@ public class SettingsActivity extends Activity {
                 mIconBadgingObserver.unregister();
                 mIconBadgingObserver = null;
             }
+            /*
             if (mProfileSettings != null) {
                 mProfileSettings.onDestroy();
                 mProfileSettings = null;
-            }
+            }*/
             super.onDestroy();
         }
     }

@@ -3,6 +3,7 @@ package com.google.android.apps.nexuslauncher;
 import android.app.*;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -56,6 +57,16 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
             super.onCreate(bundle);
 
             mContext = getActivity();
+            /*
+            findPreference("profiles_screen").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getActivity(), ProfilesActivity.class);
+                    startActivity(intent);
+                    getActivity().finish();
+                    return true;
+                }
+            });*/
 
             findPreference(SHOW_PREDICTIONS_PREF).setOnPreferenceChangeListener(this);
             findPreference(ENABLE_MINUS_ONE_PREF).setOnPreferenceChangeListener(this);

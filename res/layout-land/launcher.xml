@@ -118,17 +118,28 @@
                 android:id="@+id/relative_layout">
                 <Button
                     android:id="@+id/minimal_settings_button"
-                    android:layout_width="170dp"
+                    android:layout_width="167dp"
                     android:layout_height="55dp"
-                    android:drawableStart="@drawable/ic_setting"
+                    android:drawableStart="@drawable/ic_setting_small"
                     android:layout_alignParentStart="true"
                     android:text="@string/settings"
                     android:textSize="12sp"
                     android:backgroundTint="@color/transparent"
                     style="?android:attr/borderlessButtonStyle"/>
                 <Button
+                    android:id="@+id/minimal_profile_button"
+                    android:layout_width="105dp"
+                    android:layout_height="55dp"
+                    android:drawableStart="@drawable/ic_profiles"
+                    android:layout_centerHorizontal="true"
+                    android:layout_toEndOf="@+id/minimal_settings_button"
+                    android:text="@string/profiles"
+                    android:textSize="12sp"
+                    android:backgroundTint="@color/transparent"
+                    style="?android:attr/borderlessButtonStyle"/>
+                <Button
                     android:id="@+id/minimal_apps_button"
-                    android:layout_width="130dp"
+                    android:layout_width="95dp"
                     android:layout_height="55dp"
                     android:drawableEnd="@drawable/ic_allapps_black"
                     android:layout_alignParentEnd="true"
