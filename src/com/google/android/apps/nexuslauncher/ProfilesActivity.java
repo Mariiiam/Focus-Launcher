@@ -22,17 +22,24 @@ import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.android.launcher3.AddProfileDialogActivity;
+import com.android.launcher3.ChangeProfileNameDialogActivity;
+import com.android.launcher3.DeleteProfileDialogActivity;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
@@ -40,8 +47,11 @@ import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.views.DependentSwitchPreference;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -49,14 +59,29 @@ import java.util.Map;
 public class ProfilesActivity extends Activity {
 
     public final static String MINIMAL_DESIGN_PREF = "_minimal_design";
-    private static Preference minimalDesignPref;
-    private static Preference wallpaperPref;
     public final static String WALLPAPER_BTN_CLICKED = "wallpaper_btn_clicked";
+    public final static String CHANGE_NAME_PREF = "change_profile_name";
     static boolean changeWallpaper = false;
+    private static Preference addProfilePref;
+    public static final String ADD_PROFILE_PREF = "add_profile";
+    public static final String ID_FOR_PROFILE = "id_for_profile";
+    final static int NEW_PROFILE_ADDED = 44;
+    final static int PROFILE_NAME_CHANGE = 45;
+    private static final int MAX_PROFILE_NUMBER = 8;
+    public static int currentProfileNumber;
+    public static final String PROFILES_MANAGED = "profiles_managed";
+    public static ArrayList<String> newAddedProfiles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(Launcher.mSharedPrefs.getStringSet(ADD_PROFILE_PREF, null)==null){
+            newAddedProfiles = new ArrayList<>();
+        } else {
+            Set set = Launcher.mSharedPrefs.getStringSet(ADD_PROFILE_PREF, null);
+            newAddedProfiles = new ArrayList<>(set);
+        }
 
         if (savedInstanceState == null) {
             // Display the fragment as the main content.
@@ -66,7 +91,19 @@ public class ProfilesActivity extends Activity {
         }
     }
 
-    public static void bindWallpaperPreference(String profile){
+    public static void bindChangeNamePreference(String profile, Preference changeNamePref){
+        if(changeNamePref!=null){
+            if(Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default").equals(profile)){
+                changeNamePref.setEnabled(false);
+                changeNamePref.setSummary(R.string.change_name_pref_not_active);
+            } else {
+                changeNamePref.setEnabled(true);
+                changeNamePref.setSummary("");
+            }
+        }
+    }
+
+    public static void bindWallpaperPreference(String profile, Preference wallpaperPref){
         if(wallpaperPref!=null){
             if(Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default").equals(profile)){
                 wallpaperPref.setEnabled(true);
@@ -76,6 +113,11 @@ public class ProfilesActivity extends Activity {
                 wallpaperPref.setSummary(R.string.wallpaper_pref_not_active);
             }
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -88,7 +130,7 @@ public class ProfilesActivity extends Activity {
         private Map<String, GrayscaleAccessObserver> mGrayscaleAccessObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
 
-        public final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
+        //public final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
         public final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
         static {
             resourceIdForProfileName.put("home", R.string.profile_home);
@@ -107,11 +149,19 @@ public class ProfilesActivity extends Activity {
             this.parent = this;
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onCreate(Bundle savedInstanceState) {
             if(this.parent == this) super.onCreate(savedInstanceState);
             parent.getPreferenceManager().setSharedPreferencesName(LauncherFiles.SHARED_PREFERENCES_KEY);
             parent.addPreferencesFromResource(R.xml.profiles_preferences);
+
+            if(Launcher.mSharedPrefs.getStringSet(ADD_PROFILE_PREF, null)==null){
+                newAddedProfiles = new ArrayList<>();
+            } else {
+                Set set = Launcher.mSharedPrefs.getStringSet(ADD_PROFILE_PREF, null);
+                newAddedProfiles = new ArrayList<>(set);
+            }
 
             setupProfilePreferences();
 
@@ -122,13 +172,47 @@ public class ProfilesActivity extends Activity {
                         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                             if (key.equals(Launcher.CURRENT_PROFILE_PREF)) {
                                 String profile = sharedPreferences.getString(key, "default");
-                                profilesGroup.setSummary(parent.getString(resourceIdForProfileName.get(profile)));
+                                //profilesGroup.setSummary(parent.getString(resourceIdForProfileName.get(profile)));
+                                if(profile.equals("home") || profile.equals("work") || profile.equals("default") ||profile.equals("disconnected") ){
+                                    profilesGroup.setSummary(parent.getString(resourceIdForProfileName.get(profile)));
+                                } else {
+                                    for(String sub : newAddedProfiles){
+                                        if(sub.substring(1).equals(profile)){
+                                            String profileID = sub.charAt(0)+"";
+                                            profilesGroup.setSummary(profileID);
+                                        }
+                                    }
+                                }
+                                for (String p : Launcher.availableProfiles) {
+                                    if(p.equals("home") || p.equals("work") || p.equals("default") || p.equals("disconnected")){
+                                        final String pKey = "profile_"+p;
+                                        Preference profileGroup = parent.findPreference(pKey);
+                                        final String profileName = parent.getString(resourceIdForProfileName.get(p));
+                                        profileGroup.setTitle(p.equals(profile) ? profileName + " (" + parent.getString(R.string.profile_active) +")" : profileName);
 
-                                for (String p : availableProfiles) {
-                                    final String pKey = "profile_"+p;
-                                    Preference profileGroup = parent.findPreference(pKey);
-                                    final String profileName = parent.getString(resourceIdForProfileName.get(p));
-                                    profileGroup.setTitle(p.equals(profile) ? profileName + " (" + parent.getString(R.string.profile_active) +")" : profileName);
+                                        Preference wallpaperPref = parent.findPreference(p+"_choose_wallpaper");
+                                        bindWallpaperPreference(p, wallpaperPref);
+
+                                        Preference changeNamePref = parent.findPreference(p+"_change_name");
+                                        bindChangeNamePreference(p, changeNamePref);
+
+                                    } else {
+                                        for(String sub : newAddedProfiles){
+                                            if(sub.substring(1).equals(p)){
+                                                String profileID = sub.charAt(0)+"";
+                                                final String pKey = "profile_"+profileID;
+                                                Preference profileGroup = parent.findPreference(pKey);
+                                                final String profileName = p;
+                                                profileGroup.setTitle(p.equals(profile) ? profileName + " (" + parent.getString(R.string.profile_active) +")" : profileName);
+
+                                                Preference wallpaperPref = parent.findPreference(profileID+"_choose_wallpaper");
+                                                bindWallpaperPreference(p, wallpaperPref);
+
+                                                Preference changeNamePref = parent.findPreference(profileID+"_change_name");
+                                                bindChangeNamePreference(p, changeNamePref);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -146,43 +230,120 @@ public class ProfilesActivity extends Activity {
          * guidelines.
          */
         private void setupProfilePreferences() {
-            for (String profile : availableProfiles) {
-                Preference profileGroup = parent.findPreference("profile_" + profile);
-
-                Preference ringtonePref = parent.findPreference(profile + "_ringtone");
-                bindPreferenceToSummary(ringtonePref);
-
-                Preference notificationSoundPref = parent.findPreference(profile + "_notification_sound");
-                bindPreferenceToSummary(notificationSoundPref);
-
-                Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
-                observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
-
-                //Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
-                //observeGrayscaleSwitch(profile, (DependentSwitchPreference) grayscalePref);
-                Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
-                observeGrayscalePref(profile, (Preference) grayscalePref);
-
-                minimalDesignPref = parent.findPreference(profile + "_minimal_design");
-
-                wallpaperPref = parent.findPreference(profile+"_choose_wallpaper");
-                bindWallpaperPreference(profile);
-                wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        if(changeWallpaper){
-                            Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
-                            changeWallpaper = false;
-                        } else {
-                            Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
-                            changeWallpaper = true;
-                        }
-                        return true;
+            addProfilePref = parent.findPreference(ADD_PROFILE_PREF);
+            addProfilePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    if(currentProfileNumber<MAX_PROFILE_NUMBER){
+                        Intent intent = new Intent(parent.getActivity(), AddProfileDialogActivity.class);
+                        startActivityForResult(intent, NEW_PROFILE_ADDED);
+                    } else {
+                        Toast.makeText(parent.getActivity(), R.string.warning_max_number_profiles_reached, Toast.LENGTH_SHORT).show();
                     }
-                });
+                    return true;
+                }
+            });
+            for (final String profile : Launcher.availableProfiles) {
+                if(profile.equals("work")||profile.equals("home")||profile.equals("default")||profile.equals("disconnected")){
+                    Preference profileGroup = parent.findPreference("profile_" + profile);
 
-                Preference ssidsPref = parent.findPreference(profile + "_ssids");
-                if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+                    Preference ringtonePref = parent.findPreference(profile + "_ringtone");
+                    bindPreferenceToSummary(ringtonePref);
+
+                    Preference notificationSoundPref = parent.findPreference(profile + "_notification_sound");
+                    bindPreferenceToSummary(notificationSoundPref);
+
+                    Preference notificationBlockingPref = parent.findPreference(profile + "_hide_notifications");
+
+                    observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
+
+                    //Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
+                    //observeGrayscaleSwitch(profile, (DependentSwitchPreference) grayscalePref);
+                    Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
+                    observeGrayscalePref(profile, (Preference) grayscalePref);
+
+                    Preference minimalDesignPref = parent.findPreference(profile + "_minimal_design");
+
+                    Preference wallpaperPref = parent.findPreference(profile+"_choose_wallpaper");
+                    bindWallpaperPreference(profile, wallpaperPref);
+                    wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
+                            if(changeWallpaper){
+                                Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
+                                changeWallpaper = false;
+                            } else {
+                                Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
+                                changeWallpaper = true;
+                            }
+                            return true;
+                        }
+                    });
+
+                    Preference ssidsPref = parent.findPreference(profile + "_ssids");
+                    if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+                } else {
+                    for(String sub : newAddedProfiles){
+                        if(sub.substring(1).equals(profile)){
+                            String profileID = sub.charAt(0)+"";
+                            Preference profileGroup = parent.findPreference("profile_" + profileID);
+                            profileGroup.setEnabled(true);
+                            profileGroup.setIcon(R.drawable.ic_profiles);
+
+                            Preference ringtonePref = parent.findPreference(profileID + "_ringtone");
+                            bindPreferenceToSummary(ringtonePref);
+
+                            Preference notificationSoundPref = parent.findPreference(profileID + "_notification_sound");
+                            bindPreferenceToSummary(notificationSoundPref);
+
+                            Preference notificationBlockingPref = parent.findPreference(profileID + "_hide_notifications");
+
+                            observeNotificationBlockingSwitch(profile, (DependentSwitchPreference) notificationBlockingPref);
+
+                            //Preference grayscalePref = parent.findPreference(profileID + "_enable_grayscale");
+                            //observeGrayscaleSwitch(profileID, (DependentSwitchPreference) grayscalePref);
+                            Preference grayscalePref = parent.findPreference(profileID + "_enable_grayscale");
+                            observeGrayscalePref(profileID, (Preference) grayscalePref);
+
+                            Preference minimalDesignPref = parent.findPreference(profileID + "_minimal_design");
+
+                            Preference wallpaperPref = parent.findPreference(profileID+"_choose_wallpaper");
+                            bindWallpaperPreference(profile, wallpaperPref);
+                            wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                                @Override
+                                public boolean onPreferenceClick(Preference preference) {
+                                    changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
+                                    if(changeWallpaper){
+                                        Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
+                                        changeWallpaper = false;
+                                    } else {
+                                        Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
+                                        changeWallpaper = true;
+                                    }
+                                    return true;
+                                }
+                            });
+
+                            Preference changeNamePref = parent.findPreference(profileID+"_change_name");
+                            bindChangeNamePreference(profile, changeNamePref);
+                            changeNamePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                                @Override
+                                public boolean onPreferenceClick(Preference preference) {
+                                    Launcher.mSharedPrefs.edit().putString(CHANGE_NAME_PREF, profile).commit();
+                                    Intent intent = new Intent(getActivity(), ChangeProfileNameDialogActivity.class);
+                                    startActivityForResult(intent, PROFILE_NAME_CHANGE);
+                                    return true;
+                                }
+                            });
+
+                            Preference ssidsPref = parent.findPreference(profileID + "_ssids");
+                            if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+                        }
+                    }
+
+                }
+
             }
         }
 
@@ -221,7 +382,7 @@ public class ProfilesActivity extends Activity {
                     return true;
                 }
             });
-            boolean isColorCorrectionEnabled = Launcher.isAccessibilityEnabled(getActivity());
+            //boolean isColorCorrectionEnabled = Launcher.isAccessibilityEnabled(getActivity());
         }
         /**
          * Binds a preference's summary to its value. More specifically, when the
@@ -314,6 +475,13 @@ public class ProfilesActivity extends Activity {
                     if (current_profile.equals(profile)) {
                         int type = ((RingtonePreference) preference).getRingtoneType();
                         Launcher.setRingtone(ringtoneUri, (Activity) preference.getContext(), type);
+                    } else if(newAddedProfiles.size()!=0){
+                        for(String sub : newAddedProfiles){
+                            if((sub.charAt(0)+"").equals(profile)){
+                                int type = ((RingtonePreference) preference).getRingtoneType();
+                                Launcher.setRingtone(ringtoneUri, (Activity) preference.getContext(), type);
+                            }
+                        }
                     }
                 } else {
                     // For all other preferences, set the summary to the value's
@@ -345,6 +513,111 @@ public class ProfilesActivity extends Activity {
                 mGrayscaleAccessObservers = null;
             }
             if(this.parent == this) super.onDestroy();
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+            if(requestCode == NEW_PROFILE_ADDED){
+                if(resultCode == Activity.RESULT_OK){
+                    final String result = data.getStringExtra("result");
+                    if(result.equals(getString(R.string.error_change_profile_name_already_exists))){
+                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_already_exists, Toast.LENGTH_SHORT).show();
+                    } else if(result.equals(getString(R.string.error_change_profile_name_too_short))){
+                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_too_short, Toast.LENGTH_SHORT).show();
+                    } else {
+                        currentProfileNumber += 1;
+                        Launcher.availableProfiles.add(result);
+                        Set set2 = new HashSet(Launcher.availableProfiles);
+                        Launcher.mSharedPrefs.edit().putStringSet(PROFILES_MANAGED, set2).commit();
+                        newAddedProfiles.add(currentProfileNumber+result);
+                        Set set1 = new HashSet(newAddedProfiles);
+                        Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).commit();
+                        Preference profileGroup = parent.findPreference("profile_"+currentProfileNumber);
+                        profileGroup.setTitle(result);
+                        profileGroup.setIcon(R.drawable.ic_profiles);
+                        profileGroup.setEnabled(true);
+
+                        Preference ringtonePref = parent.findPreference(currentProfileNumber+"_ringtone");
+                        bindPreferenceToSummary(ringtonePref);
+
+                        Preference notificationSoundPref = parent.findPreference(currentProfileNumber+"_notification_sound");
+                        bindPreferenceToSummary(notificationSoundPref);
+
+                        Preference notificationBlockingPref = parent.findPreference(currentProfileNumber+"_hide_notifications");
+                        observeNotificationBlockingSwitch(currentProfileNumber+"", (DependentSwitchPreference) notificationBlockingPref);
+
+                        Preference grayscalePref = parent.findPreference(currentProfileNumber+"_enable_grayscale");
+                        observeGrayscalePref(currentProfileNumber+"", (Preference) grayscalePref);
+
+                        Preference minimalDesignPref = parent.findPreference(currentProfileNumber+"_minimal_design");
+
+                        Preference wallpaperPref = parent.findPreference(currentProfileNumber+"_choose_wallpaper");
+                        bindWallpaperPreference(result, wallpaperPref);
+                        wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                            @Override
+                            public boolean onPreferenceClick(Preference preference) {
+                                changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
+                                if(changeWallpaper){
+                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
+                                    changeWallpaper = false;
+                                } else {
+                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
+                                    changeWallpaper = true;
+                                }
+                                return true;
+                            }
+                        });
+
+                        Preference ssidsPref = parent.findPreference(currentProfileNumber+"_ssids");
+                        if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+
+                        Preference changeNamePref = parent.findPreference(currentProfileNumber+"_change_name");
+                        bindChangeNamePreference(result, changeNamePref);
+                        changeNamePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                            @Override
+                            public boolean onPreferenceClick(Preference preference) {
+                                String profileID = preference.getKey().charAt(0)+"";
+                                for(String sub : newAddedProfiles){
+                                    if((sub.charAt(0)+"").equals(profileID)){
+                                        String profile = sub.substring(1);
+                                        Launcher.mSharedPrefs.edit().putString(CHANGE_NAME_PREF, profile).commit();
+                                        Intent intent = new Intent(getActivity(), ChangeProfileNameDialogActivity.class);
+                                        startActivityForResult(intent, PROFILE_NAME_CHANGE);
+                                    }
+                                }
+                                return true;
+                            }
+                        });
+                    }
+                }
+            } else if (requestCode == PROFILE_NAME_CHANGE) {
+                if(resultCode == RESULT_OK) {
+                    final String result = data.getStringExtra("result");
+                    if(result.equals(getString(R.string.error_change_profile_name_already_exists))){
+                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_already_exists, Toast.LENGTH_SHORT).show();
+                    } else if(result.equals(getString(R.string.error_change_profile_name_too_short))){
+                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_too_short, Toast.LENGTH_SHORT).show();
+                    } else {
+                        String changedProfile = Launcher.mSharedPrefs.getString(CHANGE_NAME_PREF, null);
+                        String profileID = new String();
+                        for(String sub : newAddedProfiles){
+                            if(sub.substring(1).equals(changedProfile)){
+                                profileID = sub.charAt(0)+"";
+                            }
+                        }
+                        if(profileID!=null){
+                            Preference profileGroup = parent.findPreference("profile_"+profileID);
+                            profileGroup.setTitle(result);
+                            int i = Launcher.availableProfiles.indexOf(changedProfile);
+                            Launcher.availableProfiles.set(i, result);
+                            newAddedProfiles.add(profileID+result);
+                            Set set1 = new HashSet(newAddedProfiles);
+                            Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).commit();
+                        }
+                    }
+                }
+            }
         }
     }
 

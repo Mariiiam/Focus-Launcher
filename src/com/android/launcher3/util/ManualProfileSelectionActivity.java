@@ -10,12 +10,14 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class ManualProfileSelectionActivity extends Activity {
 
-    String[] allProfiles = Launcher.getAllProfiles();
+    Set<String> allProfilesSet = Launcher.getAllProfiles();
     ArrayList<String> allProfilesLabels = new ArrayList<String>();
     String chosenProfile;
+    String[] allProfiles;
 
 
     @Override
@@ -26,6 +28,9 @@ public class ManualProfileSelectionActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        allProfilesSet = Launcher.getAllProfiles();
+        allProfiles = new String[allProfilesSet.size()];
+        allProfiles = new ArrayList<String>(allProfilesSet).toArray(allProfiles);
         final String ACTIVE_LABEL = " ("+getString(R.string.profile_active)+")";
         for(int i = 0; i< allProfiles.length; i++){
             if(allProfiles[i].equals(Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default"))){
