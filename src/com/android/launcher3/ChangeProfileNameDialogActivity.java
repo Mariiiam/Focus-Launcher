@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -30,27 +31,24 @@ public class ChangeProfileNameDialogActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 newProfileName = input.getText().toString();
-                boolean cont = true;
                 if(newProfileName.length()==0||newProfileName.length()==1||newProfileName.length()==2){
+                    Log.d("---", "change: too short name error");
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra("result",getString(R.string.error_change_profile_name_too_short));
                     setResult(Activity.RESULT_OK,returnIntent);
-                    cont = false;
                 }
-                else if(cont){
-                    for(String p : Launcher.availableProfiles){
-                        if(newProfileName.equals(p)){
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra("result",getString(R.string.error_change_profile_name_already_exists));
-                            setResult(Activity.RESULT_OK,returnIntent);
-                        }
+                for(String p : Launcher.availableProfiles){
+                    if(newProfileName.equals(p)){
+                        Log.d("---", "change: same name error");
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("result",getString(R.string.error_change_profile_name_already_exists));
+                        setResult(Activity.RESULT_OK,returnIntent);
                     }
-                } else {
-                    Intent returnIntent = new Intent();
-                    returnIntent.putExtra("result",newProfileName);
-                    setResult(Activity.RESULT_OK,returnIntent);
-                    finish();
                 }
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("result",newProfileName);
+                setResult(Activity.RESULT_OK,returnIntent);
+                finish();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

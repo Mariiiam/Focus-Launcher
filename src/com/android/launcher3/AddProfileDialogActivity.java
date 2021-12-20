@@ -35,26 +35,24 @@ public class AddProfileDialogActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 newProfileName = input.getText().toString();
-                boolean cont = true;
                 if(newProfileName.length()==0||newProfileName.length()==1||newProfileName.length()==2){
+                    Log.d("---", "add: too short name error");
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra("result",getString(R.string.error_change_profile_name_too_short));
                     setResult(Activity.RESULT_OK,returnIntent);
-                    cont = false;
                 }
-                else if(cont){
-                    for(String p : Launcher.availableProfiles){
-                        if(newProfileName.equals(p)){
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra("result",getString(R.string.error_change_profile_name_already_exists));
-                            setResult(Activity.RESULT_OK,returnIntent);
-                        }
+                for(String p : Launcher.availableProfiles){
+                    if(newProfileName.equals(p)){
+                        Log.d("---", "add: same name error");
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("result",getString(R.string.error_change_profile_name_already_exists));
+                        setResult(Activity.RESULT_OK,returnIntent);
                     }
-                } else {
-                    Intent returnIntent = new Intent();
-                    returnIntent.putExtra("result",newProfileName);
-                    setResult(Activity.RESULT_OK,returnIntent);
                 }
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("result",newProfileName);
+                setResult(Activity.RESULT_OK,returnIntent);
+
                 finish();
             }
         });

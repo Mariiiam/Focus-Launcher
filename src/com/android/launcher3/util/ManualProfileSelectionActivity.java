@@ -10,13 +10,15 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ManualProfileSelectionActivity extends Activity {
 
-    Set<String> allProfilesSet = Launcher.getAllProfiles();
+    Set<String> allProfilesSet = new HashSet<>();
     ArrayList<String> allProfilesLabels = new ArrayList<String>();
     String chosenProfile;
+    ArrayList<String> allProfilesArray;
     String[] allProfiles;
 
 
@@ -29,8 +31,18 @@ public class ManualProfileSelectionActivity extends Activity {
     protected void onStart() {
         super.onStart();
         allProfilesSet = Launcher.getAllProfiles();
-        allProfiles = new String[allProfilesSet.size()];
-        allProfiles = new ArrayList<String>(allProfilesSet).toArray(allProfiles);
+        allProfilesArray = new ArrayList<String>(allProfilesSet);
+        allProfiles = new String[allProfilesArray.size()-1];
+        int count=0;
+        for(int k=0; k<allProfiles.length; k++){
+            if(allProfilesArray.get(k).equals("disconnected")){
+                count=k+1;
+                allProfiles[k] = allProfilesArray.get(count);
+            } else {
+                allProfiles[k] = allProfilesArray.get(count);
+            }
+            count++;
+        }
         final String ACTIVE_LABEL = " ("+getString(R.string.profile_active)+")";
         for(int i = 0; i< allProfiles.length; i++){
             if(allProfiles[i].equals(Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default"))){
@@ -39,7 +51,7 @@ public class ManualProfileSelectionActivity extends Activity {
                 allProfilesLabels.add(allProfiles[i]);
             }
         }
-        String[] allProfilesLabelsCopy = new String[allProfilesLabels.size()];
+        final String[] allProfilesLabelsCopy = new String[allProfilesLabels.size()];
         for (int j=0; j<allProfilesLabels.size(); j++) {
             if(allProfilesLabels.get(j).equals("work")){
                 allProfilesLabelsCopy[j] = getString(R.string.profile_work);
@@ -47,18 +59,19 @@ public class ManualProfileSelectionActivity extends Activity {
                 allProfilesLabelsCopy[j] = getString(R.string.profile_home);
             } else if (allProfilesLabels.get(j).equals("default")) {
                 allProfilesLabelsCopy[j] = getString(R.string.profile_default);
-            } else if (allProfilesLabels.get(j).equals("disconnected")) {
-                allProfilesLabelsCopy[j] = getString(R.string.profile_disconnected);
-            } else if(allProfilesLabels.get(j).equals("work"+ACTIVE_LABEL)){
+            } else if(allProfilesLabels.get(j).equals("disconnected")){
+
+            }
+            else if(allProfilesLabels.get(j).equals("work"+ACTIVE_LABEL)){
                 allProfilesLabelsCopy[j] = getString(R.string.profile_work)+ACTIVE_LABEL;
             } else if(allProfilesLabels.get(j).equals("home"+ACTIVE_LABEL)){
                 allProfilesLabelsCopy[j] = getString(R.string.profile_home)+ACTIVE_LABEL;
             } else if(allProfilesLabels.get(j).equals("default"+ACTIVE_LABEL)){
                 allProfilesLabelsCopy[j] = getString(R.string.profile_default)+ACTIVE_LABEL;
             } else if(allProfilesLabels.get(j).equals("disconnected"+ACTIVE_LABEL)){
-                allProfilesLabelsCopy[j] = getString(R.string.profile_disconnected)+ACTIVE_LABEL;
+
             }
-            else {
+            else{
                 allProfilesLabelsCopy[j] = allProfilesLabels.get(j);
             }
         }

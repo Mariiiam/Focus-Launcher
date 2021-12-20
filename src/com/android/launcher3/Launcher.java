@@ -320,6 +320,7 @@ public class Launcher extends BaseActivity
     private SSIDPrefChangeHandler mSSIDPrefChangeHandler;
     private MinimalDesignPrefChangeHandler mMinimalDesignPrefChangeHandler;
     private WallpaperButtonClickedHandler wallpaperButtonClickedHandler;
+    private ProfileChangeHandler profileChangeHandler;
 
     private ListView launcherListView;
     private ListView allAppsListView;
@@ -369,28 +370,6 @@ public class Launcher extends BaseActivity
             mLauncherCallbacks.preOnCreate();
         }
 
-        mSharedPrefs = Utilities.getPrefs(this);
-
-        Set set1 = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
-        if(set1==null){
-            availableProfiles = new ArrayList<>();
-            availableProfiles.add("home");
-            availableProfiles.add("work");
-            availableProfiles.add("default");
-            availableProfiles.add("disconnected");
-            Set set2 = new HashSet(availableProfiles);
-            Launcher.mSharedPrefs.edit().putStringSet(ProfilesActivity.PROFILES_MANAGED, set2).commit();
-        } else {
-            availableProfiles = new ArrayList<>(set1);
-        }
-
-        if(Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null)==null){
-            newAddedProfiles = new ArrayList<>();
-        } else {
-            Set set = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
-            newAddedProfiles = new ArrayList<>(set);
-        }
-
         WallpaperColorInfo wallpaperColorInfo = WallpaperColorInfo.getInstance(this);
         wallpaperColorInfo.setOnThemeChangeListener(this);
         overrideTheme(wallpaperColorInfo.isDark(), wallpaperColorInfo.supportsDarkText(), wallpaperColorInfo.isTransparent());
@@ -409,6 +388,27 @@ public class Launcher extends BaseActivity
         }
 
         mOrientation = getResources().getConfiguration().orientation;
+        mSharedPrefs = Utilities.getPrefs(this);
+        
+        Set set1 = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
+        if(set1==null){
+            availableProfiles = new ArrayList<>();
+            availableProfiles.add("home");
+            availableProfiles.add("work");
+            availableProfiles.add("default");
+            availableProfiles.add("disconnected");
+            Set set2 = new HashSet(availableProfiles);
+            Launcher.mSharedPrefs.edit().putStringSet(ProfilesActivity.PROFILES_MANAGED, set2).commit();
+        } else {
+            availableProfiles = new ArrayList<>(set1);
+        }
+
+        if(mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null)==null){
+            newAddedProfiles = new ArrayList<>();
+        } else {
+            Set set = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            newAddedProfiles = new ArrayList<>(set);
+        }
 
         mIsSafeModeEnabled = getPackageManager().isSafeMode();
         mModel = app.setLauncher(this);
@@ -493,6 +493,9 @@ public class Launcher extends BaseActivity
         wallpaperButtonClickedHandler = new WallpaperButtonClickedHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(wallpaperButtonClickedHandler);
 
+        profileChangeHandler = new ProfileChangeHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(profileChangeHandler);
+
         saveCurrentWallpaper();
         saveCurrentRingtones();
 
@@ -536,9 +539,7 @@ public class Launcher extends BaseActivity
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_APPLICATION_PREFERENCES)
-                        .setPackage(getPackageName());
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(intent);
             }
         });
@@ -546,9 +547,8 @@ public class Launcher extends BaseActivity
         mProfilesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), ProfilesActivity.class)
-                        .setPackage(getPackageName());
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Intent intent = new Intent(getApplicationContext(), ProfilesActivity.class);
+                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });
@@ -637,15 +637,29 @@ public class Launcher extends BaseActivity
 
         fetchAllAppList();
         fetchHomescreenAppList();
+
+        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+        if(currentProfile!=null){
+            if(currentProfile.equals("home") || currentProfile.equals("work") || currentProfile.equals("default") ||currentProfile.equals("disconnected") ){
+                isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile+ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                switchToMinimalLayout(isMinimalDesignON);
+            } else {
+                for(String sub : newAddedProfiles){
+                    if(sub.substring(1).equals(currentProfile)){
+                        isMinimalDesignON = mSharedPrefs.getBoolean(sub.charAt(0)+ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                        switchToMinimalLayout(isMinimalDesignON);
+                    }
+                }
+            }
+        }
+
     }
 
     public void switchToMinimalLayout(boolean value){
         if(value){
-            //findViewById(R.id.launcher_minimalist_layout).setVisibility(View.VISIBLE);
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(findViewById(R.id.launcher_minimalist_layout)));
         }
         else {
-            //findViewById(R.id.launcher_minimalist_layout).setVisibility(View.INVISIBLE);
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(findViewById(R.id.drag_layer)));
         }
     }
@@ -658,7 +672,7 @@ public class Launcher extends BaseActivity
                     set.add(info.title.toString());
                 }
             }
-            mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
+            mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).commit();
         }
     }
 
@@ -1059,30 +1073,35 @@ public class Launcher extends BaseActivity
                     }
                 }
             } else {
-                newAddedProfiles = new ArrayList<String>(mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null));
-
-                for(String sub : newAddedProfiles){
-                    if(sub.substring(1).equals(profile)){
-                        String profileID = sub.charAt(0)+"";
-                        String key = profileID+"_ringtone";
-                        String ringtonePref = mSharedPrefs.getString(key, INIT_RINGTONE);
-                        if(ringtonePref.equals(INIT_RINGTONE)) {
-                            if (currentRingtone == null) currentRingtone = extractRingtone(RingtoneManager.TYPE_RINGTONE);
-                            mSharedPrefs.edit().putString(key, currentRingtone.toString()).apply();
-                        }
-                        key = profileID+"_notification_sound";
-                        ringtonePref = mSharedPrefs.getString(key, INIT_NOTIFICATION_SOUND);
-                        if(ringtonePref.equals(INIT_NOTIFICATION_SOUND)) {
-                            if(hasExternalStoragePermission()){
-                                if (currentNotificationSound == null) currentNotificationSound = extractRingtone(RingtoneManager.TYPE_NOTIFICATION);
-                                mSharedPrefs.edit().putString(key, currentNotificationSound.toString()).apply();
-                            }
-                            else {
-                                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_EXTERNAL_STORAGE);
+                Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                if(set!=null){
+                    newAddedProfiles = new ArrayList<String>(set);
+                    if(newAddedProfiles!=null){
+                        for(String sub : newAddedProfiles){
+                            if(sub.substring(1).equals(profile)){
+                                String profileID = sub.charAt(0)+"";
+                                String key = profileID+"_ringtone";
+                                String ringtonePref = mSharedPrefs.getString(key, INIT_RINGTONE);
+                                if(ringtonePref.equals(INIT_RINGTONE)) {
+                                    if (currentRingtone == null) currentRingtone = extractRingtone(RingtoneManager.TYPE_RINGTONE);
+                                    mSharedPrefs.edit().putString(key, currentRingtone.toString()).apply();
+                                }
+                                key = profileID+"_notification_sound";
+                                ringtonePref = mSharedPrefs.getString(key, INIT_NOTIFICATION_SOUND);
+                                if(ringtonePref.equals(INIT_NOTIFICATION_SOUND)) {
+                                    if(hasExternalStoragePermission()){
+                                        if (currentNotificationSound == null) currentNotificationSound = extractRingtone(RingtoneManager.TYPE_NOTIFICATION);
+                                        mSharedPrefs.edit().putString(key, currentNotificationSound.toString()).apply();
+                                    }
+                                    else {
+                                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_EXTERNAL_STORAGE);
+                                    }
+                                }
                             }
                         }
                     }
                 }
+
             }
         }
     }
@@ -1092,12 +1111,17 @@ public class Launcher extends BaseActivity
 
         Uri defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, type);
         Ringtone defaultRingtone = RingtoneManager.getRingtone(this, defaultUri);
+
+        String defaultRingtoneTitle = defaultRingtone.getTitle(this);
         
         if (defaultRingtone == null) {
             Log.d("RINGTONE_EXTRACTION", "default "+(type == RingtoneManager.TYPE_RINGTONE ? "ringtone" : "notification sound")+" \"Silent\" with uri = " + Uri.EMPTY.getPath());
             return Uri.EMPTY;
-        } else {
-            String defaultRingtoneTitle = defaultRingtone.getTitle(this);
+        } else if(defaultRingtoneTitle.equals("Silent") || defaultRingtoneTitle.equals("Stumm")){
+            return Uri.EMPTY;
+        }
+        else {
+            Log.d("---", "defaultringtone: "+defaultRingtoneTitle);
             Log.d("RINGTONE_EXTRACTION", "default "+(type == RingtoneManager.TYPE_RINGTONE ? "ringtone" : "notification sound")+" \"" + defaultRingtoneTitle + "\" with uri = " + defaultUri.getPath());
             return defaultUri;
         }
@@ -1128,18 +1152,22 @@ public class Launcher extends BaseActivity
                     saveImageToAppPrivateFile(currentWallpaper, filename);
                 }
             } else {
-                newAddedProfiles = new ArrayList<>(mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null));
-                for(String sub : newAddedProfiles){
-                    if(sub.substring(1).equals(profile)){
-                        String profileID = sub.charAt(0)+"";
-                        String filename = "wallpaper_"+profileID;
-                        if(!privateFileExists(filename)) {
-                            if (currentWallpaper == null) currentWallpaper = extractWallpaper();
-                            saveImageToAppPrivateFile(currentWallpaper, filename);
+                Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                if(set != null){
+                   newAddedProfiles = new ArrayList<>(set);
+                    if(newAddedProfiles!=null){
+                        for(String sub : newAddedProfiles){
+                            if(sub.substring(1).equals(profile)){
+                                String profileID = sub.charAt(0)+"";
+                                String filename = "wallpaper_"+profileID;
+                                if(!privateFileExists(filename)) {
+                                    if (currentWallpaper == null) currentWallpaper = extractWallpaper();
+                                    saveImageToAppPrivateFile(currentWallpaper, filename);
+                                }
+                            }
                         }
                     }
                 }
-
             }
         }
     }
@@ -1864,7 +1892,8 @@ public class Launcher extends BaseActivity
     }
 
     public static Set<String> getAllProfiles() {
-        Set<String> set = mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
+        Set<String> set = new HashSet<String>();
+        set = mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
         return set;
     }
 
@@ -1906,14 +1935,14 @@ public class Launcher extends BaseActivity
             dialog.dismiss();
             String[] profiles = {"home", "work", "default"};
             Log.d("PROFILE_UPDATE", "From dialog");
-            mLauncher.mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profiles[which]).commit();
-            mLauncher.updateProfile(profiles[which]);
+            //mLauncher.mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profiles[which]).commit();
+            //mLauncher.updateProfile(profiles[which]);
         }
     }
 
     public static void updateSharedPrefsProfile(String profile){
-        mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profile).apply();
-        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
+        mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profile).commit();
+        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).commit();
     }
 
     /**
@@ -1956,10 +1985,19 @@ public class Launcher extends BaseActivity
         favorite.setOnClickListener(this);
         favorite.setOnFocusChangeListener(mFocusHandler);
         Set<String> appsOnHomescreen = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
-        if(!appsOnHomescreen.contains(info.title.toString())){
-            appsOnHomescreen.add(info.title.toString());
-            mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, appsOnHomescreen).apply();
-            fetchHomescreenAppList();
+
+        if(info.container == Favorites.CONTAINER_DESKTOP){
+            if(!appsOnHomescreen.contains(info.title.toString())){
+                appsOnHomescreen.add(info.title.toString());
+                mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, appsOnHomescreen).commit();
+                fetchHomescreenAppList();
+            }
+        } else if(info.container == -1){
+            if(!appsOnHomescreen.contains(info.title.toString())){
+                appsOnHomescreen.add(info.title.toString());
+                mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, appsOnHomescreen).commit();
+                fetchHomescreenAppList();
+            }
         }
         return favorite;
     }
@@ -2230,20 +2268,20 @@ public class Launcher extends BaseActivity
 
         if(mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null)!=null){
             newAddedProfiles = new ArrayList<>(mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null));
-            for(String newProfile : newAddedProfiles){
-                String profileID = newProfile.charAt(0)+"";
-                String[] profile_ssids = mSharedPrefs.getString(profileID+"_ssids", "").split("\\n");
-                for(String ssid : profile_ssids) {
-                    if(ssid.equals(newSSID)) return updateProfile(newProfile);
+            if(newAddedProfiles!=null){
+                for(String newProfile : newAddedProfiles){
+                    String profileID = newProfile.charAt(0)+"";
+                    String[] profile_ssids = mSharedPrefs.getString(profileID+"_ssids", "").split("\\n");
+                    for(String ssid : profile_ssids) {
+                        if(ssid.equals(newSSID)) return updateProfile(newProfile.substring(1));
+                    }
                 }
             }
         }
-
-
         return updateProfile("default");
     }
 
-    private boolean firstTime = true;
+    private static boolean firstTime = true;
     private String lastProfileUpdate = null;
     public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
@@ -2261,7 +2299,9 @@ public class Launcher extends BaseActivity
         firstTime = false;
 
         //if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
-        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
+        if(!mSharedPrefs.getString(CURRENT_PROFILE_PREF, "").equals(profile)){
+            mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
+        }
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
         if (profile.equals(lastProfileUpdate)) return true; /* abort updating */
         else lastProfileUpdate = profile;
@@ -2314,8 +2354,24 @@ public class Launcher extends BaseActivity
      */
 
     private void updateLayoutDesign(final String profile) {
-        boolean b = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
-        switchToMinimalLayout(b);
+        if(profile.equals("home") || profile.equals("work") || profile.equals("default") ||profile.equals("disconnected")){
+            boolean b = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+            switchToMinimalLayout(b);
+        } else{
+            Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            if(set!=null){
+                newAddedProfiles = new ArrayList<>(set);
+                if(newAddedProfiles!=null){
+                    for(String sub : newAddedProfiles){
+                        if(sub.substring(1).equals(profile)){
+                            String profileID = sub.charAt(0)+"";
+                            boolean b = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                            switchToMinimalLayout(b);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void updateWallpaper(final String profile) {
@@ -2341,7 +2397,22 @@ public class Launcher extends BaseActivity
         new AsyncTask<Void, Void, Void>() {
             public Void doInBackground(Void ... args) {
                 try {
-                    String ringtone = mSharedPrefs.getString(profile + "_ringtone", null);
+                    String ringtone = null;
+                    if(profile.equals("home") || profile.equals("work") || profile.equals("default") ||profile.equals("disconnected")){
+                        ringtone = mSharedPrefs.getString(profile + "_ringtone", null);
+                    } else {
+                        Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                        if(set!=null){
+                            newAddedProfiles = new ArrayList<>(set);
+                            if(newAddedProfiles!=null){
+                                for(String sub : newAddedProfiles){
+                                    if(sub.substring(1).equals(profile)){
+                                        ringtone = mSharedPrefs.getString(sub.charAt(0) + "_ringtone", null);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if(ringtone != null) {
                         Uri ringtoneUri = Uri.parse(ringtone);
                         if(ringtoneUri != null) setRingtone(ringtoneUri, Launcher.this, RingtoneManager.TYPE_RINGTONE);
@@ -2358,7 +2429,22 @@ public class Launcher extends BaseActivity
         new AsyncTask<Void, Void, Void>() {
             public Void doInBackground(Void ... args) {
                 try {
-                    String sound = mSharedPrefs.getString(profile + "_notification_sound", null);
+                    String sound = null;
+                    if(profile.equals("home") || profile.equals("work") || profile.equals("default") ||profile.equals("disconnected") ){
+                        sound = mSharedPrefs.getString(profile + "_notification_sound", null);
+                    } else {
+                        Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                        if(set!=null){
+                            newAddedProfiles = new ArrayList<>(set);
+                            if(newAddedProfiles!=null){
+                                for(String sub : newAddedProfiles){
+                                    if(sub.substring(1).equals(profile)){
+                                        sound = mSharedPrefs.getString(sub.charAt(0) + "_notification_sound", null);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if(sound != null) {
                         Uri notificationSoundUri = Uri.parse(sound);
                         if(notificationSoundUri != null) setRingtone(notificationSoundUri, Launcher.this, RingtoneManager.TYPE_NOTIFICATION);
@@ -2759,6 +2845,9 @@ public class Launcher extends BaseActivity
         if (mSSIDPrefChangeHandler != null) {
             mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
         }
+        if (profileChangeHandler != null){
+            mSharedPrefs.unregisterOnSharedPreferenceChangeListener(profileChangeHandler);
+        }
 
         try {
             mAppWidgetHost.stopListening();
@@ -3158,12 +3247,30 @@ public class Launcher extends BaseActivity
             mWorkspace.exitWidgetResizeMode();
         }
         String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
-        isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
-        if(isMinimalDesignON){
-            allAppsListView.setVisibility(View.INVISIBLE);
-            launcherListView.setVisibility(View.VISIBLE);
+        if(currentProfile.equals("home") || currentProfile.equals("work") || currentProfile.equals("default") ||currentProfile.equals("disconnected") ){
+            isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+            if(isMinimalDesignON){
+                allAppsListView.setVisibility(View.INVISIBLE);
+                launcherListView.setVisibility(View.VISIBLE);
+            }
+        } else {
+            Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            if(set!=null){
+                newAddedProfiles = new ArrayList<String>(set);
+                if(newAddedProfiles!=null){
+                    for(String sub : newAddedProfiles){
+                        if(sub.substring(1).equals(currentProfile)){
+                            String profileID = sub.charAt(0)+"";
+                            isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                            if(isMinimalDesignON){
+                                allAppsListView.setVisibility(View.INVISIBLE);
+                                launcherListView.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                }
+            }
         }
-
     }
 
     /**
@@ -3460,6 +3567,7 @@ public class Launcher extends BaseActivity
                 intent.setPackage(pickerPackage);
             }
         } catch (PackageManager.NameNotFoundException ex) {
+           // Doesnt find the picker package on samsung
         }
 
         intent.setSourceBounds(getViewBounds(v));
@@ -3479,11 +3587,12 @@ public class Launcher extends BaseActivity
      */
     public void onClickSettingsButton(View v) {
         if (LOGD) Log.d(TAG, "onClickSettingsButton");
-        Intent intent = new Intent(Intent.ACTION_APPLICATION_PREFERENCES)
-                .setPackage(getPackageName());
-        intent.setSourceBounds(getViewBounds(v));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent, getActivityLaunchOptions(v));
+        Intent intent = new Intent(Intent.ACTION_APPLICATION_PREFERENCES);
+        //        .setPackage(getPackageName());
+        //intent.setSourceBounds(getViewBounds(v));
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //startActivity(intent, getActivityLaunchOptions(v));
+        startActivity(intent);
     }
 
     /**
@@ -3492,11 +3601,12 @@ public class Launcher extends BaseActivity
      */
     public void onClickProfilesButton(View v) {
         if (LOGD) Log.d(TAG, "onClickProfilesButton");
-        Intent intent = new Intent(this, ProfilesActivity.class)
-                .setPackage(getPackageName());
-        intent.setSourceBounds(getViewBounds(v));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent, getActivityLaunchOptions(v));
+        Intent intent = new Intent(getApplicationContext(), ProfilesActivity.class);
+        //        .setPackage(getPackageName());
+        //intent.setSourceBounds(getViewBounds(v));
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //startActivity(intent, getActivityLaunchOptions(v));
+        startActivity(intent);
     }
 
     @Override
@@ -5011,26 +5121,29 @@ public class Launcher extends BaseActivity
     private class MinimalDesignPrefChangeHandler implements OnSharedPreferenceChangeListener {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if(key.equals(CURRENT_PROFILE_PREF)){
-                for (String profile : availableProfiles) {
-                    if(profile.equals("home") || profile.equals("work") || profile.equals("default") ||profile.equals("disconnected") ){
-                        if(key.equals(profile+ProfilesActivity.MINIMAL_DESIGN_PREF)){
-                            String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
-                            if (profile.equals(currentProfile)) {
-                                isMinimalDesignON = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
-                                switchToMinimalLayout(isMinimalDesignON);
-                            }
+            for (String profile : availableProfiles) {
+                if(profile.equals("home") || profile.equals("work") || profile.equals("default") ||profile.equals("disconnected") ){
+                    if(key.equals(profile+ProfilesActivity.MINIMAL_DESIGN_PREF)){
+                        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
+                        if (profile.equals(currentProfile)) {
+                            isMinimalDesignON = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                            switchToMinimalLayout(isMinimalDesignON);
                         }
-                    } else {
-                        newAddedProfiles = new ArrayList<>(mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null));
-                        for(String sub : newAddedProfiles){
-                            if(sub.substring(1).equals(profile)){
-                                String profileID = sub.charAt(0)+"";
-                                if(key.equals(profileID+ProfilesActivity.MINIMAL_DESIGN_PREF)){
-                                    String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
-                                    if (profile.equals(currentProfile)) {
-                                        isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
-                                        switchToMinimalLayout(isMinimalDesignON);
+                    }
+                } else {
+                    Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                    if(set!=null){
+                        newAddedProfiles = new ArrayList<>(set);
+                        if(newAddedProfiles!=null){
+                            for(String sub : newAddedProfiles){
+                                if(sub.substring(1).equals(profile)){
+                                    String profileID = sub.charAt(0)+"";
+                                    if(key.equals(profileID+ProfilesActivity.MINIMAL_DESIGN_PREF)){
+                                        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
+                                        if (profile.equals(currentProfile)) {
+                                            isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                                            switchToMinimalLayout(isMinimalDesignON);
+                                        }
                                     }
                                 }
                             }
@@ -5042,7 +5155,6 @@ public class Launcher extends BaseActivity
     }
 
     private class RotationPrefChangeHandler implements OnSharedPreferenceChangeListener {
-
         @Override
         public void onSharedPreferenceChanged(
                 SharedPreferences sharedPreferences, String key) {
@@ -5050,8 +5162,43 @@ public class Launcher extends BaseActivity
                 // Recreate the activity so that it initializes the rotation preference again.
                 recreate();
             }
+        }
+    }
+
+    private class ProfileChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(MANUAL_PROFILE_PREF)){
+                String selectedProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
+                if(selectedProfile!=null){
+                    updateProfile(selectedProfile);
+                }
+            }
             if(key.equals(CURRENT_PROFILE_PREF)){
-                updateProfile(mSharedPrefs.getString(CURRENT_PROFILE_PREF, ""));
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                if(currentProfile!=null){
+                    if(currentProfile.equals("home") || currentProfile.equals("work") || currentProfile.equals("default") ||currentProfile.equals("disconnected") ){
+                        isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                        if(isMinimalDesignON){ fetchHomescreenAppList(); }
+                    } else {
+                        Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                        if(set!=null){
+                            newAddedProfiles = new ArrayList<String>(set);
+                            if(newAddedProfiles!=null){
+                                for(String sub : newAddedProfiles){
+                                    if(sub.substring(1).equals(currentProfile)){
+                                        String profileID = sub.charAt(0)+"";
+                                        isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                                    }
+                                }
+                            }
+                        }
+                        if(isMinimalDesignON){ fetchHomescreenAppList(); }
+                    }
+                }
+            }
+            if(key.equals(APPS_ON_HOMESCREEN)){
+                if(isMinimalDesignON) {fetchHomescreenAppList();}
             }
         }
     }

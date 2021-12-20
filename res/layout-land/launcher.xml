@@ -128,9 +128,9 @@
                     style="?android:attr/borderlessButtonStyle"/>
                 <Button
                     android:id="@+id/minimal_profile_button"
-                    android:layout_width="105dp"
+                    android:layout_width="110dp"
                     android:layout_height="55dp"
-                    android:drawableStart="@drawable/ic_profiles"
+                    android:drawableStart="@drawable/ic_profile_small"
                     android:layout_centerHorizontal="true"
                     android:layout_toEndOf="@+id/minimal_settings_button"
                     android:text="@string/profiles"

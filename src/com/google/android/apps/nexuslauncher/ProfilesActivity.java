@@ -64,7 +64,6 @@ public class ProfilesActivity extends Activity {
     static boolean changeWallpaper = false;
     private static Preference addProfilePref;
     public static final String ADD_PROFILE_PREF = "add_profile";
-    public static final String ID_FOR_PROFILE = "id_for_profile";
     final static int NEW_PROFILE_ADDED = 44;
     final static int PROFILE_NAME_CHANGE = 45;
     private static final int MAX_PROFILE_NUMBER = 8;
@@ -105,12 +104,15 @@ public class ProfilesActivity extends Activity {
 
     public static void bindWallpaperPreference(String profile, Preference wallpaperPref){
         if(wallpaperPref!=null){
-            if(Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default").equals(profile)){
-                wallpaperPref.setEnabled(true);
-                wallpaperPref.setSummary(R.string.wallpaper_pref_active);
-            } else {
-                wallpaperPref.setEnabled(false);
-                wallpaperPref.setSummary(R.string.wallpaper_pref_not_active);
+            String currentProfile = Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, null);
+            if(currentProfile!=null){
+                if(currentProfile.equals(profile)){
+                    wallpaperPref.setEnabled(true);
+                    wallpaperPref.setSummary(R.string.wallpaper_pref_active);
+                } else {
+                    wallpaperPref.setEnabled(false);
+                    wallpaperPref.setSummary(R.string.wallpaper_pref_not_active);
+                }
             }
         }
     }
@@ -190,11 +192,11 @@ public class ProfilesActivity extends Activity {
                                         final String profileName = parent.getString(resourceIdForProfileName.get(p));
                                         profileGroup.setTitle(p.equals(profile) ? profileName + " (" + parent.getString(R.string.profile_active) +")" : profileName);
 
-                                        Preference wallpaperPref = parent.findPreference(p+"_choose_wallpaper");
-                                        bindWallpaperPreference(p, wallpaperPref);
+                                        //Preference wallpaperPref = parent.findPreference(p+"_choose_wallpaper");
+                                        //bindWallpaperPreference(p, wallpaperPref);
 
-                                        Preference changeNamePref = parent.findPreference(p+"_change_name");
-                                        bindChangeNamePreference(p, changeNamePref);
+                                        //Preference changeNamePref = parent.findPreference(p+"_change_name");
+                                        //bindChangeNamePreference(p, changeNamePref);
 
                                     } else {
                                         for(String sub : newAddedProfiles){
@@ -205,11 +207,11 @@ public class ProfilesActivity extends Activity {
                                                 final String profileName = p;
                                                 profileGroup.setTitle(p.equals(profile) ? profileName + " (" + parent.getString(R.string.profile_active) +")" : profileName);
 
-                                                Preference wallpaperPref = parent.findPreference(profileID+"_choose_wallpaper");
-                                                bindWallpaperPreference(p, wallpaperPref);
+                                                //Preference wallpaperPref = parent.findPreference(profileID+"_choose_wallpaper");
+                                                //bindWallpaperPreference(p, wallpaperPref);
 
-                                                Preference changeNamePref = parent.findPreference(profileID+"_change_name");
-                                                bindChangeNamePreference(p, changeNamePref);
+                                                //Preference changeNamePref = parent.findPreference(profileID+"_change_name");
+                                                //bindChangeNamePreference(p, changeNamePref);
                                             }
                                         }
                                     }
@@ -313,15 +315,16 @@ public class ProfilesActivity extends Activity {
                             wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                                 @Override
                                 public boolean onPreferenceClick(Preference preference) {
-                                    changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
-                                    if(changeWallpaper){
-                                        Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
-                                        changeWallpaper = false;
-                                    } else {
-                                        Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
-                                        changeWallpaper = true;
-                                    }
-                                    return true;
+                                changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
+                                if(changeWallpaper){
+                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
+                                    changeWallpaper = false;
+                                } else {
+                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
+                                    changeWallpaper = true;
+                                }
+                                getActivity().finish();
+                                return true;
                                 }
                             });
 
