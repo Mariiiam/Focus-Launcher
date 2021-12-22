@@ -160,9 +160,11 @@ public class ProfilesActivity extends Activity {
 
             if(Launcher.mSharedPrefs.getStringSet(ADD_PROFILE_PREF, null)==null){
                 newAddedProfiles = new ArrayList<>();
+                currentProfileNumber = 0;
             } else {
                 Set set = Launcher.mSharedPrefs.getStringSet(ADD_PROFILE_PREF, null);
                 newAddedProfiles = new ArrayList<>(set);
+                currentProfileNumber = newAddedProfiles.size();
             }
 
             setupProfilePreferences();
@@ -524,9 +526,10 @@ public class ProfilesActivity extends Activity {
             if(requestCode == NEW_PROFILE_ADDED){
                 if(resultCode == Activity.RESULT_OK){
                     final String result = data.getStringExtra("result");
-                    if(result.equals(getString(R.string.error_change_profile_name_already_exists))){
+                    Log.d("---", "result: "+result);
+                    if(result.equals("already_exists")){
                         Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_already_exists, Toast.LENGTH_SHORT).show();
-                    } else if(result.equals(getString(R.string.error_change_profile_name_too_short))){
+                    } else if(result.equals("too_short")){
                         Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_too_short, Toast.LENGTH_SHORT).show();
                     } else {
                         currentProfileNumber += 1;
