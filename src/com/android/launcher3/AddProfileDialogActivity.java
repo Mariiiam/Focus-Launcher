@@ -14,6 +14,7 @@ import android.widget.EditText;
 
 public class AddProfileDialogActivity extends Activity {
     public static String newProfileName;
+    public static boolean cont = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,26 +35,33 @@ public class AddProfileDialogActivity extends Activity {
         builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                cont = true;
                 newProfileName = input.getText().toString();
-                boolean cont = true;
                 if(newProfileName.length()==0||newProfileName.length()==1||newProfileName.length()==2){
                     Intent returnIntent = new Intent();
-                    returnIntent.putExtra("result",getString(R.string.error_change_profile_name_too_short));
+                    returnIntent.putExtra("result","too_short");
                     setResult(Activity.RESULT_OK,returnIntent);
                     cont = false;
                 }
-                else if(cont){
-                    for(String p : Launcher.availableProfiles){
-                        if(newProfileName.equals(p)){
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra("result",getString(R.string.error_change_profile_name_already_exists));
-                            setResult(Activity.RESULT_OK,returnIntent);
-                        }
+                for(String p : Launcher.availableProfiles){
+                    if(newProfileName.equals(getString(R.string.profile_home)) || newProfileName.equals(getString(R.string.profile_disconnected)) || newProfileName.equals(getString(R.string.profile_default)) || newProfileName.equals(getString(R.string.profile_work))){
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("result","already_exists");
+                        setResult(Activity.RESULT_OK,returnIntent);
+                        cont = false;
                     }
-                } else {
+                    else if(newProfileName.equals(p)){
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("result","already_exists");
+                        setResult(Activity.RESULT_OK,returnIntent);
+                        cont = false;
+                    }
+                }
+                if(cont){
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra("result",newProfileName);
                     setResult(Activity.RESULT_OK,returnIntent);
+                    cont = true;
                 }
                 finish();
             }
