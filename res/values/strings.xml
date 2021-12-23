@@ -428,4 +428,6 @@
     <string name="change_name_pref_not_active">Profile must be inactive to change its name</string>
     <string name="error_change_profile_name_too_short">Name must contain at least three characters</string>
     <string name="error_change_profile_name_already_exists">This name already exists</string>
+    <string name="title_trigger_rules">Trigger Rules</string>
+    <string name="title_settings_and_design">Settings and Design</string>
 </resources>

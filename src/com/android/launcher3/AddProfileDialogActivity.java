@@ -38,7 +38,6 @@ public class AddProfileDialogActivity extends Activity {
                 cont = true;
                 newProfileName = input.getText().toString();
                 if(newProfileName.length()==0||newProfileName.length()==1||newProfileName.length()==2){
-                    Log.d("---", "add: too short name error");
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra("result","too_short");
                     setResult(Activity.RESULT_OK,returnIntent);
@@ -46,14 +45,12 @@ public class AddProfileDialogActivity extends Activity {
                 }
                 for(String p : Launcher.availableProfiles){
                     if(newProfileName.equals(getString(R.string.profile_home)) || newProfileName.equals(getString(R.string.profile_disconnected)) || newProfileName.equals(getString(R.string.profile_default)) || newProfileName.equals(getString(R.string.profile_work))){
-                        Log.d("---", "here already exists");
                         Intent returnIntent = new Intent();
                         returnIntent.putExtra("result","already_exists");
                         setResult(Activity.RESULT_OK,returnIntent);
                         cont = false;
                     }
                     else if(newProfileName.equals(p)){
-                        Log.d("---", "add: same name error");
                         Intent returnIntent = new Intent();
                         returnIntent.putExtra("result","already_exists");
                         setResult(Activity.RESULT_OK,returnIntent);

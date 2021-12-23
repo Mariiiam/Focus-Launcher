@@ -526,7 +526,6 @@ public class ProfilesActivity extends Activity {
             if(requestCode == NEW_PROFILE_ADDED){
                 if(resultCode == Activity.RESULT_OK){
                     final String result = data.getStringExtra("result");
-                    Log.d("---", "result: "+result);
                     if(result.equals("already_exists")){
                         Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_already_exists, Toast.LENGTH_SHORT).show();
                     } else if(result.equals("too_short")){
@@ -600,9 +599,9 @@ public class ProfilesActivity extends Activity {
             } else if (requestCode == PROFILE_NAME_CHANGE) {
                 if(resultCode == RESULT_OK) {
                     final String result = data.getStringExtra("result");
-                    if(result.equals(getString(R.string.error_change_profile_name_already_exists))){
+                    if(result.equals("already_exists")){
                         Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_already_exists, Toast.LENGTH_SHORT).show();
-                    } else if(result.equals(getString(R.string.error_change_profile_name_too_short))){
+                    } else if(result.equals("too_short")){
                         Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_too_short, Toast.LENGTH_SHORT).show();
                     } else {
                         String changedProfile = Launcher.mSharedPrefs.getString(CHANGE_NAME_PREF, null);
