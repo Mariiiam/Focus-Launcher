@@ -252,4 +252,9 @@
     <dimen name="hotseat_qsb_scroll_shadow_blur_radius">1.5dp</dimen>
     <dimen name="hotseat_qsb_scroll_key_shadow_offset">2dp</dimen>
     <dimen name="all_apps_extra_search_padding">8dp</dimen>
+
+    <dimen name="day_button_size">35dp</dimen>
+    <dimen name="day_button_spacing">10dp</dimen>
+    <dimen name="setup_spacing_vert">60dp</dimen>
+    <dimen name="setup_spacing_vert_small">5dp</dimen>
 </resources>

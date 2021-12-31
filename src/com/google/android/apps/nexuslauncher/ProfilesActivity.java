@@ -45,6 +45,7 @@ import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
 import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.notification.NotificationListener;
+import com.android.launcher3.util.TimePreferenceActivity;
 import com.android.launcher3.views.DependentSwitchPreference;
 
 import java.util.ArrayList;
@@ -250,6 +251,13 @@ public class ProfilesActivity extends Activity {
             for (final String profile : Launcher.availableProfiles) {
                 if(profile.equals("work")||profile.equals("home")||profile.equals("default")||profile.equals("disconnected")){
                     Preference profileGroup = parent.findPreference("profile_" + profile);
+                    profileGroup.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            TimePreferenceActivity.selectedProfile = profile;
+                            return true;
+                        }
+                    });
 
                     Preference ringtonePref = parent.findPreference(profile + "_ringtone");
                     bindPreferenceToSummary(ringtonePref);
@@ -287,13 +295,22 @@ public class ProfilesActivity extends Activity {
 
                     Preference ssidsPref = parent.findPreference(profile + "_ssids");
                     if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+
+                    Preference schedulePref = parent.findPreference(profile + "_schedule");
                 } else {
                     for(String sub : newAddedProfiles){
                         if(sub.substring(1).equals(profile)){
-                            String profileID = sub.charAt(0)+"";
+                            final String profileID = sub.charAt(0)+"";
                             Preference profileGroup = parent.findPreference("profile_" + profileID);
                             profileGroup.setEnabled(true);
                             profileGroup.setIcon(R.drawable.ic_profiles);
+                            profileGroup.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                                @Override
+                                public boolean onPreferenceClick(Preference preference) {
+                                    TimePreferenceActivity.selectedProfile = profileID;
+                                    return true;
+                                }
+                            });
 
                             Preference ringtonePref = parent.findPreference(profileID + "_ringtone");
                             bindPreferenceToSummary(ringtonePref);
@@ -344,6 +361,8 @@ public class ProfilesActivity extends Activity {
 
                             Preference ssidsPref = parent.findPreference(profileID + "_ssids");
                             if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+
+                            Preference schedulePref = parent.findPreference(profileID + "_schedule");
                         }
                     }
 
@@ -542,6 +561,13 @@ public class ProfilesActivity extends Activity {
                         profileGroup.setTitle(result);
                         profileGroup.setIcon(R.drawable.ic_profiles);
                         profileGroup.setEnabled(true);
+                        profileGroup.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                            @Override
+                            public boolean onPreferenceClick(Preference preference) {
+                                TimePreferenceActivity.selectedProfile = currentProfileNumber+"";
+                                return true;
+                            }
+                        });
 
                         Preference ringtonePref = parent.findPreference(currentProfileNumber+"_ringtone");
                         bindPreferenceToSummary(ringtonePref);
@@ -576,6 +602,8 @@ public class ProfilesActivity extends Activity {
 
                         Preference ssidsPref = parent.findPreference(currentProfileNumber+"_ssids");
                         if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+
+                        Preference schedulePref = parent.findPreference(currentProfileNumber + "_schedule");
 
                         Preference changeNamePref = parent.findPreference(currentProfileNumber+"_change_name");
                         bindChangeNamePreference(result, changeNamePref);

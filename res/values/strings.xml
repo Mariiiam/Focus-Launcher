@@ -430,4 +430,13 @@
     <string name="error_change_profile_name_already_exists">This name already exists</string>
     <string name="title_trigger_rules">Trigger Rules</string>
     <string name="title_settings_and_design">Settings and Design</string>
+    <string name="title_schedule">Schedule</string>
+    <string name="day_m">MO</string>
+    <string name="day_tu">TU</string>
+    <string name="day_w">WE</string>
+    <string name="day_th">TH</string>
+    <string name="day_f">FR</string>
+    <string name="day_sa">SA</string>
+    <string name="day_su">SU</string>
+    <string name="msg_no_day_selected">Please select a day</string>
 </resources>

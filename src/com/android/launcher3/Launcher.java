@@ -349,7 +349,6 @@ public class Launcher extends BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("---", "on create");
         if (DEBUG_STRICT_MODE) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectDiskReads()
@@ -959,7 +958,6 @@ public class Launcher extends BaseActivity
             return;
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
             //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
-            Log.d("---", "onactivityresult 1");
                 Bitmap wallpaper = extractWallpaper();
                 String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
                 saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
@@ -967,7 +965,6 @@ public class Launcher extends BaseActivity
                 // we move to the closest one now.
                 mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
                 showWorkspace(false);
-            Log.d("---", "onactivityresult 2");
             //}
             return;
         }
@@ -2245,7 +2242,6 @@ public class Launcher extends BaseActivity
         if (profile == null || profile.isEmpty()) return false;
 
         String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
-        Log.d("---", "manual profile: "+manualProfile);
         if(firstTime && manualProfile != null) {
             // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
             mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, null).commit();
@@ -2253,17 +2249,14 @@ public class Launcher extends BaseActivity
 
             //profile = manualProfile;
             lastProfileUpdate = manualProfile;
-            Log.d("---", "first time, lastProfileUpdate: "+lastProfileUpdate);
             return false;
         }
         firstTime = false;
-        Log.d("---", "currentProfile: "+mSharedPrefs.getString("current_profiles", "")+", profile: "+profile);
         if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
 
         mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
 
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
-        Log.d("---", "lastprofileUpdate: "+lastProfileUpdate+", profile: "+profile);
         if (profile.equals(lastProfileUpdate)) return true; /* abort updating */
         else lastProfileUpdate = profile;
         Log.d("UPDATE PROFILE", profile);
@@ -2782,7 +2775,6 @@ public class Launcher extends BaseActivity
     public void onDestroy() {
         super.onDestroy();
 
-        Log.d("---", "on destroy");
         unregisterReceiver(mReceiver);
         unregisterReceiver(mWiFiReceiver);
         mWorkspace.removeCallbacks(mBuildLayersRunnable);
@@ -5121,7 +5113,6 @@ public class Launcher extends BaseActivity
                 SharedPreferences sharedPreferences, String key) {
             if (Utilities.ALLOW_ROTATION_PREFERENCE_KEY.equals(key)) {
                 // Recreate the activity so that it initializes the rotation preference again.
-                Log.d("---", "recreate");
                 recreate();
             }
         }

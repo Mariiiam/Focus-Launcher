@@ -28,6 +28,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="work_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -118,6 +121,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="home_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -305,6 +311,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="1_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -370,6 +379,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="2_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -435,6 +447,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="3_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -500,6 +515,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="4_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -565,6 +583,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="5_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -630,6 +651,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="6_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -693,6 +717,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="7_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
@@ -758,6 +785,9 @@
                 android:selectAllOnFocus="false"
                 android:inputType="textMultiLine"
                 />
+            <com.android.launcher3.util.TimePreferenceActivity
+                android:key="8_schedule"
+                android:title="@string/title_schedule" />
         </PreferenceCategory>
 
         <PreferenceCategory
