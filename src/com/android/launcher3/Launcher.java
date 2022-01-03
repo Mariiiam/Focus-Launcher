@@ -48,6 +48,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -70,6 +71,9 @@ import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace.ItemOperator;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
+import com.android.launcher3.alarm.AlarmModel;
+import com.android.launcher3.alarm.AlarmReceiver;
+import com.android.launcher3.alarm.AlarmsService;
 import com.android.launcher3.allapps.AllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.allapps.AlphabeticalAppsList;
@@ -319,6 +323,7 @@ public class Launcher extends BaseActivity
 
     private RotationPrefChangeHandler mRotationPrefChangeHandler;
     private SSIDPrefChangeHandler mSSIDPrefChangeHandler;
+    private SchedulePrefChangeHandler mSchedulePrefChangeHandler;
     private MinimalDesignPrefChangeHandler mMinimalDesignPrefChangeHandler;
     private WallpaperButtonClickedHandler wallpaperButtonClickedHandler;
     private ProfileChangeHandler profileChangeHandler;
@@ -488,6 +493,9 @@ public class Launcher extends BaseActivity
             mRotationEnabled = true;
         }
 
+        mSchedulePrefChangeHandler = new SchedulePrefChangeHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(mSchedulePrefChangeHandler);
+
         mMinimalDesignPrefChangeHandler = new MinimalDesignPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mMinimalDesignPrefChangeHandler);
 
@@ -519,6 +527,12 @@ public class Launcher extends BaseActivity
         filter.addAction("android.intent.action.AIRPLANE_MODE");
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
+
+        filter = new IntentFilter();
+        filter.addAction(AlarmsService.ACTION_COMPLETE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mAlarmReceiver, filter);
+        AlarmsService.launchAlarmsService(this);
+
 
         mSSIDPrefChangeHandler = new SSIDPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
@@ -2095,6 +2109,7 @@ public class Launcher extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            Log.d("---", "received an action: "+action);
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mDragLayer.clearResizeFrame();
 
@@ -2112,6 +2127,12 @@ public class Launcher extends BaseActivity
                 // the user unlocked and the Launcher is not in the foreground.
                 mShouldFadeInScrim = false;
             }
+        }
+    };
+
+    private final BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
         }
     };
 
@@ -2777,6 +2798,7 @@ public class Launcher extends BaseActivity
 
         unregisterReceiver(mReceiver);
         unregisterReceiver(mWiFiReceiver);
+        unregisterReceiver(mAlarmReceiver);
         mWorkspace.removeCallbacks(mBuildLayersRunnable);
         mWorkspace.removeFolderListeners();
 
@@ -2790,6 +2812,10 @@ public class Launcher extends BaseActivity
 
         if (mRotationPrefChangeHandler != null) {
             mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mRotationPrefChangeHandler);
+        }
+
+        if(mSchedulePrefChangeHandler != null) {
+            mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mSchedulePrefChangeHandler);
         }
 
         if(mMinimalDesignPrefChangeHandler != null) {
@@ -5070,6 +5096,15 @@ public class Launcher extends BaseActivity
         }
     }
 
+    private class SchedulePrefChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(TimePreferenceActivity.SCHEDULE_PREF)){
+                AlarmsService.updateAlarmsList();
+            }
+        }
+    }
+
     private class MinimalDesignPrefChangeHandler implements OnSharedPreferenceChangeListener {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -5125,6 +5160,12 @@ public class Launcher extends BaseActivity
                 String selectedProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
                 if(selectedProfile!=null){
                     updateProfile(selectedProfile);
+                }
+            }
+            if(key.equals(AlarmReceiver.CHANGE_PROFILE_ALARM)){
+                String updateToProfile = mSharedPrefs.getString(AlarmReceiver.CHANGE_PROFILE_ALARM, null);
+                if(updateToProfile!= null){
+                    updateProfile(updateToProfile);
                 }
             }
             if(key.equals(CURRENT_PROFILE_PREF)){

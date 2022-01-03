@@ -1,5 +1,6 @@
 package com.android.launcher3.util;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -15,6 +16,8 @@ import android.widget.ToggleButton;
 
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.android.launcher3.alarm.AlarmModel;
+import com.android.launcher3.alarm.AlarmReceiver;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -99,8 +102,6 @@ public class TimePreferenceActivity extends DialogPreference {
         daysViewToDataMap.put((ToggleButton) v.findViewById(R.id.btn_fri), Calendar.FRIDAY);
         daysViewToDataMap.put((ToggleButton) v.findViewById(R.id.btn_sat), Calendar.SATURDAY);
         daysViewToDataMap.put((ToggleButton) v.findViewById(R.id.btn_sun), Calendar.SUNDAY);
-
-        Log.d("---", "selectedProfile: "+selectedProfile);
 
         if (scheduleList.size()!=0){
             for(String eachSchedule : scheduleList){
@@ -187,6 +188,9 @@ public class TimePreferenceActivity extends DialogPreference {
             scheduleList.add(configSchedule);
             Set set = new HashSet(scheduleList);
             Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
+            Log.d("---", "save alarm: "+configSchedule);
+            AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
+            AlarmReceiver.setReminderAlarm(context, alarmModel);
         }
     }
 
