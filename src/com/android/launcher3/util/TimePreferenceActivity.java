@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -179,11 +180,15 @@ public class TimePreferenceActivity extends DialogPreference {
             Toast.makeText(context, context.getString(R.string.msg_no_day_selected), Toast.LENGTH_SHORT).show();
         } else {
             String configSchedule = selectedProfile+"_"+selectedDays+"_"+picker.getHour()+":"+picker.getMinute();
-            for(String eachSchedule: scheduleList){
-                String profileSchedule = eachSchedule.split("_")[0];
+            ArrayList<String> itemsToRemove = new ArrayList<>();
+            for (String eachProfile : scheduleList){
+                String profileSchedule = eachProfile.split("_")[0];
                 if(selectedProfile.equals(profileSchedule)){
-                    scheduleList.remove(eachSchedule);
+                    itemsToRemove.add(eachProfile);
                 }
+            }
+            if(itemsToRemove.size()!=0){
+                scheduleList.removeAll(itemsToRemove);
             }
             scheduleList.add(configSchedule);
             Set set = new HashSet(scheduleList);

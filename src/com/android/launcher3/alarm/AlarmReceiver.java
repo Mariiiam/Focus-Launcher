@@ -198,7 +198,6 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             void schedule(AlarmModel alarmModel, PendingIntent pendingIntent){
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmModel.getTime(), pendingIntent);
-                Log.d("---", "send pending intent "+alarmModel.getHours()+":"+alarmModel.getMinutes());
             }
 
         }
