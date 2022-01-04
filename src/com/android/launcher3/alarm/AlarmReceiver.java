@@ -71,6 +71,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             boolean isAlarmSetForDay;
 
             final SparseBooleanArray daysArray = getDaysBooleanArray(context, alarm);
+            Log.d("---", "profile: "+alarm.getProfile()+" "+daysArray.toString());
 
             do {
                 final int index = (startIndex + count) % 7;
@@ -110,26 +111,26 @@ public class AlarmReceiver extends BroadcastReceiver {
         private static int getDayInInt(Context context, AlarmModel alarmModel, int index){
             String day = alarmModel.getDays().get(index);
             int calendarDay = 0;
-            String monday = context.getString(R.string.day_su);
+            String monday = context.getString(R.string.day_m);
             if(day.equals(monday)){
                 calendarDay = 1;
                 return calendarDay;
-            } else if(day.equals(context.getString(R.string.day_su))){
+            } else if(day.equals(context.getString(R.string.day_tu))){
                 calendarDay = 2;
                 return calendarDay;
-            } else if(day.equals(context.getString(R.string.day_tu))){
+            } else if(day.equals(context.getString(R.string.day_w))){
                 calendarDay = 3;
                 return calendarDay;
-            } else if(day.equals(context.getString(R.string.day_w))){
+            } else if(day.equals(context.getString(R.string.day_th))){
                 calendarDay = 4;
                 return calendarDay;
-            } else if(day.equals(context.getString(R.string.day_th))){
+            } else if(day.equals(context.getString(R.string.day_f))){
                 calendarDay = 5;
                 return calendarDay;
-            } else if(day.equals(context.getString(R.string.day_f))){
+            } else if(day.equals(context.getString(R.string.day_sa))){
                 calendarDay = 6;
                 return calendarDay;
-            } else if (day.equals(context.getString(R.string.day_sa))){
+            } else if (day.equals(context.getString(R.string.day_su))){
                 calendarDay = 7;
                 return calendarDay;
             }

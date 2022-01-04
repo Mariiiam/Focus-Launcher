@@ -2109,7 +2109,6 @@ public class Launcher extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            Log.d("---", "received an action: "+action);
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mDragLayer.clearResizeFrame();
 
