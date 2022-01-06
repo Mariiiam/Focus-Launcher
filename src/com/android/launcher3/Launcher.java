@@ -5169,10 +5169,25 @@ public class Launcher extends BaseActivity
                 if(updateToProfile!= null){
                     updateToProfile = updateToProfile.split("_")[0];
                     if(!currentProfile.equals(updateToProfile)){
-                        Log.d("---", "update to profile: "+updateToProfile);
-                        updateProfile(updateToProfile);
+                        if(updateToProfile.equals("home") || updateToProfile.equals("work")){
+                            updateProfile(updateToProfile);
+                            Log.d("---", "update to profile: "+updateToProfile);
+                        } else {
+                            Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                            if(set!=null) {
+                                newAddedProfiles = new ArrayList<String>(set);
+                                if (newAddedProfiles != null) {
+                                    for(String sub : newAddedProfiles){
+                                        if(updateToProfile.equals(sub.charAt(0)+"")){
+                                            updateToProfile = sub.substring(1);
+                                            Log.d("---", "update to profile: "+updateToProfile);
+                                            updateProfile(updateToProfile);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-
                 }
             }
             if(key.equals(CURRENT_PROFILE_PREF)){

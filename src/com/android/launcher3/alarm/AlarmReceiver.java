@@ -34,10 +34,9 @@ public class AlarmReceiver extends BroadcastReceiver {
                 Log.e(TAG, "Alarm is null", new NullPointerException());
                 return;
             }
-            String newProfile = getProfileNameFromID(alarm.getProfile());
             Random randomGenerator = new Random();
             int randomInt = randomGenerator.nextInt(100);
-            newProfile = newProfile+"_"+randomInt;
+            String newProfile = alarm.getProfile()+"_"+randomInt;
             Launcher.mSharedPrefs.edit().putString(CHANGE_PROFILE_ALARM, newProfile).apply();
             setReminderAlarm(context, alarm);
         }
@@ -183,25 +182,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             final AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             manager.cancel(pIntent);
             Log.d("---", "alarm canceled");
-        }
-
-        private static String getProfileNameFromID(String profile){
-            String newProfile = "";
-            if(profile.equals("home") || profile.equals("work")){
-                newProfile = profile;
-            } else {
-                ArrayList<String> newAddedProfiles;
-                if (Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null) != null) {
-                    Set set = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
-                    newAddedProfiles = new ArrayList<>(set);
-                    for (String eachProfile : newAddedProfiles) {
-                        if (profile.equals(eachProfile.charAt(0) + "")) {
-                            newProfile = eachProfile.substring(1);
-                        }
-                    }
-                }
-            }
-            return newProfile;
         }
 
         private static class ScheduleAlarm {

@@ -126,7 +126,7 @@ public class ProfilesActivity extends Activity {
                 String profileNameInSchedule = eachSchedule.split("_")[0];
                 if(profileNameInSchedule.equals(profile)){
                     String timeInfo = eachSchedule.split("_")[2];
-                    if(timeInfo.length()==4){
+                    if(timeInfo.split(":")[1].length()==1){
                         Character lastChar = timeInfo.charAt(timeInfo.length()-1);
                         timeInfo = timeInfo.substring(0,timeInfo.length()-1);
                         timeInfo = timeInfo+"0"+lastChar;
