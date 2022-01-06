@@ -166,36 +166,72 @@ public class TimePreferenceActivity extends DialogPreference {
     @Override
     public void onClick(DialogInterface dialog, int which){
         if(which == DialogInterface.BUTTON_POSITIVE) {
-            // do your stuff to handle positive button
             saveAlarm(getContext());
         }else if(which == DialogInterface.BUTTON_NEGATIVE){
-            // do your stuff to handle negative button
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private static void saveAlarm(Context context) {
+        picker.clearFocus();
         ArrayList<String> selectedDays = getSelectedDays();
+
+        //check if no days are selected. If so, then delete the alarm if the profile already has a schedule or show a message if it is a new schedule.
         if(selectedDays.isEmpty()) {
-            Toast.makeText(context, context.getString(R.string.msg_no_day_selected), Toast.LENGTH_SHORT).show();
-        } else {
-            String configSchedule = selectedProfile+"_"+selectedDays+"_"+picker.getHour()+":"+picker.getMinute();
-            ArrayList<String> itemsToRemove = new ArrayList<>();
-            for (String eachProfile : scheduleList){
-                String profileSchedule = eachProfile.split("_")[0];
-                if(selectedProfile.equals(profileSchedule)){
-                    itemsToRemove.add(eachProfile);
+            boolean profileAlreadyScheduled = false;
+            ArrayList<String> scheduleToDelete = new ArrayList<>();
+            for(String eachProfile : scheduleList){
+                String profileName = eachProfile.split("_")[0];
+                if(profileName.equals(selectedProfile)){
+                    profileAlreadyScheduled = true;
+                    scheduleToDelete.add(eachProfile);
                 }
             }
-            if(itemsToRemove.size()!=0){
-                scheduleList.removeAll(itemsToRemove);
+            if(profileAlreadyScheduled){
+                scheduleList.remove(scheduleToDelete);
+                AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
+                AlarmReceiver.cancelReminderAlarm(context, alarmModel);
+            } else {
+                Toast.makeText(context, context.getString(R.string.msg_no_day_selected), Toast.LENGTH_SHORT).show();
             }
-            scheduleList.add(configSchedule);
-            Set set = new HashSet(scheduleList);
-            Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
-            Log.d("---", "save alarm: "+configSchedule);
-            AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
-            AlarmReceiver.setReminderAlarm(context, alarmModel);
+        }
+        // save the alarm.
+        else {
+            String configSchedule = selectedProfile+"_"+selectedDays+"_"+picker.getHour()+":"+picker.getMinute();
+            boolean scheduleIsSame = false;
+
+            // handling if schedule already exist
+            for (String eachProfile : scheduleList){
+                if(scheduleIsSame(eachProfile, configSchedule)){
+                    String profileSchedule = eachProfile.split("_")[0];
+                    if(!selectedProfile.equals(profileSchedule)){
+                        // New profile has the same schedule of another profile. Show toast message.
+                        scheduleIsSame = true;
+                        Toast.makeText(context, context.getString(R.string.msg_same_schedule)+" "+translateProfileName(context, profileSchedule), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            if(!scheduleIsSame){
+                //check if profile already has a schedule. If so, then update its schedule.
+                ArrayList<String> itemsToRemove = new ArrayList<>();
+                for(String eachProfile : scheduleList){
+                    String oldProfileName = configSchedule.split("_")[0];
+                    String newProfileName = eachProfile.split("_")[0];
+                    if(newProfileName.equals(oldProfileName)){
+                        itemsToRemove.add(eachProfile);
+                    }
+                }
+                if(itemsToRemove.size()!=0){
+                    scheduleList.removeAll(itemsToRemove);
+                }
+                scheduleList.add(configSchedule);
+                Set set = new HashSet(scheduleList);
+                Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
+                Log.d("---", "save alarm: "+configSchedule);
+                AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
+                AlarmReceiver.setReminderAlarm(context, alarmModel);
+            }
         }
     }
 
@@ -209,4 +245,54 @@ public class TimePreferenceActivity extends DialogPreference {
         return list;
     }
 
+    private static ArrayList<String> convertDaysStringToArrayList(String daysAsString){
+        ArrayList<String> daysAsArrayList = new ArrayList<>();
+        String sumDays = daysAsString.substring(1, daysAsString.length()-1);
+        String[] eachDay = sumDays.split(",");
+        for (String day : eachDay) {
+            day = day.replace(" ", "");
+            daysAsArrayList.add(day);
+        }
+        return daysAsArrayList;
+    }
+
+    // checks if two profiles has a same day and time
+    private static boolean scheduleIsSame(String oldProfile, String newProfile){
+        boolean scheduleIsSame = false;
+        String newProfileHour = newProfile.split("_")[2].split(":")[0];
+        String newProfileMinute = newProfile.split("_")[2].split(":")[1];
+        String oldProfileHour = oldProfile.split("_")[2].split(":")[0];
+        String oldProfileMinute = oldProfile.split("_")[2].split(":")[1];
+
+        ArrayList<String> newDays = convertDaysStringToArrayList(newProfile.split("_")[1]);
+        ArrayList<String> oldDays = convertDaysStringToArrayList(oldProfile.split("_")[1]);
+
+        for(String eachDay : newDays){
+            if(oldDays.contains(eachDay)){
+                if(oldProfileHour.equals(newProfileHour) && oldProfileMinute.equals(newProfileMinute)){
+                    // The schedule of the profile did not change
+                    scheduleIsSame = true;
+                    return scheduleIsSame;
+                } else {
+                    // The schedule of the profile did change
+                    scheduleIsSame = false;
+                }
+            }
+        }
+        return scheduleIsSame;
+    }
+
+    private static String translateProfileName(Context context, String profile){
+        String translatedName;
+        if(profile.equals("work")){
+            translatedName = context.getString(R.string.profile_work);
+            return translatedName;
+        } else if(profile.equals("home")){
+            translatedName = context.getString(R.string.profile_home);
+            return translatedName;
+        } else {
+            translatedName = profile;
+            return translatedName;
+        }
+    }
 }

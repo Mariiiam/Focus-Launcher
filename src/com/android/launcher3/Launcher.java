@@ -527,11 +527,12 @@ public class Launcher extends BaseActivity
         filter.addAction("android.intent.action.AIRPLANE_MODE");
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
-
+        /*
         filter = new IntentFilter();
         filter.addAction(AlarmsService.ACTION_COMPLETE);
         LocalBroadcastManager.getInstance(this).registerReceiver(mAlarmReceiver, filter);
         AlarmsService.launchAlarmsService(this);
+         */
 
 
         mSSIDPrefChangeHandler = new SSIDPrefChangeHandler();
@@ -2129,11 +2130,12 @@ public class Launcher extends BaseActivity
         }
     };
 
+    /*
     private final BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
         }
-    };
+    };*/
 
     private final BroadcastReceiver mWiFiReceiver = new BroadcastReceiver() {
         @Override
@@ -2797,7 +2799,7 @@ public class Launcher extends BaseActivity
 
         unregisterReceiver(mReceiver);
         unregisterReceiver(mWiFiReceiver);
-        unregisterReceiver(mAlarmReceiver);
+        //unregisterReceiver(mAlarmReceiver);
         mWorkspace.removeCallbacks(mBuildLayersRunnable);
         mWorkspace.removeFolderListeners();
 
@@ -5162,9 +5164,15 @@ public class Launcher extends BaseActivity
                 }
             }
             if(key.equals(AlarmReceiver.CHANGE_PROFILE_ALARM)){
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
                 String updateToProfile = mSharedPrefs.getString(AlarmReceiver.CHANGE_PROFILE_ALARM, null);
                 if(updateToProfile!= null){
-                    updateProfile(updateToProfile);
+                    updateToProfile = updateToProfile.split("_")[0];
+                    if(!currentProfile.equals(updateToProfile)){
+                        Log.d("---", "update to profile: "+updateToProfile);
+                        updateProfile(updateToProfile);
+                    }
+
                 }
             }
             if(key.equals(CURRENT_PROFILE_PREF)){

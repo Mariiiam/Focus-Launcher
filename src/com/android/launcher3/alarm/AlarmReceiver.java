@@ -11,9 +11,12 @@ import android.util.SparseBooleanArray;
 
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Random;
+import java.util.Set;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
@@ -27,14 +30,15 @@ public class AlarmReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             final AlarmModel alarm = intent.getBundleExtra(BUNDLE_EXTRA).getParcelable(ALARM_KEY);
-            Log.d("---", "on receive here? "+alarm);
             if(alarm == null) {
-                Log.d("---", "alarm is null");
                 Log.e(TAG, "Alarm is null", new NullPointerException());
                 return;
             }
-            Log.d("---", "update to profile "+alarm.getProfile());
-            Launcher.mSharedPrefs.edit().putString(CHANGE_PROFILE_ALARM, alarm.getProfile()).apply();
+            String newProfile = getProfileNameFromID(alarm.getProfile());
+            Random randomGenerator = new Random();
+            int randomInt = randomGenerator.nextInt(100);
+            newProfile = newProfile+"_"+randomInt;
+            Launcher.mSharedPrefs.edit().putString(CHANGE_PROFILE_ALARM, newProfile).apply();
             setReminderAlarm(context, alarm);
         }
 
@@ -71,7 +75,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             boolean isAlarmSetForDay;
 
             final SparseBooleanArray daysArray = getDaysBooleanArray(context, alarm);
-            Log.d("---", "profile: "+alarm.getProfile()+" "+daysArray.toString());
 
             do {
                 final int index = (startIndex + count) % 7;
@@ -81,6 +84,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                     count++;
                 }
             } while (!isAlarmSetForDay && count < 7);
+
+            calendar.set(Calendar.SECOND, 0);
 
             return calendar;
         }
@@ -178,6 +183,25 @@ public class AlarmReceiver extends BroadcastReceiver {
             final AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             manager.cancel(pIntent);
             Log.d("---", "alarm canceled");
+        }
+
+        private static String getProfileNameFromID(String profile){
+            String newProfile = "";
+            if(profile.equals("home") || profile.equals("work")){
+                newProfile = profile;
+            } else {
+                ArrayList<String> newAddedProfiles;
+                if (Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null) != null) {
+                    Set set = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                    newAddedProfiles = new ArrayList<>(set);
+                    for (String eachProfile : newAddedProfiles) {
+                        if (profile.equals(eachProfile.charAt(0) + "")) {
+                            newProfile = eachProfile.substring(1);
+                        }
+                    }
+                }
+            }
+            return newProfile;
         }
 
         private static class ScheduleAlarm {

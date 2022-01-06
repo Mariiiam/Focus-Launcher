@@ -426,8 +426,8 @@
     <string name="change_profile_name">Change profile name</string>
     <string name="change_profile_name_question">What should this profile be called?</string>
     <string name="change_name_pref_not_active">Profile must be inactive to change its name</string>
-    <string name="error_change_profile_name_too_short">Name must contain at least three characters</string>
-    <string name="error_change_profile_name_already_exists">This name already exists</string>
+    <string name="error_change_profile_name_too_short">Not saved. Name must contain at least three characters.</string>
+    <string name="error_change_profile_name_already_exists">Not saved. This name already exists.</string>
     <string name="title_trigger_rules">Trigger Rules</string>
     <string name="title_settings_and_design">Settings and Design</string>
     <string name="title_schedule">Schedule</string>
@@ -438,5 +438,10 @@
     <string name="day_f">FR</string>
     <string name="day_sa">SA</string>
     <string name="day_su">SU</string>
-    <string name="msg_no_day_selected">Please select a day</string>
+    <string name="msg_no_day_selected">Not saved. Please select a day.</string>
+    <string name="msg_same_schedule">Not saved. This schedule is already set in: </string>
+    <string name="summary_alarm_empty">Set time when this profile should be activated</string>
+    <string name="every_string">Every</string>
+    <string name="clock_string">o\'clock</string>
+    <string name="at_string">at</string>
 </resources>
