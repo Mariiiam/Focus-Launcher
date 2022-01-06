@@ -80,7 +80,6 @@ public class ManualProfileSelectionActivity extends Activity {
                 .setItems(allProfilesLabelsCopy, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.d("---", "manualprofileselection: "+allProfiles[i]);
                         Launcher.updateSharedPrefsProfile(allProfiles[i]);
                         chosenProfile = allProfiles[i];
                         finish();

@@ -210,8 +210,22 @@
     <string name="change_profile_name_question">Wie soll dieses Profil heißen?</string>
     <string name="delete_profile_question">Dieses Profil löschen?</string>
     <string name="change_name_pref_not_active">Profil muss inaktiv sein, um den Namen ändern zu können</string>
-    <string name="error_change_profile_name_too_short">Name muss mindestens drei Zeichen enthalten</string>
-    <string name="error_change_profile_name_already_exists">Dieser Name existiert bereits</string>
+    <string name="error_change_profile_name_too_short">Speichern abgebrochen. Name muss mindestens drei Zeichen enthalten</string>
+    <string name="error_change_profile_name_already_exists">Speichern abgebrochen. Dieser Name existiert bereits</string>
     <string name="title_trigger_rules">Auslöser Regeln</string>
     <string name="title_settings_and_design">Einstellungen und Design</string>
+    <string name="title_schedule">Zeitplan</string>
+    <string name="day_m">MO</string>
+    <string name="day_tu">DI</string>
+    <string name="day_w">MI</string>
+    <string name="day_th">DO</string>
+    <string name="day_f">FR</string>
+    <string name="day_sa">SA</string>
+    <string name="day_su">SO</string>
+    <string name="msg_no_day_selected">Speichern abgebrochen. Bitte Tag auswählen.</string>
+    <string name="msg_same_schedule">Speichern abgebrochen. Dieser Termin ist bereits vorhanden in: </string>
+    <string name="summary_alarm_empty">Zeit festlegen, wann dieses Profil aktiviert werden soll</string>
+    <string name="every_string">Jeden</string>
+    <string name="clock_string">Uhr</string>
+    <string name="at_string">um</string>
 </resources>

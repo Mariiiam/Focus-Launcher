@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TimePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:timePickerMode="spinner"
+        android:id="@+id/time_picker"
+        android:layout_marginTop="@dimen/setup_spacing_vert_small"
+        android:layout_marginStart="@dimen/setup_spacing_vert" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="15dp">
+        <ToggleButton
+            android:id="@+id/btn_mon"
+            android:layout_width="@dimen/day_button_size"
+            android:layout_height="@dimen/day_button_size"
+            style="@style/CircleToggleButton"
+            android:layout_marginEnd="@dimen/day_button_spacing"
+            android:layout_marginStart="@dimen/day_button_spacing"
+            android:textOff="@string/day_m"
+            android:textOn="@string/day_m"/>
+        <ToggleButton
+            android:id="@+id/btn_tues"
+            android:layout_width="@dimen/day_button_size"
+            android:layout_height="@dimen/day_button_size"
+            style="@style/CircleToggleButton"
+            android:layout_marginEnd="@dimen/day_button_spacing"
+            android:textOff="@string/day_tu"
+            android:textOn="@string/day_tu"/>
+        <ToggleButton
+            android:id="@+id/btn_weds"
+            android:layout_width="@dimen/day_button_size"
+            android:layout_height="@dimen/day_button_size"
+            style="@style/CircleToggleButton"
+            android:layout_marginEnd="@dimen/day_button_spacing"
+            android:textOff="@string/day_w"
+            android:textOn="@string/day_w"/>
+        <ToggleButton
+            android:id="@+id/btn_thurs"
+            android:layout_width="@dimen/day_button_size"
+            android:layout_height="@dimen/day_button_size"
+            style="@style/CircleToggleButton"
+            android:layout_marginEnd="@dimen/day_button_spacing"
+            android:textOff="@string/day_th"
+            android:textOn="@string/day_th"/>
+        <ToggleButton
+            android:id="@+id/btn_fri"
+            android:layout_width="@dimen/day_button_size"
+            android:layout_height="@dimen/day_button_size"
+            style="@style/CircleToggleButton"
+            android:layout_marginEnd="@dimen/day_button_spacing"
+            android:textOff="@string/day_f"
+            android:textOn="@string/day_f"/>
+        <ToggleButton
+            android:id="@+id/btn_sat"
+            android:layout_width="@dimen/day_button_size"
+            android:layout_height="@dimen/day_button_size"
+            style="@style/CircleToggleButton"
+            android:layout_marginEnd="@dimen/day_button_spacing"
+            android:textOff="@string/day_sa"
+            android:textOn="@string/day_sa"/>
+        <ToggleButton
+            android:id="@+id/btn_sun"
+            android:layout_width="@dimen/day_button_size"
+            android:layout_height="@dimen/day_button_size"
+            style="@style/CircleToggleButton"
+            android:layout_marginEnd="@dimen/day_button_spacing"
+            android:textOff="@string/day_su"
+            android:textOn="@string/day_su"/>
+    </LinearLayout>
+
+
+
+</LinearLayout>

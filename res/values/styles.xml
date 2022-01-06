@@ -251,6 +251,15 @@
         <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:colorAccent">@color/colorAccent</item>
     </style>
+    <style name="BackgroundToggleButton" parent="android:Widget">
+        <item name="android:background">@drawable/day_button_bg</item>
+    </style>
+
+    <style name="CircleToggleButton" parent="BaseLauncherTheme">
+        <item name="android:buttonStyleToggle">@style/BackgroundToggleButton</item>
+        <item name="android:textColor">@drawable/day_button_text_colour</item>
+        <item name="android:background">@drawable/day_button_bg</item>
+    </style>
     <style name="Theme.Transparent" parent="android:Theme">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

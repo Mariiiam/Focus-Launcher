@@ -45,6 +45,7 @@ import com.android.launcher3.LauncherFiles;
 import com.android.launcher3.R;
 import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.notification.NotificationListener;
+import com.android.launcher3.util.TimePreferenceActivity;
 import com.android.launcher3.views.DependentSwitchPreference;
 
 import java.util.ArrayList;
@@ -117,6 +118,42 @@ public class ProfilesActivity extends Activity {
         }
     }
 
+    public static void bindAlarmSummaryPreference(String profile, Preference alarmPref){
+        Set set = Launcher.mSharedPrefs.getStringSet(TimePreferenceActivity.SCHEDULE_PREF, null);
+        if(set!=null){
+            ArrayList<String> alarmsList = new ArrayList<>(set);
+            for (String eachSchedule : alarmsList){
+                String profileNameInSchedule = eachSchedule.split("_")[0];
+                if(profileNameInSchedule.equals(profile)){
+                    String timeInfo = eachSchedule.split("_")[2];
+                    if(timeInfo.split(":")[1].length()==1){
+                        Character lastChar = timeInfo.charAt(timeInfo.length()-1);
+                        timeInfo = timeInfo.substring(0,timeInfo.length()-1);
+                        timeInfo = timeInfo+"0"+lastChar;
+                    }
+                    String daysInfo = eachSchedule.split("_")[1].substring(1, eachSchedule.split("_")[1].length()-1);
+                    Context context = alarmPref.getContext();
+                    String sumInfo = context.getString(R.string.every_string)+" "+daysInfo+" "+context.getString(R.string.at_string)+" "+timeInfo+" "+context.getString(R.string.clock_string);
+                    alarmPref.setSummary(sumInfo);
+                } else {
+                    if(alarmPref!=null){
+                        if(alarmPref.getSummary()==null){
+                            alarmPref.setSummary(alarmPref.getContext().getString(R.string.summary_alarm_empty));
+                        }
+                    }
+                }
+            }
+        } else {
+            if(alarmPref!=null){
+                if(alarmPref.getSummary()==null){
+                    alarmPref.setSummary(alarmPref.getContext().getString(R.string.summary_alarm_empty));
+                }
+            }
+        }
+    }
+
+
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -131,6 +168,7 @@ public class ProfilesActivity extends Activity {
         private Map<String, NotificationAccessObserver> mNotificationAccessObservers = new HashMap<>();
         private Map<String, GrayscaleAccessObserver> mGrayscaleAccessObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
+        private ScheduleChangeHandler mScheduleChangeHandler;
 
         //public final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
         public final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
@@ -224,6 +262,9 @@ public class ProfilesActivity extends Activity {
             parent.getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(mCurrentProfileListener);
             mCurrentProfileListener.onSharedPreferenceChanged(parent.getPreferenceManager().getSharedPreferences(), Launcher.CURRENT_PROFILE_PREF);
 
+            mScheduleChangeHandler = new ScheduleChangeHandler();
+            Launcher.mSharedPrefs.registerOnSharedPreferenceChangeListener(mScheduleChangeHandler);
+
             if (this.parent == this) Launcher.hasWritePermission(parent.getActivity(), true);
         }
 
@@ -250,6 +291,13 @@ public class ProfilesActivity extends Activity {
             for (final String profile : Launcher.availableProfiles) {
                 if(profile.equals("work")||profile.equals("home")||profile.equals("default")||profile.equals("disconnected")){
                     Preference profileGroup = parent.findPreference("profile_" + profile);
+                    profileGroup.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            TimePreferenceActivity.selectedProfile = profile;
+                            return true;
+                        }
+                    });
 
                     Preference ringtonePref = parent.findPreference(profile + "_ringtone");
                     bindPreferenceToSummary(ringtonePref);
@@ -287,13 +335,23 @@ public class ProfilesActivity extends Activity {
 
                     Preference ssidsPref = parent.findPreference(profile + "_ssids");
                     if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+
+                    Preference schedulePref = parent.findPreference(profile + "_schedule");
+                    bindAlarmSummaryPreference(profile, schedulePref);
                 } else {
                     for(String sub : newAddedProfiles){
                         if(sub.substring(1).equals(profile)){
-                            String profileID = sub.charAt(0)+"";
+                            final String profileID = sub.charAt(0)+"";
                             Preference profileGroup = parent.findPreference("profile_" + profileID);
                             profileGroup.setEnabled(true);
                             profileGroup.setIcon(R.drawable.ic_profiles);
+                            profileGroup.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                                @Override
+                                public boolean onPreferenceClick(Preference preference) {
+                                    TimePreferenceActivity.selectedProfile = profileID;
+                                    return true;
+                                }
+                            });
 
                             Preference ringtonePref = parent.findPreference(profileID + "_ringtone");
                             bindPreferenceToSummary(ringtonePref);
@@ -344,6 +402,9 @@ public class ProfilesActivity extends Activity {
 
                             Preference ssidsPref = parent.findPreference(profileID + "_ssids");
                             if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+
+                            Preference schedulePref = parent.findPreference(profileID + "_schedule");
+                            bindAlarmSummaryPreference(profileID, schedulePref);
                         }
                     }
 
@@ -425,6 +486,35 @@ public class ProfilesActivity extends Activity {
             // current value.
             listener.onPreferenceChange(preference,
                     parent.getPreferenceManager().getSharedPreferences().getString(preference.getKey(), ""));
+        }
+
+        private class ScheduleChangeHandler implements SharedPreferences.OnSharedPreferenceChangeListener {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if(key.equals(TimePreferenceActivity.SCHEDULE_PREF)){
+                    Set set = Launcher.mSharedPrefs.getStringSet(TimePreferenceActivity.SCHEDULE_PREF, null);
+                    if(set!=null){
+                        for (final String profile : Launcher.availableProfiles) {
+                            if(profile.equals("disconnected") || profile.equals("default")){
+                                //do nothing
+                            } else if(profile.equals("work")){
+                                Preference alarmPref = findPreference("work_schedule");
+                                bindAlarmSummaryPreference(profile, alarmPref);
+                            } else if(profile.equals("home")){
+                                Preference alarmPref = findPreference("home_schedule");
+                                bindAlarmSummaryPreference(profile, alarmPref);
+                            }
+                            else {
+                                for(String sub : newAddedProfiles){
+                                    String profileID = sub.charAt(0)+"";
+                                    Preference alarmPref = findPreference(profileID+"_schedule");
+                                    bindAlarmSummaryPreference(profileID, alarmPref);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /**
@@ -517,6 +607,9 @@ public class ProfilesActivity extends Activity {
                 mGrayscaleAccessObservers.clear();
                 mGrayscaleAccessObservers = null;
             }
+            if(mScheduleChangeHandler!=null){
+                Launcher.mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mScheduleChangeHandler);
+            }
             if(this.parent == this) super.onDestroy();
         }
 
@@ -527,9 +620,9 @@ public class ProfilesActivity extends Activity {
                 if(resultCode == Activity.RESULT_OK){
                     final String result = data.getStringExtra("result");
                     if(result.equals("already_exists")){
-                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_already_exists, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_already_exists, Toast.LENGTH_LONG).show();
                     } else if(result.equals("too_short")){
-                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_too_short, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_too_short, Toast.LENGTH_LONG).show();
                     } else {
                         currentProfileNumber += 1;
                         Launcher.availableProfiles.add(result);
@@ -542,6 +635,13 @@ public class ProfilesActivity extends Activity {
                         profileGroup.setTitle(result);
                         profileGroup.setIcon(R.drawable.ic_profiles);
                         profileGroup.setEnabled(true);
+                        profileGroup.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                            @Override
+                            public boolean onPreferenceClick(Preference preference) {
+                                TimePreferenceActivity.selectedProfile = currentProfileNumber+"";
+                                return true;
+                            }
+                        });
 
                         Preference ringtonePref = parent.findPreference(currentProfileNumber+"_ringtone");
                         bindPreferenceToSummary(ringtonePref);
@@ -576,6 +676,9 @@ public class ProfilesActivity extends Activity {
 
                         Preference ssidsPref = parent.findPreference(currentProfileNumber+"_ssids");
                         if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
+
+                        Preference schedulePref = parent.findPreference(currentProfileNumber + "_schedule");
+                        bindAlarmSummaryPreference(currentProfileNumber+"", schedulePref);
 
                         Preference changeNamePref = parent.findPreference(currentProfileNumber+"_change_name");
                         bindChangeNamePreference(result, changeNamePref);
@@ -688,3 +791,4 @@ public class ProfilesActivity extends Activity {
         }
     }
 }
+

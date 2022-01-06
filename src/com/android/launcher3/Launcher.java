@@ -48,6 +48,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -70,6 +71,9 @@ import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace.ItemOperator;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
+import com.android.launcher3.alarm.AlarmModel;
+import com.android.launcher3.alarm.AlarmReceiver;
+import com.android.launcher3.alarm.AlarmsService;
 import com.android.launcher3.allapps.AllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
 import com.android.launcher3.allapps.AlphabeticalAppsList;
@@ -319,6 +323,7 @@ public class Launcher extends BaseActivity
 
     private RotationPrefChangeHandler mRotationPrefChangeHandler;
     private SSIDPrefChangeHandler mSSIDPrefChangeHandler;
+    private SchedulePrefChangeHandler mSchedulePrefChangeHandler;
     private MinimalDesignPrefChangeHandler mMinimalDesignPrefChangeHandler;
     private WallpaperButtonClickedHandler wallpaperButtonClickedHandler;
     private ProfileChangeHandler profileChangeHandler;
@@ -349,7 +354,6 @@ public class Launcher extends BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("---", "on create");
         if (DEBUG_STRICT_MODE) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectDiskReads()
@@ -489,6 +493,9 @@ public class Launcher extends BaseActivity
             mRotationEnabled = true;
         }
 
+        mSchedulePrefChangeHandler = new SchedulePrefChangeHandler();
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(mSchedulePrefChangeHandler);
+
         mMinimalDesignPrefChangeHandler = new MinimalDesignPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mMinimalDesignPrefChangeHandler);
 
@@ -520,6 +527,13 @@ public class Launcher extends BaseActivity
         filter.addAction("android.intent.action.AIRPLANE_MODE");
         filter.setPriority(100);
         registerReceiver(mWiFiReceiver, filter);
+        /*
+        filter = new IntentFilter();
+        filter.addAction(AlarmsService.ACTION_COMPLETE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mAlarmReceiver, filter);
+        AlarmsService.launchAlarmsService(this);
+         */
+
 
         mSSIDPrefChangeHandler = new SSIDPrefChangeHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mSSIDPrefChangeHandler);
@@ -959,7 +973,6 @@ public class Launcher extends BaseActivity
             return;
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
             //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
-            Log.d("---", "onactivityresult 1");
                 Bitmap wallpaper = extractWallpaper();
                 String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
                 saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
@@ -967,7 +980,6 @@ public class Launcher extends BaseActivity
                 // we move to the closest one now.
                 mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
                 showWorkspace(false);
-            Log.d("---", "onactivityresult 2");
             //}
             return;
         }
@@ -2118,6 +2130,13 @@ public class Launcher extends BaseActivity
         }
     };
 
+    /*
+    private final BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        }
+    };*/
+
     private final BroadcastReceiver mWiFiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -2245,7 +2264,6 @@ public class Launcher extends BaseActivity
         if (profile == null || profile.isEmpty()) return false;
 
         String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
-        Log.d("---", "manual profile: "+manualProfile);
         if(firstTime && manualProfile != null) {
             // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
             mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, null).commit();
@@ -2253,17 +2271,14 @@ public class Launcher extends BaseActivity
 
             //profile = manualProfile;
             lastProfileUpdate = manualProfile;
-            Log.d("---", "first time, lastProfileUpdate: "+lastProfileUpdate);
             return false;
         }
         firstTime = false;
-        Log.d("---", "currentProfile: "+mSharedPrefs.getString("current_profiles", "")+", profile: "+profile);
         if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
 
         mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
 
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
-        Log.d("---", "lastprofileUpdate: "+lastProfileUpdate+", profile: "+profile);
         if (profile.equals(lastProfileUpdate)) return true; /* abort updating */
         else lastProfileUpdate = profile;
         Log.d("UPDATE PROFILE", profile);
@@ -2782,9 +2797,9 @@ public class Launcher extends BaseActivity
     public void onDestroy() {
         super.onDestroy();
 
-        Log.d("---", "on destroy");
         unregisterReceiver(mReceiver);
         unregisterReceiver(mWiFiReceiver);
+        //unregisterReceiver(mAlarmReceiver);
         mWorkspace.removeCallbacks(mBuildLayersRunnable);
         mWorkspace.removeFolderListeners();
 
@@ -2798,6 +2813,10 @@ public class Launcher extends BaseActivity
 
         if (mRotationPrefChangeHandler != null) {
             mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mRotationPrefChangeHandler);
+        }
+
+        if(mSchedulePrefChangeHandler != null) {
+            mSharedPrefs.unregisterOnSharedPreferenceChangeListener(mSchedulePrefChangeHandler);
         }
 
         if(mMinimalDesignPrefChangeHandler != null) {
@@ -5078,6 +5097,15 @@ public class Launcher extends BaseActivity
         }
     }
 
+    private class SchedulePrefChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(TimePreferenceActivity.SCHEDULE_PREF)){
+                AlarmsService.updateAlarmsList();
+            }
+        }
+    }
+
     private class MinimalDesignPrefChangeHandler implements OnSharedPreferenceChangeListener {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -5121,7 +5149,6 @@ public class Launcher extends BaseActivity
                 SharedPreferences sharedPreferences, String key) {
             if (Utilities.ALLOW_ROTATION_PREFERENCE_KEY.equals(key)) {
                 // Recreate the activity so that it initializes the rotation preference again.
-                Log.d("---", "recreate");
                 recreate();
             }
         }
@@ -5134,6 +5161,33 @@ public class Launcher extends BaseActivity
                 String selectedProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
                 if(selectedProfile!=null){
                     updateProfile(selectedProfile);
+                }
+            }
+            if(key.equals(AlarmReceiver.CHANGE_PROFILE_ALARM)){
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                String updateToProfile = mSharedPrefs.getString(AlarmReceiver.CHANGE_PROFILE_ALARM, null);
+                if(updateToProfile!= null){
+                    updateToProfile = updateToProfile.split("_")[0];
+                    if(!currentProfile.equals(updateToProfile)){
+                        if(updateToProfile.equals("home") || updateToProfile.equals("work")){
+                            updateProfile(updateToProfile);
+                            Log.d("---", "update to profile: "+updateToProfile);
+                        } else {
+                            Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                            if(set!=null) {
+                                newAddedProfiles = new ArrayList<String>(set);
+                                if (newAddedProfiles != null) {
+                                    for(String sub : newAddedProfiles){
+                                        if(updateToProfile.equals(sub.charAt(0)+"")){
+                                            updateToProfile = sub.substring(1);
+                                            Log.d("---", "update to profile: "+updateToProfile);
+                                            updateProfile(updateToProfile);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             if(key.equals(CURRENT_PROFILE_PREF)){
