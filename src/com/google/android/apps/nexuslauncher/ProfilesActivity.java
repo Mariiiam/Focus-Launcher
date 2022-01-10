@@ -16,6 +16,7 @@
 
 package com.google.android.apps.nexuslauncher;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.*;
 import android.content.*;
 import android.content.pm.PackageManager;
@@ -31,19 +32,22 @@ import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
+import android.support.annotation.IntRange;
 import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.launcher3.AddProfileDialogActivity;
 import com.android.launcher3.ChangeProfileNameDialogActivity;
-import com.android.launcher3.DeleteProfileDialogActivity;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherFiles;
+import com.android.launcher3.QuestionGrayscaleDialog;
 import com.android.launcher3.R;
 import com.android.launcher3.SettingsActivity;
+import com.android.launcher3.logger.FirebaseLogger;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.util.TimePreferenceActivity;
 import com.android.launcher3.views.DependentSwitchPreference;
@@ -53,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Settings activity for Launcher. Currently implements the following setting: Allow rotation
@@ -71,6 +76,10 @@ public class ProfilesActivity extends Activity {
     public static int currentProfileNumber;
     public static final String PROFILES_MANAGED = "profiles_managed";
     public static ArrayList<String> newAddedProfiles;
+    public static final int GRAYSCALE_CLICKED = 47;
+    public static final int NOTIFICATION_BLOCKING_ALLOWED = 48;
+    public static boolean grayscale_on = false;
+    public static final String GRAYSCALE_PREF ="grayscale_pref";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +97,19 @@ public class ProfilesActivity extends Activity {
             getFragmentManager().beginTransaction()
                     .replace(android.R.id.content, new ProfilesSettingsFragment())
                     .commit();
+        }
+
+        Set grayscaleInfos = Launcher.mSharedPrefs.getStringSet(GRAYSCALE_PREF, null);
+        if(grayscaleInfos==null){
+            grayscaleInfos = new HashSet<String>();
+            grayscaleInfos.add("work_false");
+            grayscaleInfos.add("home_false");
+            grayscaleInfos.add("disconnected_false");
+            grayscaleInfos.add("default_false"); //Todo check for added profiles
+            for(String newAddedProfile : newAddedProfiles){
+                grayscaleInfos.add(newAddedProfile.substring(1)+"_false");
+            }
+            Launcher.mSharedPrefs.edit().putStringSet(GRAYSCALE_PREF, grayscaleInfos).apply();
         }
     }
 
@@ -152,7 +174,66 @@ public class ProfilesActivity extends Activity {
         }
     }
 
+    public static void saveGrayscaleInfo(boolean isEnabled){
+        String grayscaleInfo = TimePreferenceActivity.selectedProfile+"_"+isEnabled;
+        Set set = Launcher.mSharedPrefs.getStringSet(GRAYSCALE_PREF, null);
+        if(set!=null){
+            ArrayList<String> setAsArray = new ArrayList<>(set);
+            String elementToRemove ="";
+            boolean replaceInfo = false;
+            for(String eachInfo : setAsArray){
+                String profile = eachInfo.split("_")[0];
+                if(profile.equals(grayscaleInfo.split("_")[0])){
+                    elementToRemove = profile+"_"+!isEnabled;
+                    replaceInfo = true;
+                }
+            }
+            if(replaceInfo){
+                setAsArray.remove(elementToRemove);
+            }
+            setAsArray.add(grayscaleInfo);
+            Set set2 = new HashSet(setAsArray);
+            Launcher.mSharedPrefs.edit().putStringSet(GRAYSCALE_PREF, set2).apply();
+            FirebaseLogger firebaseLogger = FirebaseLogger.getInstance();
+            //creating a user ID that is added to each log message in the Firebase database
+            String userID = Launcher.mSharedPrefs.getString("userID_firebase", null);
+            if(userID==null){
+                userID = UUID.randomUUID().toString().substring(0,7);
+                Launcher.mSharedPrefs.edit().putString("userID_firebase", userID).apply();
+                firebaseLogger.setUserID(userID);
+            }
+            firebaseLogger.setUserID(userID);
 
+            String profile = grayscaleInfo.split("_")[0];
+            if(profile.length()>1){
+                firebaseLogger.addLogMessage("events", "profile edited", profile+", grayscale edited, "+Launcher.getProfileSettings(profile));
+            } else {
+                for(String newAddedProfile:newAddedProfiles){
+                    if(profile.equals(newAddedProfile.charAt(0)+"")){
+                        profile = newAddedProfile.substring(1);
+                        firebaseLogger.addLogMessage("events", "profile edited", profile+", grayscale edited, "+Launcher.getProfileSettings(newAddedProfile.charAt(0)+""));
+                    }
+                }
+            }
+
+        }
+    }
+
+    public static String getGrayscaleInfo(String profile){
+        String isEnabled = "false";
+        Set set = Launcher.mSharedPrefs.getStringSet(GRAYSCALE_PREF, null);
+        if(set!=null){
+            ArrayList<String> setAsArray = new ArrayList<>(set);
+            for (String eachElement : setAsArray){
+                if(eachElement.split("_")[0].equals(profile)){
+                    isEnabled = eachElement.split("_")[1];
+                    return isEnabled;
+                }
+            }
+        }
+
+        return isEnabled;
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -169,6 +250,7 @@ public class ProfilesActivity extends Activity {
         private Map<String, GrayscaleAccessObserver> mGrayscaleAccessObservers = new HashMap<>();
         private SharedPreferences.OnSharedPreferenceChangeListener mCurrentProfileListener;
         private ScheduleChangeHandler mScheduleChangeHandler;
+        private FirebaseLogger firebaseLogger;
 
         //public final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
         public final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
@@ -275,6 +357,7 @@ public class ProfilesActivity extends Activity {
          * guidelines.
          */
         private void setupProfilePreferences() {
+            firebaseLogger = FirebaseLogger.getInstance();
             addProfilePref = parent.findPreference(ADD_PROFILE_PREF);
             addProfilePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -312,9 +395,25 @@ public class ProfilesActivity extends Activity {
                     //Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
                     //observeGrayscaleSwitch(profile, (DependentSwitchPreference) grayscalePref);
                     Preference grayscalePref = parent.findPreference(profile + "_enable_grayscale");
-                    observeGrayscalePref(profile, (Preference) grayscalePref);
+                    //observeGrayscalePref(profile, (Preference) grayscalePref);
+                    grayscalePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            Intent intent = new Intent(getActivity(), QuestionGrayscaleDialog.class);
+                            //startActivityForResult(intent, GRAYSCALE_CLICKED);
+                            startActivity(intent);
+                            return true;
+                        }
+                    });
 
                     Preference minimalDesignPref = parent.findPreference(profile + "_minimal_design");
+                    minimalDesignPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            firebaseLogger.addLogMessage("events", "profile edited", profile+", minimal design edited, "+Launcher.getProfileSettings(profile));
+                            return true;
+                        }
+                    });
 
                     Preference wallpaperPref = parent.findPreference(profile+"_choose_wallpaper");
                     bindWallpaperPreference(profile, wallpaperPref);
@@ -366,9 +465,25 @@ public class ProfilesActivity extends Activity {
                             //Preference grayscalePref = parent.findPreference(profileID + "_enable_grayscale");
                             //observeGrayscaleSwitch(profileID, (DependentSwitchPreference) grayscalePref);
                             Preference grayscalePref = parent.findPreference(profileID + "_enable_grayscale");
-                            observeGrayscalePref(profileID, (Preference) grayscalePref);
+                            //observeGrayscalePref(profileID, (Preference) grayscalePref);
+                            grayscalePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                                @Override
+                                public boolean onPreferenceClick(Preference preference) {
+                                    Intent intent = new Intent(getActivity(), QuestionGrayscaleDialog.class);
+                                    //startActivityForResult(intent, GRAYSCALE_CLICKED);
+                                    startActivity(intent);
+                                    return true;
+                                }
+                            });
 
                             Preference minimalDesignPref = parent.findPreference(profileID + "_minimal_design");
+                            minimalDesignPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                                @Override
+                                public boolean onPreferenceClick(Preference preference) {
+                                    firebaseLogger.addLogMessage("events", "profile edited", profile+", minimal design edited, "+Launcher.getProfileSettings(profileID));
+                                    return true;
+                                }
+                            });
 
                             Preference wallpaperPref = parent.findPreference(profileID+"_choose_wallpaper");
                             bindWallpaperPreference(profile, wallpaperPref);
@@ -613,6 +728,7 @@ public class ProfilesActivity extends Activity {
             if(this.parent == this) super.onDestroy();
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             super.onActivityResult(requestCode, resultCode, data);
@@ -624,6 +740,8 @@ public class ProfilesActivity extends Activity {
                     } else if(result.equals("too_short")){
                         Toast.makeText(parent.getActivity(), R.string.error_change_profile_name_too_short, Toast.LENGTH_LONG).show();
                     } else {
+                        //Firebase Logging
+                        firebaseLogger = FirebaseLogger.getInstance();
                         currentProfileNumber += 1;
                         Launcher.availableProfiles.add(result);
                         Set set2 = new HashSet(Launcher.availableProfiles);
@@ -631,6 +749,7 @@ public class ProfilesActivity extends Activity {
                         newAddedProfiles.add(currentProfileNumber+result);
                         Set set1 = new HashSet(newAddedProfiles);
                         Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).commit();
+
                         Preference profileGroup = parent.findPreference("profile_"+currentProfileNumber);
                         profileGroup.setTitle(result);
                         profileGroup.setIcon(R.drawable.ic_profiles);
@@ -653,9 +772,32 @@ public class ProfilesActivity extends Activity {
                         observeNotificationBlockingSwitch(currentProfileNumber+"", (DependentSwitchPreference) notificationBlockingPref);
 
                         Preference grayscalePref = parent.findPreference(currentProfileNumber+"_enable_grayscale");
-                        observeGrayscalePref(currentProfileNumber+"", (Preference) grayscalePref);
+                        //observeGrayscalePref(currentProfileNumber+"", (Preference) grayscalePref);
+                        grayscalePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                            @Override
+                            public boolean onPreferenceClick(Preference preference) {
+                                Intent intent = new Intent(getActivity(), QuestionGrayscaleDialog.class);
+                                //startActivityForResult(intent, GRAYSCALE_CLICKED);
+                                startActivity(intent);
+                                return true;
+                            }
+                        });
+                        Set grayscaleSet = Launcher.mSharedPrefs.getStringSet(GRAYSCALE_PREF, null);
+                        if(grayscaleSet!=null){
+                            ArrayList<String> setAsArray = new ArrayList<>(grayscaleSet);
+                            setAsArray.add(currentProfileNumber+"_false");
+                            Set set3 = new HashSet(setAsArray);
+                            Launcher.mSharedPrefs.edit().putStringSet(GRAYSCALE_PREF, set3).apply();
+                        }
 
                         Preference minimalDesignPref = parent.findPreference(currentProfileNumber+"_minimal_design");
+                        minimalDesignPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                            @Override
+                            public boolean onPreferenceClick(Preference preference) {
+                                firebaseLogger.addLogMessage("events", "profile edited", result+", minimal design edited, "+Launcher.getProfileSettings(currentProfileNumber+""));
+                                return true;
+                            }
+                        });
 
                         Preference wallpaperPref = parent.findPreference(currentProfileNumber+"_choose_wallpaper");
                         bindWallpaperPreference(result, wallpaperPref);
@@ -697,6 +839,35 @@ public class ProfilesActivity extends Activity {
                                 return true;
                             }
                         });
+
+                        //creating a user ID that is added to each log message in the Firebase database
+                        String userID = Launcher.mSharedPrefs.getString("userID_firebase", null);
+                        if(userID==null){
+                            userID = UUID.randomUUID().toString().substring(0,7);
+                            Launcher.mSharedPrefs.edit().putString("userID_firebase", userID).apply();
+                            firebaseLogger.setUserID(userID);
+                        }
+                        firebaseLogger.setUserID(userID);
+
+                        String ssIDInfo = "ssID: {"+ssidsPref.getSummary()+"}, ";
+                        String scheduleInfo = schedulePref.getSummary()+"";
+                        if(scheduleInfo.equals(getString(R.string.summary_alarm_empty))){
+                            scheduleInfo = "schedule: {}, ";
+                        } else {
+                            scheduleInfo = "schedule: {"+schedulePref.getSummary()+"}, ";
+                        }
+                        String ringtoneInfo = "ringtone: "+ringtonePref.getSummary()+", ";
+                        String notificationSoundInfo = "notification sound: "+notificationSoundPref.getSummary()+", ";
+                        String notificationBlockInfo = "notifications blocked: "+((DependentSwitchPreference) notificationBlockingPref).isChecked()+", ";
+                        String minimalDesignInfo = "minimal design on: "+Launcher.mSharedPrefs.getBoolean(currentProfileNumber+MINIMAL_DESIGN_PREF, false)+", ";
+                        String homescreenAppsInfo ="homesreen apps: empty, ";
+                        String wallpaperInfo = "wallpaper: "+Launcher.getWallpaperInfo(currentProfileNumber+"")+", ";
+                        String grayscaleInfo = "grayscale on: "+getGrayscaleInfo(currentProfileNumber+"");
+
+                        String profileSetting = ssIDInfo+scheduleInfo+ringtoneInfo+notificationSoundInfo+notificationBlockInfo+minimalDesignInfo+homescreenAppsInfo+wallpaperInfo+grayscaleInfo;
+
+                        //*********** <timestamp> - profile added - <profilename> - <profilesettings>
+                        firebaseLogger.addLogMessage("events", "profile added", result+", "+profileSetting);
                     }
                 }
             } else if (requestCode == PROFILE_NAME_CHANGE) {
@@ -722,9 +893,22 @@ public class ProfilesActivity extends Activity {
                             newAddedProfiles.add(profileID+result);
                             Set set1 = new HashSet(newAddedProfiles);
                             Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).commit();
+                            firebaseLogger = FirebaseLogger.getInstance();
+                            firebaseLogger.addLogMessage("events", "profile edited", "new name: "+result+", old name: "+changedProfile+", profile name edited, "+Launcher.getProfileSettings(profileID));
                         }
                     }
                 }
+            } else if(requestCode == GRAYSCALE_CLICKED){
+                /*
+                final String result = data.getStringExtra("result");
+                if(result.equals("on")){
+                    grayscale_on = true;
+                    Log.d("---", "grayscale on");
+                } else if(result.equals("off")){
+                    grayscale_on = false;
+                    Log.d("---", "grayscale off");
+                }
+                 */
             }
         }
     }
@@ -768,6 +952,8 @@ public class ProfilesActivity extends Activity {
     public static class NotificationAccessConfirmation
             extends DialogFragment implements DialogInterface.OnClickListener {
 
+        private FirebaseLogger firebaseLogger;
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final Context context = getActivity();
@@ -787,7 +973,18 @@ public class ProfilesActivity extends Activity {
             Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     .putExtra(":settings:fragment_args_key", cn.flattenToString());
-            getActivity().startActivity(intent);
+            getActivity().startActivityForResult(intent, NOTIFICATION_BLOCKING_ALLOWED);
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+            if(requestCode==NOTIFICATION_BLOCKING_ALLOWED){
+                if(resultCode == RESULT_OK) {
+                    firebaseLogger = FirebaseLogger.getInstance();
+                    firebaseLogger.addLogMessage("events", "profile edited", "notification blocking edited, " + Launcher.getProfileSettings(TimePreferenceActivity.selectedProfile));
+                }
+            }
         }
     }
 }

@@ -228,4 +228,7 @@
     <string name="every_string">Jeden</string>
     <string name="clock_string">Uhr</string>
     <string name="at_string">um</string>
+    <string name="question_grayscale">Sind Sie dabei den Graustufen-Modus an oder auszuschalten?</string>
+    <string name="activate">Anschalten</string>
+    <string name="deactivate">Ausschalten</string>
 </resources>

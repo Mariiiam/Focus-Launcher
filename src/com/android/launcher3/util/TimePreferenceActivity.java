@@ -18,6 +18,8 @@ import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.alarm.AlarmModel;
 import com.android.launcher3.alarm.AlarmReceiver;
+import com.android.launcher3.logger.FirebaseLogger;
+import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,6 +39,7 @@ public class TimePreferenceActivity extends DialogPreference {
     public static String selectedProfile;
     public static ArrayList<String> scheduleList = new ArrayList<>();
 
+    private FirebaseLogger firebaseLogger;
 
     public TimePreferenceActivity(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -47,6 +50,8 @@ public class TimePreferenceActivity extends DialogPreference {
         }
         setPositiveButtonText(R.string.save);
         setNegativeButtonText(R.string.cancel);
+        //Firebase Logging
+        firebaseLogger = FirebaseLogger.getInstance();
     }
 
     public TimePreferenceActivity(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -58,6 +63,8 @@ public class TimePreferenceActivity extends DialogPreference {
         }
         setPositiveButtonText(R.string.save);
         setNegativeButtonText(R.string.cancel);
+        //Firebase Logging
+        firebaseLogger = FirebaseLogger.getInstance();
     }
 
     public TimePreferenceActivity(Context context) {
@@ -69,6 +76,8 @@ public class TimePreferenceActivity extends DialogPreference {
         }
         setPositiveButtonText(R.string.save);
         setNegativeButtonText(R.string.cancel);
+        //Firebase Logging
+        firebaseLogger = FirebaseLogger.getInstance();
     }
 
     public TimePreferenceActivity(Context context, AttributeSet attrs) {
@@ -80,6 +89,8 @@ public class TimePreferenceActivity extends DialogPreference {
         }
         setPositiveButtonText(R.string.save);
         setNegativeButtonText(R.string.cancel);
+        //Firebase Logging
+        firebaseLogger = FirebaseLogger.getInstance();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -126,6 +137,7 @@ public class TimePreferenceActivity extends DialogPreference {
                 }
             }
         }
+
     }
 
 
@@ -172,7 +184,7 @@ public class TimePreferenceActivity extends DialogPreference {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private static void saveAlarm(Context context) {
+    private void saveAlarm(Context context) {
         picker.clearFocus();
         ArrayList<String> selectedDays = getSelectedDays();
 
@@ -228,7 +240,19 @@ public class TimePreferenceActivity extends DialogPreference {
                 scheduleList.add(configSchedule);
                 Set set = new HashSet(scheduleList);
                 Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
-                Log.d("---", "save alarm: "+configSchedule);
+
+                ArrayList<String> newAddedProfiles;
+                Set newAddedProfilesSet = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                if(set!=null) {
+                    newAddedProfiles = new ArrayList<>(newAddedProfilesSet);
+                    for(String newAddedProfile : newAddedProfiles){
+                        if(configSchedule.split("_")[0].equals(newAddedProfile.charAt(0)+"")){
+                            firebaseLogger.addLogMessage("events", "profile edited", newAddedProfile.substring(1)+", schedule edited, "+Launcher.getProfileSettings(configSchedule.split("_")[0]));
+                        }
+                    }
+                } else {
+                    firebaseLogger.addLogMessage("events", "profile edited", configSchedule.split("_")[0]+", schedule edited, "+Launcher.getProfileSettings(configSchedule.split("_")[0]));
+                }
                 AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
                 AlarmReceiver.setReminderAlarm(context, alarmModel);
             }

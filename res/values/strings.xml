@@ -444,4 +444,7 @@
     <string name="every_string">Every</string>
     <string name="clock_string">o\'clock</string>
     <string name="at_string">at</string>
+    <string name="question_grayscale">Are you about to turn grayscale mode on or off?</string>
+    <string name="activate">On</string>
+    <string name="deactivate">Off</string>
 </resources>
