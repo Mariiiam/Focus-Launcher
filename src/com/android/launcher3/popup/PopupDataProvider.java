@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import com.android.launcher3.*;
 import com.android.launcher3.badge.BadgeInfo;
+import com.android.launcher3.logger.FirebaseLogger;
 import com.android.launcher3.notification.NotificationInfo;
 import com.android.launcher3.notification.NotificationKeyData;
 import com.android.launcher3.notification.NotificationListener;
@@ -51,6 +52,8 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
 
     private final Launcher mLauncher;
 
+    private FirebaseLogger firebaseLogger;
+
     /** Maps launcher activity components to their list of shortcut ids. */
     private MultiHashMap<ComponentKey, String> mDeepShortcutMap = new MultiHashMap<>();
     /** Maps packages to their BadgeInfo's . */
@@ -63,6 +66,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
                 new SystemShortcut.AppInfo(),
                 new SystemShortcut.Widgets(),
         };
+        firebaseLogger = FirebaseLogger.getInstance();
     }
 
     private boolean currentProfileHidesNotificationsFromAppsNotOnHomescreen() {
@@ -183,9 +187,20 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         BadgeInfo badgeInfo = mPackageUserToBadgeInfos.get(postedPackageUserKey);
 
         if (currentProfileHidesNotificationsFromAppsNotOnHomescreen() && !isAppOnHomescreen(postedPackageUserKey)) {
-            Log.d("NOTIFICATIONS", "Canceled " + postedPackageUserKey.mPackageName + " notification");
+            Log.d("NOTIFICATIONS", "Canceled " + postedPackageUserKey.mPackageName + ", priority: "+notificationKey.notificationKey);
             hideNotification(notificationKey);
             shouldBeFilteredOut = true;
+        }
+
+        String currentProfile = Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, null);
+        if(currentProfile!=null){
+            if(postedPackageUserKey.mPackageName.equals("android")){
+                // do nothing
+            } else if(postedPackageUserKey.mPackageName.equals("com.samsung.android.oneconnect")){
+                //do nothing
+            } else {
+                firebaseLogger.addLogMessage("notification", "received notification", "profile: "+currentProfile+", app name: " +postedPackageUserKey.mPackageName+", is blocked: "+shouldBeFilteredOut);
+            }
         }
 
         final boolean badgingDisabled = !isBadgingEnabled();
