@@ -20,6 +20,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.*;
 import android.content.*;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -420,14 +421,8 @@ public class ProfilesActivity extends Activity {
                     wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                         @Override
                         public boolean onPreferenceClick(Preference preference) {
-                            changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
-                            if(changeWallpaper){
-                                Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
-                                changeWallpaper = false;
-                            } else {
-                                Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
-                                changeWallpaper = true;
-                            }
+                            Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                            startActivityForResult(intent, Launcher.REQUEST_PICK_WALLPAPER);
                             return true;
                         }
                     });
@@ -490,16 +485,10 @@ public class ProfilesActivity extends Activity {
                             wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                                 @Override
                                 public boolean onPreferenceClick(Preference preference) {
-                                changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
-                                if(changeWallpaper){
-                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
-                                    changeWallpaper = false;
-                                } else {
-                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
-                                    changeWallpaper = true;
-                                }
-                                getActivity().finish();
-                                return true;
+                                    Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                                    startActivityForResult(intent, Launcher.REQUEST_PICK_WALLPAPER);
+                                    //getActivity().finish();
+                                    return true;
                                 }
                             });
 
@@ -804,14 +793,8 @@ public class ProfilesActivity extends Activity {
                         wallpaperPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                             @Override
                             public boolean onPreferenceClick(Preference preference) {
-                                changeWallpaper = Launcher.mSharedPrefs.getBoolean(WALLPAPER_BTN_CLICKED, false);
-                                if(changeWallpaper){
-                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, false).commit();
-                                    changeWallpaper = false;
-                                } else {
-                                    Launcher.mSharedPrefs.edit().putBoolean(WALLPAPER_BTN_CLICKED, true).commit();
-                                    changeWallpaper = true;
-                                }
+                                Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                                startActivityForResult(intent, Launcher.REQUEST_PICK_WALLPAPER);
                                 return true;
                             }
                         });
@@ -909,6 +892,8 @@ public class ProfilesActivity extends Activity {
                     Log.d("---", "grayscale off");
                 }
                  */
+            } else if(requestCode == Launcher.REQUEST_PICK_WALLPAPER){
+                Launcher.mSharedPrefs.edit().putString(WALLPAPER_BTN_CLICKED, UUID.randomUUID().toString().substring(0,4)).apply();
             }
         }
     }

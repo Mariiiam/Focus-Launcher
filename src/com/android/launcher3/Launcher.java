@@ -133,7 +133,7 @@ public class Launcher extends BaseActivity
     private static final int REQUEST_CREATE_APPWIDGET = 5;
 
     private static final int REQUEST_PICK_APPWIDGET = 9;
-    private static final int REQUEST_PICK_WALLPAPER = 10;
+    public static final int REQUEST_PICK_WALLPAPER = 10;
 
     private static final int REQUEST_BIND_APPWIDGET = 11;
     private static final int REQUEST_BIND_PENDING_APPWIDGET = 12;
@@ -633,6 +633,8 @@ public class Launcher extends BaseActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 try {
                     startActivity(packageManager.getLaunchIntentForPackage(allPackageNames.get(position)));
+                    String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                    usedApps.add(adapterAll.getItem(position)+"_"+currentProfile);
                 } catch (Exception e) {
                     fetchAllAppList();
                 }
@@ -723,59 +725,65 @@ public class Launcher extends BaseActivity
         if(homescreenPackageNames!=null){
             homescreenPackageNames.clear();
         }
+        if(packageManager!=null){
+            // Query the package manager for all apps
+            List<ResolveInfo> activities = packageManager.queryIntentActivities(
+                    new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
 
-        // Query the package manager for all apps
-        List<ResolveInfo> activities = packageManager.queryIntentActivities(
-                new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
-
-        // Sort the applications by alphabetical order and add them to the list
-        Collections.sort(activities, new ResolveInfo.DisplayNameComparator(packageManager));
-        Set<String> appsOnHomescreen = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
-        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
-        if (appsOnHomescreen != null && currentProfile!=null) {
-            for (String profileApps : appsOnHomescreen) {
-                String profileName = profileApps.split("_")[0];
-                if (profileName.equals(currentProfile)) {
-                    if(profileApps.split("_").length>1){
-                        List<String> listProfileApps = Arrays.asList(profileApps.split("_")[1].split(","));
-                        for(String app : listProfileApps){
-                            for (ResolveInfo resolver : activities) {
-                                // Exclude  this launcher from the list of apps shown
-                                String appName = (String) resolver.loadLabel(packageManager);
-                                if (appName.equals("Focus Launcher")) continue;
-                                if (appName.equals(app)) {
-                                    adapterHomescreen.add(appName);
-                                    homescreenPackageNames.add(resolver.activityInfo.packageName);
+            // Sort the applications by alphabetical order and add them to the list
+            Collections.sort(activities, new ResolveInfo.DisplayNameComparator(packageManager));
+            Set<String> appsOnHomescreen = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
+            String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+            if (appsOnHomescreen != null && currentProfile!=null) {
+                for (String profileApps : appsOnHomescreen) {
+                    String profileName = profileApps.split("_")[0];
+                    if (profileName.equals(currentProfile)) {
+                        if(profileApps.split("_").length>1){
+                            List<String> listProfileApps = Arrays.asList(profileApps.split("_")[1].split(","));
+                            for(String app : listProfileApps){
+                                for (ResolveInfo resolver : activities) {
+                                    // Exclude  this launcher from the list of apps shown
+                                    String appName = (String) resolver.loadLabel(packageManager);
+                                    if (appName.equals("Focus Launcher")) continue;
+                                    if (appName.equals(app)) {
+                                        adapterHomescreen.add(appName);
+                                        homescreenPackageNames.add(resolver.activityInfo.packageName);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+            launcherListView.setAdapter(adapterHomescreen);
         }
-        launcherListView.setAdapter(adapterHomescreen);
     }
 
     private void fetchAllAppList() {
         // Start from a clean adapter when refreshing the list
-        adapterAll.clear();
-        allPackageNames.clear();
-
-        // Query the package manager for all apps
-        List<ResolveInfo> activities = packageManager.queryIntentActivities(
-                new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
-
-        // Sort the applications by alphabetical order and add them to the list
-        Collections.sort(activities, new ResolveInfo.DisplayNameComparator(packageManager));
-        for (ResolveInfo resolver : activities) {
-
-            // Exclude the settings app and this launcher from the list of apps shown
-            String appName = (String) resolver.loadLabel(packageManager);
-                if (appName.equals("Focus Launcher")) continue;
-                adapterAll.add(appName);
-                allPackageNames.add(resolver.activityInfo.packageName);
+        if(adapterAll!=null){
+            adapterAll.clear();
         }
-        allAppsListView.setAdapter(adapterAll);
+        if(allPackageNames!=null){
+            allPackageNames.clear();
+        }
+        if(packageManager!=null){
+            // Query the package manager for all apps
+            List<ResolveInfo> activities = packageManager.queryIntentActivities(
+                    new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER), 0);
+
+            // Sort the applications by alphabetical order and add them to the list
+            Collections.sort(activities, new ResolveInfo.DisplayNameComparator(packageManager));
+            for (ResolveInfo resolver : activities) {
+
+                // Exclude the settings app and this launcher from the list of apps shown
+                String appName = (String) resolver.loadLabel(packageManager);
+                    if (appName.equals("Focus Launcher")) continue;
+                    adapterAll.add(appName);
+                    allPackageNames.add(resolver.activityInfo.packageName);
+            }
+            allAppsListView.setAdapter(adapterAll);
+        }
     }
 
     @Override
@@ -1001,33 +1009,26 @@ public class Launcher extends BaseActivity
             }
             return;
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
-            //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
-                Bitmap wallpaper = extractWallpaper();
-                String profile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
-                saveImageToAppPrivateFile(wallpaper, "wallpaper_"+profile);
-                // User could have free-scrolled between pages before picking a wallpaper; make sure
-                // we move to the closest one now.
-                mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
-                showWorkspace(false);
-                saveWallpaperInfo();
-                if(profile!=null){
-                    if(profile.length()>1){
-                        firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
-                    } else {
-                        Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
-                        if(set!=null){
-                            newAddedProfiles = new ArrayList<String>(set);
-                            for(String newAddedProfile : newAddedProfiles){
-                                if(profile.equals(newAddedProfile.substring(1))){
-                                    profile = newAddedProfile.charAt(0)+"";
-                                    firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
-                                }
+            //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {}
+            onRequestWallpaperPick();
+            String profile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+            if(profile!=null){
+                if(profile.length()>1){
+                    firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
+                } else {
+                    Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                    if(set!=null){
+                        newAddedProfiles = new ArrayList<String>(set);
+                        for(String newAddedProfile : newAddedProfiles){
+                            if(profile.equals(newAddedProfile.substring(1))){
+                                profile = newAddedProfile.charAt(0)+"";
+                                firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
                             }
                         }
                     }
                 }
+            }
 
-            //}
             return;
         }
 
@@ -1107,6 +1108,17 @@ public class Launcher extends BaseActivity
             }
         }
         mDragLayer.clearAnimatedView();
+    }
+
+    private void onRequestWallpaperPick(){
+        Bitmap wallpaper = extractWallpaper();
+        String profile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+        saveImageToAppPrivateFile(wallpaper, "wallpaper_"+profile);
+        // User could have free-scrolled between pages before picking a wallpaper; make sure
+        // we move to the closest one now.
+        mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
+        showWorkspace(false);
+        saveWallpaperInfo();
     }
 
     private static final String INIT_RINGTONE = "INIT_RINGTONE";
@@ -2017,24 +2029,24 @@ public class Launcher extends BaseActivity
                         if(profileApps.split("_").length>1){
                             List<String> apps = Arrays.asList(profileApps.split("_")[1].split(","));
                             if(!apps.contains(info.title.toString())){
-                                String updatedProfileApps = profileApps+", "+info.title.toString();
+                                String updatedProfileApps = profileApps+","+info.title.toString();
                                 appsOnHomescreenList.remove(profileApps);
                                 appsOnHomescreenList.add(updatedProfileApps);
-                                Set set = new HashSet(appsOnHomescreenList);
+                                Set<String> set = new HashSet(appsOnHomescreenList);
                                 mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
                             }
                         } else {
-                            String updatedProfileApps = profileApps+", "+info.title.toString();
+                            String updatedProfileApps = profileApps+info.title.toString();
                             appsOnHomescreenList.remove(profileApps);
                             appsOnHomescreenList.add(updatedProfileApps);
-                            Set set = new HashSet(appsOnHomescreenList);
+                            Set<String> set = new HashSet(appsOnHomescreenList);
                             mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
                         }
                     } else {
                         //if profile is not saved in the list
                         String newProfileApps = currentProfile+"_"+info.title.toString();
                         appsOnHomescreenList.add(newProfileApps);
-                        Set set = new HashSet(appsOnHomescreenList);
+                        Set<String> set = new HashSet(appsOnHomescreenList);
                         mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
                     }
                 }
@@ -2043,9 +2055,10 @@ public class Launcher extends BaseActivity
                 ArrayList<String> appsOnHomescreenList = new ArrayList<>();
                 String newProfileApps = currentProfile+"_"+info.title.toString();
                 appsOnHomescreenList.add(newProfileApps);
-                Set set = new HashSet(appsOnHomescreenList);
+                Set<String> set = new HashSet(appsOnHomescreenList);
                 mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
             }
+            fetchHomescreenAppList();
             firebaseLogger.addLogMessage("events", "profile edited", "app added on homescreen, "+getProfileSettings(currentProfile));
         }
         return favorite;
@@ -2368,7 +2381,6 @@ public class Launcher extends BaseActivity
     private String lastProfileUpdate = null;
     public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
-
         String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
         if(firstTime && manualProfile != null) {
             // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
@@ -3249,10 +3261,16 @@ public class Launcher extends BaseActivity
                               List<String> appsFromProfile = Arrays.asList(profileApps.split("_")[1].split(","));
                                 String updatedAppsForProfile = profileName+"_";
                                 appsOnHomescreenList.remove(profileApps);
+                                boolean firstTime = true;
                                 //add all apps except the removed one
                                 for(String app : appsFromProfile){
                                     if(!app.equals(itemInfo.title.toString())){
-                                        updatedAppsForProfile = updatedAppsForProfile+", "+app;
+                                        if(firstTime){
+                                            updatedAppsForProfile = updatedAppsForProfile+app;
+                                            firstTime = false;
+                                        } else {
+                                            updatedAppsForProfile = updatedAppsForProfile+","+app;
+                                        }
                                     }
                                 }
                                 appsOnHomescreenList.add(updatedAppsForProfile);
@@ -3637,7 +3655,6 @@ public class Launcher extends BaseActivity
             if ((shortcut.isDisabled &
                     ~ShortcutInfo.FLAG_DISABLED_SUSPENDED &
                     ~ShortcutInfo.FLAG_DISABLED_QUIET_USER) == 0) {
-                Log.d("---", "click 2: "+shortcut.title);
                 // If the app is only disabled because of the above flags, launch activity anyway.
                 // Framework will tell the user why the app is suspended.
             } else {
@@ -5294,7 +5311,7 @@ public class Launcher extends BaseActivity
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if(key.equals(ProfilesActivity.WALLPAPER_BTN_CLICKED)){
-                onClickWallpaperPicker(view);
+                onRequestWallpaperPick();
             }
         }
     }
