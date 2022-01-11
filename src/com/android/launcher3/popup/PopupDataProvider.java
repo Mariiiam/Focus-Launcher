@@ -187,7 +187,6 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         BadgeInfo badgeInfo = mPackageUserToBadgeInfos.get(postedPackageUserKey);
 
         if (currentProfileHidesNotificationsFromAppsNotOnHomescreen() && !isAppOnHomescreen(postedPackageUserKey)) {
-            Log.d("NOTIFICATIONS", "Canceled " + postedPackageUserKey.mPackageName + ", priority: "+notificationKey.notificationKey);
             hideNotification(notificationKey);
             shouldBeFilteredOut = true;
         }

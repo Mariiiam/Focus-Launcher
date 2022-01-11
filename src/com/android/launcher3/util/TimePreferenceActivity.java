@@ -243,7 +243,7 @@ public class TimePreferenceActivity extends DialogPreference {
 
                 ArrayList<String> newAddedProfiles;
                 Set newAddedProfilesSet = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
-                if(set!=null) {
+                if(set!=null && newAddedProfilesSet!=null) {
                     newAddedProfiles = new ArrayList<>(newAddedProfilesSet);
                     for(String newAddedProfile : newAddedProfiles){
                         if(configSchedule.split("_")[0].equals(newAddedProfile.charAt(0)+"")){

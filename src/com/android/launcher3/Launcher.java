@@ -26,10 +26,8 @@ import android.appwidget.AppWidgetManager;
 import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.*;
 import android.graphics.drawable.*;
@@ -41,14 +39,10 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Process;
 import android.os.*;
-import android.preference.Preference;
-import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -71,12 +65,10 @@ import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace.ItemOperator;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
-import com.android.launcher3.alarm.AlarmModel;
 import com.android.launcher3.alarm.AlarmReceiver;
 import com.android.launcher3.alarm.AlarmsService;
 import com.android.launcher3.allapps.AllAppsContainerView;
 import com.android.launcher3.allapps.AllAppsTransitionController;
-import com.android.launcher3.allapps.AlphabeticalAppsList;
 import com.android.launcher3.anim.AnimationLayerSet;
 import com.android.launcher3.compat.AppWidgetManagerCompat;
 import com.android.launcher3.compat.LauncherAppsCompat;
@@ -107,14 +99,9 @@ import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ContainerType;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ControlType;
 import com.android.launcher3.util.*;
-import com.android.launcher3.views.DependentSwitchPreference;
-import com.android.launcher3.views.DoubleShadowBubbleTextView;
 import com.android.launcher3.widget.*;
 import com.google.android.apps.nexuslauncher.ProfilesActivity;
 import com.google.android.apps.nexuslauncher.SettingsActivity;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.*;
 import java.util.*;
@@ -363,6 +350,9 @@ public class Launcher extends BaseActivity
 
     private static boolean isRecreatedForThemeChange = false;
 
+    private static ArrayList<String> usedApps = new ArrayList<>();
+
+    private static ArrayList<String> usedShortcuts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -546,6 +536,7 @@ public class Launcher extends BaseActivity
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_USER_PRESENT); // When the device wakes up + keyguard is gone
+        filter.addAction(Intent.ACTION_SCREEN_ON);
         registerReceiver(mReceiver, filter);
         mShouldFadeInScrim = true;
 
@@ -629,6 +620,8 @@ public class Launcher extends BaseActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 try {
                     startActivity(packageManager.getLaunchIntentForPackage(homescreenPackageNames.get(position)));
+                    String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                    usedShortcuts.add(adapterHomescreen.getItem(position)+"_"+currentProfile);
                 } catch (Exception e) {
                     fetchHomescreenAppList();
                 }
@@ -714,7 +707,6 @@ public class Launcher extends BaseActivity
             String profileApps = currentProfile+"_";
             for(ItemInfo info : workspaceItems) {
                 if(info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
-                    Log.d("---", "getAppItemsFromLoaderResults: "+info.title.toString());
                     profileApps = profileApps+","+info.title.toString();
                 }
             }
@@ -2015,7 +2007,6 @@ public class Launcher extends BaseActivity
         String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
 
         if(info.container == Favorites.CONTAINER_DESKTOP || info.container == -1){
-            Log.d("---", "create shortcut: "+info.title.toString());
             if(appsOnHomescreen!=null){
                 ArrayList<String> appsOnHomescreenList = new ArrayList<>(appsOnHomescreen);
                 // search if the app is already saved in the list, if not than add it to the list
@@ -2024,7 +2015,6 @@ public class Launcher extends BaseActivity
 
                     if(profileName.equals(currentProfile)){
                         //if profile has already entries, save new entry
-                        Log.d("---", "profile apps: "+profileApps);
                         if(profileApps.split("_").length>1){
                             List<String> apps = Arrays.asList(profileApps.split("_")[1].split(","));
                             if(!apps.contains(info.title.toString())){
@@ -2202,6 +2192,10 @@ public class Launcher extends BaseActivity
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mDragLayer.clearResizeFrame();
 
+                firebaseLogger.addLogMessage("unlocks", "screen off", "used apps: "+usedApps+", used shortcuts: "+usedShortcuts);
+                usedApps = new ArrayList<>();
+                usedShortcuts = new ArrayList<>();
+
                 // Reset AllApps to its initial state only if we are not in the middle of
                 // processing a multi-step drop
                 if (mAppsView != null && mWidgetsView != null && mPendingRequestArgs == null) {
@@ -2213,8 +2207,12 @@ public class Launcher extends BaseActivity
                 mShouldFadeInScrim = true;
             } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 // ACTION_USER_PRESENT is sent after onStart/onResume. This covers the case where
-                // the user unlocked and the Launcher is not in the foreground.
+                // the user unlocked.
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                firebaseLogger.addLogMessage("unlocks", "phone unlocked", "unlock, profile: " +currentProfile);
                 mShouldFadeInScrim = false;
+            } else if(Intent.ACTION_SCREEN_ON.equals(action)){
+                firebaseLogger.addLogMessage("unlocks", "screen on", "");
             }
         }
     };
@@ -3462,6 +3460,16 @@ public class Launcher extends BaseActivity
             return;
         }
 
+        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+        if(v.getTag() instanceof ShortcutInfo){
+            String shortcutName = ((ShortcutInfo) v.getTag()).title+"_"+currentProfile;
+            usedShortcuts.add(shortcutName); //for firebase logging
+        }
+        if(v.getTag() instanceof AppInfo){
+            String appName = ((AppInfo) v.getTag()).title+"_"+currentProfile;
+            usedApps.add(appName); //for firebase logging
+        }
+
         if (v instanceof Workspace) {
             if (mWorkspace.isInOverviewMode()) {
                 getUserEventDispatcher().logActionOnContainer(LauncherLogProto.Action.Type.TOUCH,
@@ -3621,6 +3629,8 @@ public class Launcher extends BaseActivity
             throw new IllegalArgumentException("Input must be a Shortcut");
         }
 
+
+
         // Open shortcut
         final ShortcutInfo shortcut = (ShortcutInfo) tag;
 
@@ -3628,6 +3638,7 @@ public class Launcher extends BaseActivity
             if ((shortcut.isDisabled &
                     ~ShortcutInfo.FLAG_DISABLED_SUSPENDED &
                     ~ShortcutInfo.FLAG_DISABLED_QUIET_USER) == 0) {
+                Log.d("---", "click 2: "+shortcut.title);
                 // If the app is only disabled because of the above flags, launch activity anyway.
                 // Framework will tell the user why the app is suspended.
             } else {
