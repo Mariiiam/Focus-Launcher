@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.protobuf'
+apply plugin: 'com.google.gms.google-services'
 
 buildscript {
     repositories {
@@ -11,6 +12,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+        classpath 'com.google.gms:google-services:4.3.10'
     }
 }
 
@@ -117,6 +119,7 @@ repositories {
 
 final String SUPPORT_LIBS_VERSION = '27.1.1'
 dependencies {
+    implementation 'com.google.firebase:firebase-database:17.0.0'
     implementation "com.android.support:support-v4:${SUPPORT_LIBS_VERSION}"
     implementation "com.android.support:support-dynamic-animation:${SUPPORT_LIBS_VERSION}"
     implementation "com.android.support:recyclerview-v7:${SUPPORT_LIBS_VERSION}"
