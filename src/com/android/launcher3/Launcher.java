@@ -1971,8 +1971,9 @@ public class Launcher extends BaseActivity
     }
 
     public static void updateSharedPrefsProfile(String profile){
-        mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profile).commit();
-        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).commit();
+        mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, profile).apply();
+        String profileName = profile.split("_")[0];
+        mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profileName).apply();
     }
 
     /**
@@ -2382,6 +2383,9 @@ public class Launcher extends BaseActivity
     public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
         String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
+        if(manualProfile!=null){
+            manualProfile = manualProfile.split("_")[0];
+        }
         if(firstTime && manualProfile != null) {
             // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
             mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, null).apply();
@@ -5380,6 +5384,7 @@ public class Launcher extends BaseActivity
             if(key.equals(MANUAL_PROFILE_PREF)){
                 String selectedProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
                 if(selectedProfile!=null){
+                    selectedProfile = selectedProfile.split("_")[0];
                     firebaseLogger.addLogMessage("events", "profile triggered", selectedProfile+", manually");
                     updateProfile(selectedProfile);
                 }
