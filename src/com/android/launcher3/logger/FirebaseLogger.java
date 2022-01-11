@@ -16,7 +16,7 @@ public class FirebaseLogger {
     }
 
     private String userID;
-    private DatabaseReference database = FirebaseDatabase.getInstance("<add firebase link here>").getReference();
+    private DatabaseReference database = FirebaseDatabase.getInstance(ConfigStore.databaseURL).getReference();
 
     public void setUserID(String userID){
         this.userID = userID;
