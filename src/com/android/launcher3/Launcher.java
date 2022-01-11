@@ -1003,14 +1003,13 @@ public class Launcher extends BaseActivity
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
             //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {
                 Bitmap wallpaper = extractWallpaper();
-                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
-                saveImageToAppPrivateFile(wallpaper, "wallpaper_"+currentProfile);
+                String profile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                saveImageToAppPrivateFile(wallpaper, "wallpaper_"+profile);
                 // User could have free-scrolled between pages before picking a wallpaper; make sure
                 // we move to the closest one now.
                 mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
                 showWorkspace(false);
                 saveWallpaperInfo();
-                String profile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
                 if(profile!=null){
                     if(profile.length()>1){
                         firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
@@ -2365,7 +2364,7 @@ public class Launcher extends BaseActivity
         return updateProfile("default");
     }
 
-    private boolean firstTime = true;
+    private static boolean firstTime = true;
     private String lastProfileUpdate = null;
     public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
@@ -2373,7 +2372,7 @@ public class Launcher extends BaseActivity
         String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
         if(firstTime && manualProfile != null) {
             // this happens if a profile was manually changed to a profile with a different theme which triggered a recreate()
-            mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, null).commit();
+            mSharedPrefs.edit().putString(MANUAL_PROFILE_PREF, null).apply();
             firstTime = false;
 
             //profile = manualProfile;
@@ -2384,7 +2383,7 @@ public class Launcher extends BaseActivity
         if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
 
         mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
-
+        
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
         if (profile.equals(lastProfileUpdate)) return true; /* abort updating */
         else lastProfileUpdate = profile;
