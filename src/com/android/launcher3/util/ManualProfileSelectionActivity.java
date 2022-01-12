@@ -12,6 +12,7 @@ import com.android.launcher3.R;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class ManualProfileSelectionActivity extends Activity {
 
@@ -31,7 +32,7 @@ public class ManualProfileSelectionActivity extends Activity {
     protected void onStart() {
         super.onStart();
         allProfilesSet = Launcher.getAllProfiles();
-        allProfilesArray = new ArrayList<String>(allProfilesSet);
+        allProfilesArray = new ArrayList<>(allProfilesSet);
         allProfiles = new String[allProfilesArray.size()-1];
         int count=0;
         for(int k=0; k<allProfiles.length; k++){
@@ -80,7 +81,7 @@ public class ManualProfileSelectionActivity extends Activity {
                 .setItems(allProfilesLabelsCopy, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Launcher.updateSharedPrefsProfile(allProfiles[i]);
+                        Launcher.updateSharedPrefsProfile(allProfiles[i]+"_"+ UUID.randomUUID().toString().substring(0,3));
                         chosenProfile = allProfiles[i];
                         finish();
                     }

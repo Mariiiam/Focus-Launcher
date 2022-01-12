@@ -41,7 +41,6 @@ public class AlarmsService extends IntentService {
         ArrayList<AlarmModel> alarmsListClone = (ArrayList<AlarmModel>) alarmsList.clone();
         i.putParcelableArrayListExtra(ALARMS_EXTRA, alarmsListClone);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
-        Log.d("---", "send broadcast "+i.getAction());
     }
 
     public static void launchAlarmsService(Context context) {
