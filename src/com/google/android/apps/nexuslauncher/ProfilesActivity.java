@@ -16,11 +16,8 @@
 
 package com.google.android.apps.nexuslauncher;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.*;
 import android.content.*;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -29,16 +26,11 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
-import android.preference.SwitchPreference;
 import android.provider.Settings;
-import android.support.annotation.IntRange;
 import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.launcher3.AddProfileDialogActivity;
@@ -253,7 +245,6 @@ public class ProfilesActivity extends Activity {
         private ScheduleChangeHandler mScheduleChangeHandler;
         private FirebaseLogger firebaseLogger;
 
-        //public final static String[] availableProfiles = new String[]{"home", "work", "default", "disconnected"};
         public final static Map<String, Integer> resourceIdForProfileName = new HashMap<>();
         static {
             resourceIdForProfileName.put("home", R.string.profile_home);
@@ -733,11 +724,11 @@ public class ProfilesActivity extends Activity {
                         firebaseLogger = FirebaseLogger.getInstance();
                         currentProfileNumber += 1;
                         Launcher.availableProfiles.add(result);
-                        Set set2 = new HashSet(Launcher.availableProfiles);
-                        Launcher.mSharedPrefs.edit().putStringSet(PROFILES_MANAGED, set2).commit();
+                        Set<String> set2 = new HashSet(Launcher.availableProfiles);
+                        Launcher.mSharedPrefs.edit().putStringSet(PROFILES_MANAGED, set2).apply();
                         newAddedProfiles.add(currentProfileNumber+result);
-                        Set set1 = new HashSet(newAddedProfiles);
-                        Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).commit();
+                        Set<String> set1 = new HashSet(newAddedProfiles);
+                        Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).apply();
 
                         Preference profileGroup = parent.findPreference("profile_"+currentProfileNumber);
                         profileGroup.setTitle(result);
@@ -814,7 +805,7 @@ public class ProfilesActivity extends Activity {
                                 for(String sub : newAddedProfiles){
                                     if((sub.charAt(0)+"").equals(profileID)){
                                         String profile = sub.substring(1);
-                                        Launcher.mSharedPrefs.edit().putString(CHANGE_NAME_PREF, profile).commit();
+                                        Launcher.mSharedPrefs.edit().putString(CHANGE_NAME_PREF, profile).apply();
                                         Intent intent = new Intent(getActivity(), ChangeProfileNameDialogActivity.class);
                                         startActivityForResult(intent, PROFILE_NAME_CHANGE);
                                     }
@@ -863,35 +854,33 @@ public class ProfilesActivity extends Activity {
                     } else {
                         String changedProfile = Launcher.mSharedPrefs.getString(CHANGE_NAME_PREF, null);
                         String profileID = new String();
+                        int indexOfChangedProfile = 0;
+                        String profileToAddToNewAddedList = "";
                         for(String sub : newAddedProfiles){
                             if(sub.substring(1).equals(changedProfile)){
                                 profileID = sub.charAt(0)+"";
+                                if(profileID!=null){
+                                    Preference profileGroup = parent.findPreference("profile_"+profileID);
+                                    profileGroup.setTitle(result);
+                                    getActivity().recreate();
+                                    int i = Launcher.availableProfiles.indexOf(changedProfile);
+                                    Launcher.availableProfiles.set(i, result);
+                                    Set<String> set2 = new HashSet<>(Launcher.availableProfiles);
+                                    Launcher.mSharedPrefs.edit().putStringSet(PROFILES_MANAGED, set2).apply();
+
+                                    indexOfChangedProfile = newAddedProfiles.indexOf(profileID+changedProfile);
+                                    profileToAddToNewAddedList = profileID+result;
+                                }
                             }
                         }
-                        if(profileID!=null){
-                            Preference profileGroup = parent.findPreference("profile_"+profileID);
-                            profileGroup.setTitle(result);
-                            int i = Launcher.availableProfiles.indexOf(changedProfile);
-                            Launcher.availableProfiles.set(i, result);
-                            newAddedProfiles.add(profileID+result);
-                            Set set1 = new HashSet(newAddedProfiles);
-                            Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).commit();
-                            firebaseLogger = FirebaseLogger.getInstance();
-                            firebaseLogger.addLogMessage("events", "profile edited", "new name: "+result+", old name: "+changedProfile+", profile name edited, "+Launcher.getProfileSettings(profileID));
-                        }
+                        newAddedProfiles.set(indexOfChangedProfile, profileToAddToNewAddedList);
+                        Set<String> set1 = new HashSet(newAddedProfiles);
+                        Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).apply();
+
+                        firebaseLogger = FirebaseLogger.getInstance();
+                        firebaseLogger.addLogMessage("events", "profile edited", "new name: "+result+", old name: "+changedProfile+", profile name edited, "+Launcher.getProfileSettings(profileID));
                     }
                 }
-            } else if(requestCode == GRAYSCALE_CLICKED){
-                /*
-                final String result = data.getStringExtra("result");
-                if(result.equals("on")){
-                    grayscale_on = true;
-                    Log.d("---", "grayscale on");
-                } else if(result.equals("off")){
-                    grayscale_on = false;
-                    Log.d("---", "grayscale off");
-                }
-                 */
             } else if(requestCode == Launcher.REQUEST_PICK_WALLPAPER){
                 Launcher.mSharedPrefs.edit().putString(WALLPAPER_BTN_CLICKED, UUID.randomUUID().toString().substring(0,4)).apply();
             }

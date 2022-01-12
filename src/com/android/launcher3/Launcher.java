@@ -410,15 +410,22 @@ public class Launcher extends BaseActivity
         }
         firebaseLogger.setUserID(userID);
 
-        Set set1 = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
+        Set<String> set1 = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
         if(set1==null){
             availableProfiles = new ArrayList<>();
             availableProfiles.add("home");
             availableProfiles.add("work");
             availableProfiles.add("default");
             availableProfiles.add("disconnected");
-            Set set2 = new HashSet(availableProfiles);
-            Launcher.mSharedPrefs.edit().putStringSet(ProfilesActivity.PROFILES_MANAGED, set2).commit();
+            Set<String> setNewAddedProfiles = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            if(setNewAddedProfiles!=null){
+                newAddedProfiles = new ArrayList<>(setNewAddedProfiles);
+                for(String newAddedProfile : newAddedProfiles){
+                    availableProfiles.add(newAddedProfile.substring(1));
+                }
+            }
+            Set<String> set2 = new HashSet<>(availableProfiles);
+            Launcher.mSharedPrefs.edit().putStringSet(ProfilesActivity.PROFILES_MANAGED, set2).apply();
         } else {
             availableProfiles = new ArrayList<>(set1);
         }
@@ -426,7 +433,7 @@ public class Launcher extends BaseActivity
         if(mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null)==null){
             newAddedProfiles = new ArrayList<>();
         } else {
-            Set set = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            Set<String> set = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
             newAddedProfiles = new ArrayList<>(set);
         }
 
@@ -1922,8 +1929,7 @@ public class Launcher extends BaseActivity
     }
 
     public static Set<String> getAllProfiles() {
-        Set<String> set = new HashSet<String>();
-        set = mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
+        Set<String> set = mSharedPrefs.getStringSet(ProfilesActivity.PROFILES_MANAGED, null);
         return set;
     }
 
@@ -5347,14 +5353,16 @@ public class Launcher extends BaseActivity
                         newAddedProfiles = new ArrayList<>(set);
                         if(newAddedProfiles!=null){
                             for(String sub : newAddedProfiles){
-                                if(sub.substring(1).equals(profile)){
-                                    String profileID = sub.charAt(0)+"";
-                                    if(key.equals(profileID+ProfilesActivity.MINIMAL_DESIGN_PREF)){
-                                        firebaseLogger.addLogMessage("events", "profile edited", profile+", minimal design edited, "+getProfileSettings(profileID));
-                                        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
-                                        if (profile.equals(currentProfile)) {
-                                            isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
-                                            switchToMinimalLayout(isMinimalDesignON);
+                                if(sub.length()!=0){
+                                    if(sub.substring(1).equals(profile)){
+                                        String profileID = sub.charAt(0)+"";
+                                        if(key.equals(profileID+ProfilesActivity.MINIMAL_DESIGN_PREF)){
+                                            firebaseLogger.addLogMessage("events", "profile edited", profile+", minimal design edited, "+getProfileSettings(profileID));
+                                            String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
+                                            if (profile.equals(currentProfile)) {
+                                                isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                                                switchToMinimalLayout(isMinimalDesignON);
+                                            }
                                         }
                                     }
                                 }

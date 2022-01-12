@@ -32,7 +32,7 @@ public class ManualProfileSelectionActivity extends Activity {
     protected void onStart() {
         super.onStart();
         allProfilesSet = Launcher.getAllProfiles();
-        allProfilesArray = new ArrayList<String>(allProfilesSet);
+        allProfilesArray = new ArrayList<>(allProfilesSet);
         allProfiles = new String[allProfilesArray.size()-1];
         int count=0;
         for(int k=0; k<allProfiles.length; k++){
