@@ -1018,24 +1018,6 @@ public class Launcher extends BaseActivity
         } else if (requestCode == REQUEST_PICK_WALLPAPER) {
             //if (resultCode == RESULT_OK /* && mWorkspace.isInOverviewMode()*/) {}
             onRequestWallpaperPick();
-            String profile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
-            if(profile!=null){
-                if(profile.length()>1){
-                    firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
-                } else {
-                    Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
-                    if(set!=null){
-                        newAddedProfiles = new ArrayList<String>(set);
-                        for(String newAddedProfile : newAddedProfiles){
-                            if(profile.equals(newAddedProfile.substring(1))){
-                                profile = newAddedProfile.charAt(0)+"";
-                                firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
-                            }
-                        }
-                    }
-                }
-            }
-
             return;
         }
 
@@ -1126,6 +1108,23 @@ public class Launcher extends BaseActivity
         mWorkspace.setCurrentPage(mWorkspace.getPageNearestToCenterOfScreen());
         showWorkspace(false);
         saveWallpaperInfo();
+
+        if(profile!=null){
+            if(profile.length()>1){
+                firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
+            } else {
+                Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                if(set!=null){
+                    newAddedProfiles = new ArrayList<String>(set);
+                    for(String newAddedProfile : newAddedProfiles){
+                        if(profile.equals(newAddedProfile.substring(1))){
+                            profile = newAddedProfile.charAt(0)+"";
+                            firebaseLogger.addLogMessage("events", "profile edited", profile+", wallpaper edited, "+getProfileSettings(profile));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static final String INIT_RINGTONE = "INIT_RINGTONE";

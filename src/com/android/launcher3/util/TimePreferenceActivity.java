@@ -188,6 +188,14 @@ public class TimePreferenceActivity extends DialogPreference {
         picker.clearFocus();
         ArrayList<String> selectedDays = getSelectedDays();
 
+        Set newAddedProfilesSet = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+        ArrayList<String> newAddedProfiles;
+        if(newAddedProfilesSet != null){
+            newAddedProfiles = new ArrayList<>(newAddedProfilesSet);
+        } else {
+            newAddedProfiles = new ArrayList<>();
+        }
+
         //check if no days are selected. If so, then delete the alarm if the profile already has a schedule or show a message if it is a new schedule.
         if(selectedDays.isEmpty()) {
             boolean profileAlreadyScheduled = false;
@@ -203,6 +211,15 @@ public class TimePreferenceActivity extends DialogPreference {
                 scheduleList.remove(scheduleToDelete);
                 AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
                 AlarmReceiver.cancelReminderAlarm(context, alarmModel);
+                if(selectedProfile.length()==1){
+                    for(String newAddedProfile : newAddedProfiles){
+                        if((newAddedProfile.charAt(0)+"").equals(selectedProfile)){
+                            firebaseLogger.addLogMessage("events", "profile edited", newAddedProfile.substring(1)+", schedule edited alarm deleted, "+Launcher.getProfileSettings(selectedProfile));
+                        }
+                    }
+                } else {
+                    firebaseLogger.addLogMessage("events", "profile edited", selectedProfile+", schedule edited alarm deleted, "+Launcher.getProfileSettings(selectedProfile));
+                }
             } else {
                 Toast.makeText(context, context.getString(R.string.msg_no_day_selected), Toast.LENGTH_SHORT).show();
             }
@@ -241,10 +258,7 @@ public class TimePreferenceActivity extends DialogPreference {
                 Set set = new HashSet(scheduleList);
                 Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
 
-                ArrayList<String> newAddedProfiles;
-                Set newAddedProfilesSet = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
-                if(set!=null && newAddedProfilesSet!=null) {
-                    newAddedProfiles = new ArrayList<>(newAddedProfilesSet);
+                if(set!=null) {
                     for(String newAddedProfile : newAddedProfiles){
                         if(configSchedule.split("_")[0].equals(newAddedProfile.charAt(0)+"")){
                             firebaseLogger.addLogMessage("events", "profile edited", newAddedProfile.substring(1)+", schedule edited, "+Launcher.getProfileSettings(configSchedule.split("_")[0]));
