@@ -36,6 +36,7 @@ import com.android.launcher3.shortcuts.ShortcutInfoCompat;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.MultiHashMap;
 import com.android.launcher3.util.PackageUserKey;
+import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
 import java.util.*;
 
@@ -71,7 +72,21 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
 
     private boolean currentProfileHidesNotificationsFromAppsNotOnHomescreen() {
         String currentProfile = mLauncher.getSharedPrefs().getString(Launcher.CURRENT_PROFILE_PREF, "default");
-        boolean pref = mLauncher.getSharedPrefs().getBoolean(currentProfile + "_hide_notifications", false);
+        boolean pref = false;
+        if(currentProfile.equals("home")||currentProfile.equals("work")||currentProfile.equals("disconnected")||currentProfile.equals("default")){
+            pref = mLauncher.getSharedPrefs().getBoolean(currentProfile + "_hide_notifications", false);
+        } else {
+            Set newAddedProfilesSet = mLauncher.getSharedPrefs().getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            if(newAddedProfilesSet!=null){
+                ArrayList<String> newAddedProfiles = new ArrayList<>(newAddedProfilesSet);
+                for(String newAddedProfile : newAddedProfiles){
+                    if(currentProfile.equals(newAddedProfile.substring(1))){
+                        pref = mLauncher.getSharedPrefs().getBoolean(newAddedProfile.charAt(0)+"_hide_notifications", false);
+                    }
+                }
+            }
+        }
+
         Log.e("NOTIFICATIONS", currentProfile + "_hide_notifications = "+ pref);
         return pref;
     }
@@ -196,7 +211,9 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             if(postedPackageUserKey.mPackageName.equals("android")){
                 // do nothing
             } else if(postedPackageUserKey.mPackageName.equals("com.samsung.android.oneconnect")){
-                //do nothing
+                // do nothing
+            } else if(postedPackageUserKey.mPackageName.equals("com.android.systemui")){
+                // do nothing
             } else {
                 firebaseLogger.addLogMessage("notification", "received notification", "profile: "+currentProfile+", app name: " +postedPackageUserKey.mPackageName+", is blocked: "+shouldBeFilteredOut);
             }
