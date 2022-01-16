@@ -17,6 +17,7 @@ public class ProfileTileService extends TileService {
     @Override
     public void onClick() {
         Intent intent = new Intent(this, ManualProfileSelectionActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityAndCollapse(intent);
     }
 

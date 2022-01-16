@@ -17,12 +17,12 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 29
     buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 29
         versionCode 30907
         versionName "3.10"
         vectorDrawables.useSupportLibrary = true
