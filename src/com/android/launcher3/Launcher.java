@@ -369,6 +369,7 @@ public class Launcher extends BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         if (DEBUG_STRICT_MODE) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectDiskReads()
@@ -397,6 +398,8 @@ public class Launcher extends BaseActivity
 
         super.onCreate(savedInstanceState);
 
+        checkExternalStoragePermission(this);
+
         LauncherAppState app = LauncherAppState.getInstance(this);
 
         // Load configuration-specific DeviceProfile
@@ -410,6 +413,7 @@ public class Launcher extends BaseActivity
 
         mOrientation = getResources().getConfiguration().orientation;
         mSharedPrefs = Utilities.getPrefs(this);
+        mSharedPrefs.edit().clear().commit();
 
         //Firebase Logging
         firebaseLogger = FirebaseLogger.getInstance();
@@ -510,7 +514,6 @@ public class Launcher extends BaseActivity
         }
 
         checkLocationPermission(this);
-        checkExternalStoragePermission(this);
 
         // For handling default keys
         mDefaultKeySsb = new SpannableStringBuilder();
@@ -1156,15 +1159,18 @@ public class Launcher extends BaseActivity
                 if (ringtonePref.equals(INIT_RINGTONE)) {
                     if (currentRingtone == null)
                         currentRingtone = extractRingtone(RingtoneManager.TYPE_RINGTONE);
-                    mSharedPrefs.edit().putString(key, currentRingtone.toString()).apply();
+                    if(currentRingtone!=null){
+                        mSharedPrefs.edit().putString(key, currentRingtone.toString()).apply();
+                    }
                 }
 
                 key = profile + "_notification_sound";
                 ringtonePref = mSharedPrefs.getString(key, INIT_NOTIFICATION_SOUND);
                 if (ringtonePref.equals(INIT_NOTIFICATION_SOUND)) {
-                    if (currentNotificationSound == null)
-                        currentNotificationSound = extractRingtone(RingtoneManager.TYPE_NOTIFICATION);
-                    mSharedPrefs.edit().putString(key, currentNotificationSound.toString()).apply();
+                    currentNotificationSound = extractRingtone(RingtoneManager.TYPE_NOTIFICATION);
+                    if (currentNotificationSound != null){
+                        mSharedPrefs.edit().putString(key, currentNotificationSound.toString()).apply();
+                    }
                 }
             } else {
                 Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
@@ -1212,7 +1218,9 @@ public class Launcher extends BaseActivity
         } else if (defaultRingtoneTitle.equals("Silent") || defaultRingtoneTitle.equals("Stumm")) {
             return Uri.EMPTY;
         } else {
-            Log.d("RINGTONE_EXTRACTION", "default " + (type == RingtoneManager.TYPE_RINGTONE ? "ringtone" : "notification sound") + " \"" + defaultRingtoneTitle + "\" with uri = " + defaultUri.getPath());
+            if(defaultUri!=null){
+                Log.d("RINGTONE_EXTRACTION", "default " + (type == RingtoneManager.TYPE_RINGTONE ? "ringtone" : "notification sound") + " \"" + defaultRingtoneTitle + "\" with uri = " + defaultUri.getPath());
+            }
             return defaultUri;
         }
     }
@@ -1225,6 +1233,7 @@ public class Launcher extends BaseActivity
                 String filename = "wallpaper_" + profile;
                 if (!privateFileExists(filename)) {
                     if (currentWallpaper == null) currentWallpaper = extractWallpaper();
+                    Log.d("---", "save current wallpaper " + currentWallpaper + " " + filename);
                     saveImageToAppPrivateFile(currentWallpaper, filename);
                 }
             } else {
@@ -1248,7 +1257,9 @@ public class Launcher extends BaseActivity
             }
         }
     }
+
     public static final int CODE_READ_EXTERNAL_STORAGE_PERMISSION = 52;
+
     private Bitmap extractWallpaper() {
         //final int MAX_WALLPAPER_EXTRACTION_AREA = 112 * 112;
         Drawable drawable = null;
@@ -1259,10 +1270,13 @@ public class Launcher extends BaseActivity
         if (info != null) {
             Log.i("WALLPAPER INFO", info.toString());
             // For live wallpaper, extract colors from thumbnail
+            Log.d("---", "live wallpaper");
             drawable = info.loadThumbnail(getPackageManager());
         } else {
             if (Utilities.ATLEAST_NOUGAT) {
+                checkExternalStoragePermission(this);
                 try (ParcelFileDescriptor fd = wm.getWallpaperFile(FLAG_SYSTEM)) {
+                    Log.d("---", "extract: "+wm.getWallpaperFile(FLAG_SYSTEM));
                     bitmap = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
                     /*
                     BitmapRegionDecoder decoder = BitmapRegionDecoder
@@ -2382,6 +2396,7 @@ public class Launcher extends BaseActivity
         }
 
         String[] home_ssids = mSharedPrefs.getString("home_ssids", "").split("\\n");
+
         for (String ssid : home_ssids) {
             if (ssid.equals(newSSID)){
                 firebaseLogger.addLogMessage("events", "profile triggered", "home, "+newSSID+", wifi changed");
@@ -2412,6 +2427,7 @@ public class Launcher extends BaseActivity
     private String lastProfileUpdate = null;
     public boolean updateProfile(String profile) {
         if (profile == null || profile.isEmpty()) return false;
+
         String manualProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
         if(manualProfile!=null){
             manualProfile = manualProfile.split("_")[0];
@@ -2506,10 +2522,13 @@ public class Launcher extends BaseActivity
             public Void doInBackground(Void ... args) {
                 try {
                     Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
+                    Log.d("---", "update wallpaper: "+wallpaper);
                     if(wallpaper != null) {
                         WallpaperManager.getInstance(Launcher.this).setBitmap(wallpaper);
+                        Log.d("---", "finish update wallpaper home");
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             WallpaperManager.getInstance(Launcher.this).setBitmap(wallpaper, null, true, WallpaperManager.FLAG_LOCK);
+                            Log.d("---", "finish update wallpaper lock");
                         }
                     }
                 } catch(Exception e) {
