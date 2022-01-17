@@ -130,6 +130,9 @@ public class HotseatQsbWidget extends AbstractQsbLayout {
                             Log.e("HotseatQsbSearch", getResultCode() + " " + getResultData());
                             if (getResultCode() == 0) {
                                 fallbackSearch("com.google.android.googlequicksearchbox.TEXT_ASSIST");
+                                String profile = Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, null);
+                                String shortcutName = "googleSearch_"+profile;
+                                Launcher.usedShortcuts.add(shortcutName);
                             } else {
                                 playQsbAnimation();
                             }

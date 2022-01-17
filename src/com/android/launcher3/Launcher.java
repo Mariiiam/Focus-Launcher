@@ -365,7 +365,7 @@ public class Launcher extends BaseActivity
 
     private static ArrayList<String> usedApps = new ArrayList<>();
 
-    private static ArrayList<String> usedShortcuts = new ArrayList<>();
+    public static ArrayList<String> usedShortcuts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
