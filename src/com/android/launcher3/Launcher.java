@@ -369,7 +369,6 @@ public class Launcher extends BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         if (DEBUG_STRICT_MODE) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectDiskReads()
@@ -398,7 +397,7 @@ public class Launcher extends BaseActivity
 
         super.onCreate(savedInstanceState);
 
-        checkExternalStoragePermission(this);
+        hasExternalStoragePermission(this);
 
         LauncherAppState app = LauncherAppState.getInstance(this);
 
@@ -413,7 +412,6 @@ public class Launcher extends BaseActivity
 
         mOrientation = getResources().getConfiguration().orientation;
         mSharedPrefs = Utilities.getPrefs(this);
-        mSharedPrefs.edit().clear().commit();
 
         //Firebase Logging
         firebaseLogger = FirebaseLogger.getInstance();
@@ -514,6 +512,7 @@ public class Launcher extends BaseActivity
         }
 
         checkLocationPermission(this);
+        checkFineLocationPermission(this);
 
         // For handling default keys
         mDefaultKeySsb = new SpannableStringBuilder();
@@ -548,8 +547,11 @@ public class Launcher extends BaseActivity
         mLogProfileEditedHandler = new LogProfileEditedHandler();
         mSharedPrefs.registerOnSharedPreferenceChangeListener(mLogProfileEditedHandler);
 
-        saveCurrentWallpaper();
-        saveWallpaperInfo();
+        if(hasExternalStoragePermission(this)){
+            saveCurrentWallpaper();
+            saveWallpaperInfo();
+        }
+
         saveCurrentRingtones();
 
         // On large interfaces, or on devices that a user has specifically enabled screen rotation,
@@ -1233,7 +1235,6 @@ public class Launcher extends BaseActivity
                 String filename = "wallpaper_" + profile;
                 if (!privateFileExists(filename)) {
                     if (currentWallpaper == null) currentWallpaper = extractWallpaper();
-                    Log.d("---", "save current wallpaper " + currentWallpaper + " " + filename);
                     saveImageToAppPrivateFile(currentWallpaper, filename);
                 }
             } else {
@@ -1258,8 +1259,6 @@ public class Launcher extends BaseActivity
         }
     }
 
-    public static final int CODE_READ_EXTERNAL_STORAGE_PERMISSION = 52;
-
     private Bitmap extractWallpaper() {
         //final int MAX_WALLPAPER_EXTRACTION_AREA = 112 * 112;
         Drawable drawable = null;
@@ -1270,32 +1269,30 @@ public class Launcher extends BaseActivity
         if (info != null) {
             Log.i("WALLPAPER INFO", info.toString());
             // For live wallpaper, extract colors from thumbnail
-            Log.d("---", "live wallpaper");
             drawable = info.loadThumbnail(getPackageManager());
         } else {
             if (Utilities.ATLEAST_NOUGAT) {
-                checkExternalStoragePermission(this);
+                hasExternalStoragePermission(this);
                 try (ParcelFileDescriptor fd = wm.getWallpaperFile(FLAG_SYSTEM)) {
-                    Log.d("---", "extract: "+wm.getWallpaperFile(FLAG_SYSTEM));
                     bitmap = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
-                    /*
-                    BitmapRegionDecoder decoder = BitmapRegionDecoder
-                            .newInstance(fd.getFileDescriptor(), false);
+                /*
+                BitmapRegionDecoder decoder = BitmapRegionDecoder
+                        .newInstance(fd.getFileDescriptor(), false);
 
-                    int requestedArea = decoder.getWidth() * decoder.getHeight();
-                    BitmapFactory.Options options = new BitmapFactory.Options();
+                int requestedArea = decoder.getWidth() * decoder.getHeight();
+                BitmapFactory.Options options = new BitmapFactory.Options();
 
-                    if (requestedArea > MAX_WALLPAPER_EXTRACTION_AREA) {
-                        double areaRatio =
-                                (double) requestedArea / MAX_WALLPAPER_EXTRACTION_AREA;
-                        double nearestPowOf2 =
-                                Math.floor(Math.log(areaRatio) / (2 * Math.log(2)));
-                        options.inSampleSize = (int) Math.pow(2, nearestPowOf2);
-                    }
-                    Rect region = new Rect(0, 0, decoder.getWidth(), decoder.getHeight());
-                    bitmap = decoder.decodeRegion(region, options);
-                    decoder.recycle();
-                    */
+                if (requestedArea > MAX_WALLPAPER_EXTRACTION_AREA) {
+                    double areaRatio =
+                            (double) requestedArea / MAX_WALLPAPER_EXTRACTION_AREA;
+                    double nearestPowOf2 =
+                            Math.floor(Math.log(areaRatio) / (2 * Math.log(2)));
+                    options.inSampleSize = (int) Math.pow(2, nearestPowOf2);
+                }
+                Rect region = new Rect(0, 0, decoder.getWidth(), decoder.getHeight());
+                bitmap = decoder.decodeRegion(region, options);
+                decoder.recycle();
+                */
                 } catch (IOException | RuntimeException e) {
                     Log.e(TAG, "Fetching partial bitmap failed, trying old method", e);
                 }
@@ -1405,6 +1402,11 @@ public class Launcher extends BaseActivity
             else {
                 Toast.makeText(this, getString(R.string.msg_no_overlay_permission,
                         getString(R.string.derived_app_name)), Toast.LENGTH_SHORT).show();
+            }
+        }
+        if(requestCode == CODE_READ_EXTERNAL_STORAGE_PERMISSION){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                saveCurrentWallpaper();
             }
         }
         if (mLauncherCallbacks != null) {
@@ -1637,7 +1639,8 @@ public class Launcher extends BaseActivity
         }
 
         checkLocationPermission(this);
-        checkExternalStoragePermission(this);
+        hasExternalStoragePermission(this);
+        checkFineLocationPermission(this);
 
     }
 
@@ -2442,7 +2445,8 @@ public class Launcher extends BaseActivity
             return false;
         }
         firstTime = false;
-        if (mSharedPrefs.getString("current_profiles", "").equals(profile)) return true;
+
+        if (mSharedPrefs.getString(CURRENT_PROFILE_PREF, "").equals(profile)) return true;
 
         mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
         
@@ -2522,16 +2526,14 @@ public class Launcher extends BaseActivity
             public Void doInBackground(Void ... args) {
                 try {
                     Bitmap wallpaper = getImageFromAppPrivateFile("wallpaper_"+profile);
-                    Log.d("---", "update wallpaper: "+wallpaper);
                     if(wallpaper != null) {
                         WallpaperManager.getInstance(Launcher.this).setBitmap(wallpaper);
-                        Log.d("---", "finish update wallpaper home");
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             WallpaperManager.getInstance(Launcher.this).setBitmap(wallpaper, null, true, WallpaperManager.FLAG_LOCK);
-                            Log.d("---", "finish update wallpaper lock");
                         }
                     }
                 } catch(Exception e) {
+                    Log.d("---", "wallpaper exception!");
                     e.printStackTrace();
                 }
                 return null;
@@ -2679,9 +2681,20 @@ public class Launcher extends BaseActivity
         }
     }
 
-    public static void checkExternalStoragePermission(Activity context){
+    public static final int CODE_ACCESS_FINE_LOCATION_PERMISSION = 54;
+    public static void checkFineLocationPermission(Activity context){
+        if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, CODE_ACCESS_FINE_LOCATION_PERMISSION);
+        }
+    }
+
+    public static final int CODE_READ_EXTERNAL_STORAGE_PERMISSION = 52;
+    public static boolean hasExternalStoragePermission(Activity context){
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, CODE_READ_EXTERNAL_STORAGE_PERMISSION);
+            return false;
+        } else {
+            return true;
         }
     }
 
