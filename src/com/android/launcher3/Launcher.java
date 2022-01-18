@@ -517,6 +517,7 @@ public class Launcher extends BaseActivity
 
         checkLocationPermission(this);
         checkFineLocationPermission(this);
+        hasWritePermission(this, true);
 
         // For handling default keys
         mDefaultKeySsb = new SpannableStringBuilder();
