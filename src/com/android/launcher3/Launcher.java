@@ -2317,6 +2317,12 @@ public class Launcher extends BaseActivity
             String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mDragLayer.clearResizeFrame();
+                if(usedApps.isEmpty()){
+                    usedApps.add("empty");
+                }
+                if(usedShortcuts.isEmpty()){
+                    usedShortcuts.add("empty");
+                }
                 LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, usedApps, usedShortcuts);
                 firebaseLogger.addLogMessage("unlocks", "screen off", logEntry);
                 usedApps = new ArrayList<>();
