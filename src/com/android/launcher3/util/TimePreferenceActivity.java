@@ -19,6 +19,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.alarm.AlarmModel;
 import com.android.launcher3.alarm.AlarmReceiver;
 import com.android.launcher3.logger.FirebaseLogger;
+import com.android.launcher3.logger.LogEntryProfileEdited;
 import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
 import java.util.ArrayList;
@@ -199,26 +200,31 @@ public class TimePreferenceActivity extends DialogPreference {
         //check if no days are selected. If so, then delete the alarm if the profile already has a schedule or show a message if it is a new schedule.
         if(selectedDays.isEmpty()) {
             boolean profileAlreadyScheduled = false;
-            ArrayList<String> scheduleToDelete = new ArrayList<>();
+            String scheduleToDelete = "";
             for(String eachProfile : scheduleList){
                 String profileName = eachProfile.split("_")[0];
                 if(profileName.equals(selectedProfile)){
                     profileAlreadyScheduled = true;
-                    scheduleToDelete.add(eachProfile);
+                    scheduleToDelete = eachProfile;
                 }
             }
             if(profileAlreadyScheduled){
                 scheduleList.remove(scheduleToDelete);
+                Set set = new HashSet(scheduleList);
+                Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
+                Log.d("---", "scheduleList updated: "+scheduleList);
                 AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
                 AlarmReceiver.cancelReminderAlarm(context, alarmModel);
                 if(selectedProfile.length()==1){
                     for(String newAddedProfile : newAddedProfiles){
                         if((newAddedProfile.charAt(0)+"").equals(selectedProfile)){
-                            firebaseLogger.addLogMessage("events", "profile edited", newAddedProfile.substring(1)+", schedule edited alarm deleted, "+Launcher.getProfileSettings(selectedProfile));
+                            LogEntryProfileEdited logEntry = new LogEntryProfileEdited(newAddedProfile.substring(1), "schedule edited alarm deleted", Launcher.getSSIDPref(selectedProfile), Launcher.getSchedulePref(selectedProfile), Launcher.getRingtonePref(selectedProfile), Launcher.getNotificationSoundPref(selectedProfile), Launcher.getNotificationBlockedPref(selectedProfile), Launcher.getMinimalDesignPref(selectedProfile), Launcher.getHomeScreenAppsList(selectedProfile), Launcher.getWallpaperInfo(selectedProfile), Launcher.getGrayScalePref(selectedProfile));
+                            firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                         }
                     }
                 } else {
-                    firebaseLogger.addLogMessage("events", "profile edited", selectedProfile+", schedule edited alarm deleted, "+Launcher.getProfileSettings(selectedProfile));
+                    LogEntryProfileEdited logEntry = new LogEntryProfileEdited(selectedProfile, "schedule edited alarm deleted", Launcher.getSSIDPref(selectedProfile), Launcher.getSchedulePref(selectedProfile), Launcher.getRingtonePref(selectedProfile), Launcher.getNotificationSoundPref(selectedProfile), Launcher.getNotificationBlockedPref(selectedProfile), Launcher.getMinimalDesignPref(selectedProfile), Launcher.getHomeScreenAppsList(selectedProfile), Launcher.getWallpaperInfo(selectedProfile), Launcher.getGrayScalePref(selectedProfile));
+                    firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                 }
             } else {
                 Toast.makeText(context, context.getString(R.string.msg_no_day_selected), Toast.LENGTH_SHORT).show();
@@ -258,14 +264,18 @@ public class TimePreferenceActivity extends DialogPreference {
                 Set set = new HashSet(scheduleList);
                 Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
 
+                //Firebase Logging
                 if(set!=null) {
                     for(String newAddedProfile : newAddedProfiles){
                         if(configSchedule.split("_")[0].equals(newAddedProfile.charAt(0)+"")){
-                            firebaseLogger.addLogMessage("events", "profile edited", newAddedProfile.substring(1)+", schedule edited, "+Launcher.getProfileSettings(configSchedule.split("_")[0]));
+                            LogEntryProfileEdited logEntry = new LogEntryProfileEdited(newAddedProfile.substring(1), "schedule edited", Launcher.getSSIDPref(configSchedule.split("_")[0]), Launcher.getSchedulePref(configSchedule.split("_")[0]), Launcher.getRingtonePref(configSchedule.split("_")[0]), Launcher.getNotificationSoundPref(configSchedule.split("_")[0]), Launcher.getNotificationBlockedPref(configSchedule.split("_")[0]), Launcher.getMinimalDesignPref(configSchedule.split("_")[0]), Launcher.getHomeScreenAppsList(configSchedule.split("_")[0]), Launcher.getWallpaperInfo(configSchedule.split("_")[0]), Launcher.getGrayScalePref(configSchedule.split("_")[0]));
+                            firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                         }
                     }
-                } else {
-                    firebaseLogger.addLogMessage("events", "profile edited", configSchedule.split("_")[0]+", schedule edited, "+Launcher.getProfileSettings(configSchedule.split("_")[0]));
+                     if(configSchedule.split("_")[0].length()>1) {
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(configSchedule.split("_")[0], "schedule edited", Launcher.getSSIDPref(configSchedule.split("_")[0]), Launcher.getSchedulePref(configSchedule.split("_")[0]), Launcher.getRingtonePref(configSchedule.split("_")[0]), Launcher.getNotificationSoundPref(configSchedule.split("_")[0]), Launcher.getNotificationBlockedPref(configSchedule.split("_")[0]), Launcher.getMinimalDesignPref(configSchedule.split("_")[0]), Launcher.getHomeScreenAppsList(configSchedule.split("_")[0]), Launcher.getWallpaperInfo(configSchedule.split("_")[0]), Launcher.getGrayScalePref(configSchedule.split("_")[0]));
+                        firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                    }
                 }
                 AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
                 AlarmReceiver.setReminderAlarm(context, alarmModel);

@@ -7,11 +7,11 @@ public class LogEntry implements Serializable {
     long timestamp;
     String userID;
     String event;
-    String eventInfo;
+    Object eventInfo;
 
     public LogEntry(){}
 
-    public LogEntry(long timestamp, String userID, String event, String eventInfo){
+    public LogEntry(long timestamp, String userID, String event, Object eventInfo){
         this.timestamp = timestamp;
         this.userID = userID;
         this.event = event;
@@ -43,11 +43,11 @@ public class LogEntry implements Serializable {
         this.event = event;
     }
 
-    public String getEventInfo() {
+    public Object getEventInfo() {
         return eventInfo;
     }
 
-    public void setEventInfo(String eventInfo) {
+    public void setEventInfo(Object eventInfo) {
         this.eventInfo = eventInfo;
     }
 }

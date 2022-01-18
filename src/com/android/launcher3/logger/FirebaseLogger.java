@@ -22,7 +22,7 @@ public class FirebaseLogger {
         this.userID = userID;
     }
 
-    public void addLogMessage(String databaseChild, String event, String eventInfo){
+    public void addLogMessage(String databaseChild, String event, Object eventInfo){
         DatabaseReference reference = database.child(this.userID).child(databaseChild).push();
         reference.setValue(new LogEntry(System.currentTimeMillis(), this.userID, event, eventInfo));
     }

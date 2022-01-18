@@ -27,6 +27,7 @@ import android.view.View;
 import com.android.launcher3.*;
 import com.android.launcher3.badge.BadgeInfo;
 import com.android.launcher3.logger.FirebaseLogger;
+import com.android.launcher3.logger.LogEntryNotification;
 import com.android.launcher3.notification.NotificationInfo;
 import com.android.launcher3.notification.NotificationKeyData;
 import com.android.launcher3.notification.NotificationListener;
@@ -215,7 +216,8 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             } else if(postedPackageUserKey.mPackageName.equals("com.android.systemui")){
                 // do nothing
             } else {
-                firebaseLogger.addLogMessage("notification", "received notification", "profile: "+currentProfile+", app name: " +postedPackageUserKey.mPackageName+", is blocked: "+shouldBeFilteredOut);
+                LogEntryNotification logEntry = new LogEntryNotification(currentProfile, postedPackageUserKey.mPackageName, shouldBeFilteredOut);
+                firebaseLogger.addLogMessage("notification", "received notification", logEntry);
             }
         }
 
