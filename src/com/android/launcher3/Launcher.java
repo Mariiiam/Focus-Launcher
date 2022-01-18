@@ -515,7 +515,7 @@ public class Launcher extends BaseActivity
             setWorkspaceLoading(true);
         }
 
-        checkLocationPermission(this);
+        //checkLocationPermission(this);
         checkFineLocationPermission(this);
         hasWritePermission(this, true);
 
@@ -1644,7 +1644,7 @@ public class Launcher extends BaseActivity
             mLauncherCallbacks.onResume();
         }
 
-        checkLocationPermission(this);
+        //checkLocationPermission(this);
         hasExternalStoragePermission(this);
         checkFineLocationPermission(this);
 
