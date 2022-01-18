@@ -212,7 +212,7 @@
     <string name="change_name_pref_not_active">Profil muss inaktiv sein, um den Namen ändern zu können</string>
     <string name="error_change_profile_name_too_short">Speichern abgebrochen. Name muss mindestens drei Zeichen enthalten</string>
     <string name="error_change_profile_name_already_exists">Speichern abgebrochen. Dieser Name existiert bereits</string>
-    <string name="title_trigger_rules">Auslöser Regeln</string>
+    <string name="title_trigger_rules">Aktivierungs-Regeln</string>
     <string name="title_settings_and_design">Einstellungen und Design</string>
     <string name="title_schedule">Zeitplan</string>
     <string name="day_m">MO</string>
