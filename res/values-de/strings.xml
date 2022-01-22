@@ -231,4 +231,5 @@
     <string name="question_grayscale">Sind Sie dabei den Graustufen-Modus an oder auszuschalten?</string>
     <string name="activate">Anschalten</string>
     <string name="deactivate">Ausschalten</string>
+    <string name="help">Hilfe</string>
 </resources>

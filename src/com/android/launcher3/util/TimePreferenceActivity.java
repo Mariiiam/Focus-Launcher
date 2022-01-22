@@ -212,7 +212,6 @@ public class TimePreferenceActivity extends DialogPreference {
                 scheduleList.remove(scheduleToDelete);
                 Set set = new HashSet(scheduleList);
                 Launcher.mSharedPrefs.edit().putStringSet(SCHEDULE_PREF, set).apply();
-                Log.d("---", "scheduleList updated: "+scheduleList);
                 AlarmModel alarmModel = new AlarmModel(selectedProfile, selectedDays, picker.getHour(), picker.getMinute());
                 AlarmReceiver.cancelReminderAlarm(context, alarmModel);
                 if(selectedProfile.length()==1){

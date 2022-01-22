@@ -92,6 +92,11 @@
 
     <Preference
         android:persistent="false"
+        android:title="@string/help"
+        android:key="help"/>
+
+    <Preference
+        android:persistent="false"
         android:title="@string/about"
         android:key="open_source_licenses"
         android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />

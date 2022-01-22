@@ -2095,7 +2095,6 @@ public class Launcher extends BaseActivity
                     if(profileName.equals(currentProfile)){
                         //if profile has already entries, save new entry
                         if(profileApps.split("_").length>1){
-                            Log.d("---", "profile has already entries");
                             if(profileApps.contains(",")){
                                 List<String> apps = Arrays.asList(profileApps.split("_")[1].split(","));
                                 for(String app : apps){
@@ -2113,7 +2112,6 @@ public class Launcher extends BaseActivity
                             }
 
                         } else {
-                            Log.d("---", "profile has no entries");
                             String updatedProfileApps = profileApps+info.title.toString();
                             appsOnHomescreenList.remove(profileApps);
                             appsOnHomescreenList.add(updatedProfileApps);
@@ -2130,7 +2128,6 @@ public class Launcher extends BaseActivity
                     mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
                 }
                 if(isEntryToDelete){
-                    Log.d("---", "there is entry to delete");
                     appsOnHomescreenList.remove(entryToDelete);
                     appsOnHomescreenList.add(entryToAdd);
                     isEntryToDelete = false;
@@ -2140,7 +2137,6 @@ public class Launcher extends BaseActivity
 
             } else {
                 //if list is null
-                Log.d("---", "list is null");
                 ArrayList<String> appsOnHomescreenList = new ArrayList<>();
                 String newProfileApps = "";
                 if(currentProfile.equals("home")||currentProfile.equals("work")||currentProfile.equals("default")||currentProfile.equals("disconnected")){
@@ -2610,7 +2606,6 @@ public class Launcher extends BaseActivity
                         }
                     }
                 } catch(Exception e) {
-                    Log.d("---", "wallpaper exception!");
                     e.printStackTrace();
                 }
                 return null;
@@ -5794,7 +5789,6 @@ public class Launcher extends BaseActivity
         if(homescreenAppsSet!=null){
             ArrayList<String> homescreenAppsArray = new ArrayList<>(homescreenAppsSet);
             for(String homescreenAppProfile : homescreenAppsArray){
-                Log.d("---", "home screen: "+homescreenAppProfile);
                 if(homescreenAppProfile.split("_").length>1){
                     if(profile.equals(homescreenAppProfile.split("_")[0])){
                         String[] apps = homescreenAppProfile.split("_")[1].split(",");

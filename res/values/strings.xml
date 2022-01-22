@@ -447,4 +447,5 @@
     <string name="question_grayscale">Are you about to turn grayscale mode on or off?</string>
     <string name="activate">On</string>
     <string name="deactivate">Off</string>
+    <string name="help">Help</string>
 </resources>
