@@ -149,9 +149,6 @@ public class Launcher extends BaseActivity
 
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
 
-    private static final String DISPLAY_DALTONIZER_ENABLED = "accessibility_display_daltonizer_enabled";
-    private static final String DISPLAY_DALTONIZER = "accessibility_display_daltonizer";
-
     public static final String WALLPAPER_INFO = "wallpaper_info";
 
     public static boolean isMinimalDesignON;
@@ -2095,17 +2092,20 @@ public class Launcher extends BaseActivity
                     if(profileName.equals(currentProfile)){
                         //if profile has already entries, save new entry
                         if(profileApps.split("_").length>1){
+                            //if profile has more than one entry
                             if(profileApps.contains(",")){
                                 List<String> apps = Arrays.asList(profileApps.split("_")[1].split(","));
                                 for(String app : apps){
-                                    if(!app.equals(info.title.toString())){
+                                    if(!apps.contains(info.title.toString())){
                                         String updatedProfileApps = profileApps+","+info.title.toString();
+                                        Log.d("---", "updated profile apps: "+updatedProfileApps);
                                         isEntryToDelete = true;
                                         entryToDelete = profileApps;
                                         entryToAdd = updatedProfileApps;
                                     }
                                 }
                             } else {
+                                //if profile has only one entry
                                 isEntryToDelete = true;
                                 entryToDelete = profileApps;
                                 entryToAdd = profileApps+","+info.title.toString();
@@ -2124,12 +2124,14 @@ public class Launcher extends BaseActivity
                     //if profile is not saved in the list
                     String newProfileApps = currentProfile+"_"+info.title.toString();
                     appsOnHomescreenList.add(newProfileApps);
+                    Log.d("---", "new list: "+appsOnHomescreenList);
                     Set<String> set = new HashSet(appsOnHomescreenList);
                     mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
                 }
                 if(isEntryToDelete){
                     appsOnHomescreenList.remove(entryToDelete);
                     appsOnHomescreenList.add(entryToAdd);
+                    Log.d("---", "updated list: "+appsOnHomescreenList);
                     isEntryToDelete = false;
                     Set<String> set = new HashSet(appsOnHomescreenList);
                     mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
@@ -2149,6 +2151,7 @@ public class Launcher extends BaseActivity
                     }
                 }
                 appsOnHomescreenList.add(newProfileApps);
+                Log.d("---", "totally new list: "+appsOnHomescreenList);
                 Set<String> set = new HashSet(appsOnHomescreenList);
                 mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
             }
