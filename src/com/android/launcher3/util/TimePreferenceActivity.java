@@ -338,8 +338,17 @@ public class TimePreferenceActivity extends DialogPreference {
             translatedName = context.getString(R.string.profile_home);
             return translatedName;
         } else {
-            translatedName = profile;
-            return translatedName;
+            Set<String> set = Launcher.mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            if(set!=null){
+                ArrayList<String> newAddedProfiles = new ArrayList<>(set);
+                for(String newAddedProfile : newAddedProfiles){
+                    if(profile.equals(newAddedProfile.charAt(0)+"")){
+                        translatedName = newAddedProfile.substring(1);
+                        return translatedName;
+                    }
+                }
+            }
+            return "";
         }
     }
 }
