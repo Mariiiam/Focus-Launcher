@@ -2465,6 +2465,11 @@ public class Launcher extends BaseActivity
 
         String[] work_ssids = mSharedPrefs.getString("work_ssids", "").split("\\n");
         for (String ssid : work_ssids) {
+            if(ssid.length()>0){
+                if((""+ssid.charAt(ssid.length()-1)).equals(" ")){
+                ssid = ssid.substring(0,ssid.length()-1);
+                }
+            }
             if (ssid.trim().equals(newSSID)){
                 LogEntryProfileTriggered logEntry = new LogEntryProfileTriggered("work", "wifi changed", ssid);
                 firebaseLogger.addLogMessage("events", "profile triggered", logEntry);
@@ -2475,6 +2480,11 @@ public class Launcher extends BaseActivity
         String[] home_ssids = mSharedPrefs.getString("home_ssids", "").split("\\n");
 
         for (String ssid : home_ssids) {
+            if(ssid.length()>0){
+                if((""+ssid.charAt(ssid.length()-1)).equals(" ")){
+                    ssid = ssid.substring(0,ssid.length()-1);
+                }
+            }
             if (ssid.equals(newSSID)){
                 LogEntryProfileTriggered logEntry = new LogEntryProfileTriggered("home", "wifi changed", ssid);
                 firebaseLogger.addLogMessage("events", "profile triggered", logEntry);
@@ -2488,6 +2498,11 @@ public class Launcher extends BaseActivity
                     String profileID = newProfile.charAt(0)+"";
                     String[] profile_ssids = mSharedPrefs.getString(profileID+"_ssids", "").split("\\n");
                     for(String ssid : profile_ssids) {
+                        if(ssid.length()>0){
+                            if((""+ssid.charAt(ssid.length()-1)).equals(" ")){
+                                ssid = ssid.substring(0,ssid.length()-1);
+                            }
+                        }
                         if(ssid.equals(newSSID)){
                             LogEntryProfileTriggered logEntry = new LogEntryProfileTriggered(newProfile.substring(1), "wifi changed", ssid);
                             firebaseLogger.addLogMessage("events", "profile triggered", logEntry);
