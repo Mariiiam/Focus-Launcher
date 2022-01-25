@@ -43,13 +43,11 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         public static void setReminderAlarm(Context context, AlarmModel alarm){
             if(alarm.getDays().size() == 0){
-                Log.d("---", "no alarm set");
                 cancelReminderAlarm(context, alarm);
                 return;
             }
             final Calendar nextAlarmTime = getTimeForNextAlarm(alarm, context);
             alarm.setTime(nextAlarmTime.getTimeInMillis());
-            Log.d("---", "next alarm time: "+nextAlarmTime.getTime());
 
             final Intent intent = new Intent(context, AlarmReceiver.class);
             final Bundle bundle = new Bundle();
@@ -181,7 +179,6 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             final AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             manager.cancel(pIntent);
-            Log.d("---", "alarm canceled");
         }
 
         private static class ScheduleAlarm {

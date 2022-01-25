@@ -27,6 +27,7 @@ import android.view.View;
 import com.android.launcher3.*;
 import com.android.launcher3.badge.BadgeInfo;
 import com.android.launcher3.logger.FirebaseLogger;
+import com.android.launcher3.logger.LogEntryNotification;
 import com.android.launcher3.notification.NotificationInfo;
 import com.android.launcher3.notification.NotificationKeyData;
 import com.android.launcher3.notification.NotificationListener;
@@ -76,7 +77,7 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
         if(currentProfile.equals("home")||currentProfile.equals("work")||currentProfile.equals("disconnected")||currentProfile.equals("default")){
             pref = mLauncher.getSharedPrefs().getBoolean(currentProfile + "_hide_notifications", false);
         } else {
-            Set newAddedProfilesSet = mLauncher.getSharedPrefs().getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            Set<String> newAddedProfilesSet = mLauncher.getSharedPrefs().getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
             if(newAddedProfilesSet!=null){
                 ArrayList<String> newAddedProfiles = new ArrayList<>(newAddedProfilesSet);
                 for(String newAddedProfile : newAddedProfiles){
@@ -87,7 +88,28 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             }
         }
 
-        Log.e("NOTIFICATIONS", currentProfile + "_hide_notifications = "+ pref);
+        Log.d("NOTIFICATIONS", currentProfile + "_hide_notifications = "+ pref);
+        return pref;
+    }
+
+    private boolean currentProfileHidesAllNotifications(){
+        String currentProfile = mLauncher.getSharedPrefs().getString(Launcher.CURRENT_PROFILE_PREF, "default");
+        boolean pref = false;
+        if(currentProfile.equals("home")||currentProfile.equals("work")||currentProfile.equals("disconnected")||currentProfile.equals("default")){
+            pref = mLauncher.getSharedPrefs().getBoolean(currentProfile + "_hide_all_notifications", false);
+        } else {
+            Set<String> newAddedProfilesSet = mLauncher.getSharedPrefs().getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+            if(newAddedProfilesSet!=null){
+                ArrayList<String> newAddedProfiles = new ArrayList<>(newAddedProfilesSet);
+                for(String newAddedProfile : newAddedProfiles){
+                    if(currentProfile.equals(newAddedProfile.substring(1))){
+                        pref = mLauncher.getSharedPrefs().getBoolean(newAddedProfile.charAt(0)+"_hide_all_notifications", false);
+                    }
+                }
+            }
+        }
+
+        Log.d("NOTIFICATIONS", currentProfile + "_hide_all_notifications = "+ pref);
         return pref;
     }
 
@@ -206,6 +228,11 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             shouldBeFilteredOut = true;
         }
 
+        if(currentProfileHidesAllNotifications()){
+            hideNotification(notificationKey);
+            shouldBeFilteredOut = true;
+        }
+
         String currentProfile = Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, null);
         if(currentProfile!=null){
             if(postedPackageUserKey.mPackageName.equals("android")){
@@ -215,7 +242,8 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
             } else if(postedPackageUserKey.mPackageName.equals("com.android.systemui")){
                 // do nothing
             } else {
-                firebaseLogger.addLogMessage("notification", "received notification", "profile: "+currentProfile+", app name: " +postedPackageUserKey.mPackageName+", is blocked: "+shouldBeFilteredOut);
+                LogEntryNotification logEntry = new LogEntryNotification(currentProfile, postedPackageUserKey.mPackageName, shouldBeFilteredOut);
+                firebaseLogger.addLogMessage("notification", "received notification", logEntry);
             }
         }
 

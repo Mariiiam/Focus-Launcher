@@ -28,8 +28,8 @@
         launcher:minAllAppsPredictionColumns="4"
         launcher:numHotseatIcons="4"
         launcher:iconSize="64"
-        launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:landscapeIconSize="62"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_4x4"
         />
 
@@ -44,8 +44,8 @@
         launcher:minAllAppsPredictionColumns="4"
         launcher:numHotseatIcons="4"
         launcher:iconSize="64"
-        launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:landscapeIconSize="62"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_4x4"
         />
 
@@ -60,8 +60,8 @@
         launcher:minAllAppsPredictionColumns="4"
         launcher:numHotseatIcons="5"
         launcher:iconSize="64"
-        launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:landscapeIconSize="60"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_5x5"
         />
 
@@ -76,8 +76,8 @@
         launcher:minAllAppsPredictionColumns="4"
         launcher:numHotseatIcons="5"
         launcher:iconSize="64"
-        launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:landscapeIconSize="62"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_4x5"
         />
 
@@ -92,8 +92,8 @@
         launcher:minAllAppsPredictionColumns="4"
         launcher:numHotseatIcons="5"
         launcher:iconSize="64"
-        launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:landscapeIconSize="62"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_5x5"
         />
 
@@ -108,8 +108,8 @@
         launcher:minAllAppsPredictionColumns="4"
         launcher:numHotseatIcons="5"
         launcher:iconSize="64"
-        launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:landscapeIconSize="62"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_5x5"
         />
 
@@ -124,8 +124,8 @@
         launcher:minAllAppsPredictionColumns="4"
         launcher:numHotseatIcons="6"
         launcher:iconSize="64"
-        launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:landscapeIconSize="62"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_6x6"
         />
 
@@ -141,7 +141,7 @@
         launcher:numHotseatIcons="6"
         launcher:iconSize="64"
         launcher:landscapeIconSize="64"
-        launcher:iconTextSize="16.0"
+        launcher:iconTextSize="13.0"
         launcher:defaultLayoutId="@xml/default_workspace_5x6"
         />
 

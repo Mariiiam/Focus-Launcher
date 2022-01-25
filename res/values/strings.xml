@@ -183,7 +183,9 @@
     <!-- Title for Notification dots setting. Tapping this will link to the system Notifications settings screen where the user can turn off notification dots globally. [CHAR LIMIT=50] -->
     <string name="icon_badging_title">Notification dots</string>
     <string name="hide_foreign_notifications_title">Hide notifications</string>
+    <string name="hide_all_notifications_title">Hide all notifications</string>
     <string name="hide_foreign_notifications_summary">From apps not on your homescreen</string>
+    <string name="hide_all_notifications_summary">Hide all incoming notifications</string>
     <string name="grayscale_summary">Link to accessibility settings. Go to Vision > Color adjustment > Greyscale</string>
     <!--Title for Grayscale setting. Tapping this will enable or disable grayscale which is also called black and white mode-->
     <string name="enable_grayscale_title">Enable Grayscale Mode</string>
@@ -447,4 +449,5 @@
     <string name="question_grayscale">Are you about to turn grayscale mode on or off?</string>
     <string name="activate">On</string>
     <string name="deactivate">Off</string>
+    <string name="help">Help</string>
 </resources>

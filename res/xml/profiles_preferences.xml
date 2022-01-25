@@ -54,6 +54,13 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="work_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
             <Preference
                 android:key="work_enable_grayscale"
                 android:title="@string/enable_grayscale_title"
@@ -149,6 +156,13 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="home_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
             <Preference
                 android:key="home_enable_grayscale"
                 android:title="@string/enable_grayscale_title"
@@ -213,6 +227,13 @@
                 android:persistent="true"
                 android:defaultValue="true"/>
 
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="disconnected_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
             <Preference
                 android:key="disconnected_enable_grayscale"
                 android:title="@string/enable_grayscale_title"
@@ -276,6 +297,13 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="default_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
             <Preference
                 android:key="default_enable_grayscale"
                 android:title="@string/enable_grayscale_title"
@@ -336,6 +364,13 @@
                 android:key="1_hide_notifications"
                 android:title="@string/hide_foreign_notifications_title"
                 android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="1_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
                 android:persistent="true"
                 android:defaultValue="false"/>
 
@@ -407,6 +442,13 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="2_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
             <Preference
                 android:key="2_enable_grayscale"
                 android:title="@string/enable_grayscale_title"
@@ -472,6 +514,13 @@
                 android:key="3_hide_notifications"
                 android:title="@string/hide_foreign_notifications_title"
                 android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="3_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
                 android:persistent="true"
                 android:defaultValue="false"/>
 
@@ -543,6 +592,13 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="4_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
             <Preference
                 android:key="4_enable_grayscale"
                 android:title="@string/enable_grayscale_title"
@@ -608,6 +664,13 @@
                 android:key="5_hide_notifications"
                 android:title="@string/hide_foreign_notifications_title"
                 android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="5_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
                 android:persistent="true"
                 android:defaultValue="false"/>
 
@@ -679,6 +742,13 @@
                 android:persistent="true"
                 android:defaultValue="false"/>
 
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="6_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
             <Preference
                 android:key="6_enable_grayscale"
                 android:title="@string/enable_grayscale_title"
@@ -742,6 +812,13 @@
                 android:key="7_hide_notifications"
                 android:title="@string/hide_foreign_notifications_title"
                 android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="7_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
                 android:persistent="true"
                 android:defaultValue="false"/>
 
@@ -810,6 +887,13 @@
                 android:key="8_hide_notifications"
                 android:title="@string/hide_foreign_notifications_title"
                 android:summary="@string/hide_foreign_notifications_summary"
+                android:persistent="true"
+                android:defaultValue="false"/>
+
+            <com.android.launcher3.views.DependentSwitchPreference
+                android:key="8_hide_all_notifications"
+                android:title="@string/hide_all_notifications_title"
+                android:summary="@string/hide_all_notifications_summary"
                 android:persistent="true"
                 android:defaultValue="false"/>
 

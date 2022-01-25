@@ -19,7 +19,8 @@
 -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.launcher3">
+    package="com.android.launcher3"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-sdk android:targetSdkVersion="23" android:minSdkVersion="21"/>
     <!--
     Manifest entries specific to Launcher3. This is merged with AndroidManifest-common.xml.
@@ -58,6 +59,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
 
     <!-- Only needed if OverlayService is used -->
     <!--<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />-->
@@ -67,7 +69,7 @@
         android:fullBackupOnly="true"
         android:fullBackupContent="@xml/backupscheme"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_focus_launcher_48dp"
+        android:icon="@drawable/ic_app_logo"
         android:label="@string/derived_app_name"
         android:theme="@style/LauncherTheme"
         android:largeHeap="@bool/config_largeHeap"

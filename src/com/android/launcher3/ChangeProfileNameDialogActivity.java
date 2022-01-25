@@ -33,6 +33,11 @@ public class ChangeProfileNameDialogActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 cont = true;
                 newProfileName = input.getText().toString();
+                if(newProfileName.length()>0){
+                    if((""+newProfileName.charAt(newProfileName.length()-1)).equals(" ")){
+                        newProfileName = newProfileName.substring(0,newProfileName.length()-1);
+                    }
+                }
                 if(newProfileName.length()==0||newProfileName.length()==1||newProfileName.length()==2){
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra("result","too_short");

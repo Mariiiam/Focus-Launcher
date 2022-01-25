@@ -79,6 +79,7 @@
     <string name="allow_rotation_blocked_desc" msgid="3212602545192996253">"Die aktuelle \"Display\"-Einstellung verhindert eine Drehung der Anzeige"</string>
     <string name="icon_badging_title" msgid="874121399231955394">"Benachrichtigungsindikatoren"</string>
     <string name="hide_foreign_notifications_title" msgid="874121399231955395">"Benachrichtigungen ausblenden"</string>
+    <string name="hide_all_notifications_title" >"Alle Benachrichtigungen ausblenden"</string>
     <string name="enable_grayscale_title" msgid="9029271080007984542">"Graustufen-Modus"</string>
     <string name="add_new_profile">"Neues Profil hinzufügen"</string>
     <string name="profile_name_summary">Gebe dem Profil einen Namen</string>
@@ -88,6 +89,7 @@
     <string name="delete">"Löschen"</string>
     <string name="grayscale_tile">Graustufen</string>
     <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
+    <string name="hide_all_notifications_summary">"Alle einkommenden Benachrichtigungen werden ausgeblendet"</string>
     <string name="grayscale_summary">"Link zu den Eingabehilfen Einstellungen. Sehhilfe > Farbanpassung > Graustufe"</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
@@ -212,7 +214,7 @@
     <string name="change_name_pref_not_active">Profil muss inaktiv sein, um den Namen ändern zu können</string>
     <string name="error_change_profile_name_too_short">Speichern abgebrochen. Name muss mindestens drei Zeichen enthalten</string>
     <string name="error_change_profile_name_already_exists">Speichern abgebrochen. Dieser Name existiert bereits</string>
-    <string name="title_trigger_rules">Auslöser Regeln</string>
+    <string name="title_trigger_rules">Aktivierungs-Regeln</string>
     <string name="title_settings_and_design">Einstellungen und Design</string>
     <string name="title_schedule">Zeitplan</string>
     <string name="day_m">MO</string>
@@ -231,4 +233,5 @@
     <string name="question_grayscale">Sind Sie dabei den Graustufen-Modus an oder auszuschalten?</string>
     <string name="activate">Anschalten</string>
     <string name="deactivate">Ausschalten</string>
+    <string name="help">Hilfe</string>
 </resources>

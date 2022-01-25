@@ -41,6 +41,7 @@ import com.android.launcher3.QuestionGrayscaleDialog;
 import com.android.launcher3.R;
 import com.android.launcher3.SettingsActivity;
 import com.android.launcher3.logger.FirebaseLogger;
+import com.android.launcher3.logger.LogEntryProfileEdited;
 import com.android.launcher3.notification.NotificationListener;
 import com.android.launcher3.util.TimePreferenceActivity;
 import com.android.launcher3.views.DependentSwitchPreference;
@@ -199,12 +200,14 @@ public class ProfilesActivity extends Activity {
 
             String profile = grayscaleInfo.split("_")[0];
             if(profile.length()>1){
-                firebaseLogger.addLogMessage("events", "profile edited", profile+", grayscale edited, "+Launcher.getProfileSettings(profile));
+                LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "grayscale edited", Launcher.getSSIDPref(profile), Launcher.getSchedulePref(profile), Launcher.getRingtonePref(profile), Launcher.getNotificationSoundPref(profile), Launcher.getNotificationBlockedPref(profile), Launcher.getMinimalDesignPref(profile), Launcher.getHomeScreenAppsList(profile), Launcher.getWallpaperInfo(profile), Launcher.getGrayScalePref(profile));
+                firebaseLogger.addLogMessage("events", "profile edited", logEntry);
             } else {
                 for(String newAddedProfile:newAddedProfiles){
                     if(profile.equals(newAddedProfile.charAt(0)+"")){
                         profile = newAddedProfile.substring(1);
-                        firebaseLogger.addLogMessage("events", "profile edited", profile+", grayscale edited, "+Launcher.getProfileSettings(newAddedProfile.charAt(0)+""));
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "grayscale edited", Launcher.getSSIDPref(newAddedProfile.charAt(0)+""), Launcher.getSchedulePref(newAddedProfile.charAt(0)+""), Launcher.getRingtonePref(newAddedProfile.charAt(0)+""), Launcher.getNotificationSoundPref(newAddedProfile.charAt(0)+""), Launcher.getNotificationBlockedPref(newAddedProfile.charAt(0)+""), Launcher.getMinimalDesignPref(newAddedProfile.charAt(0)+""), Launcher.getHomeScreenAppsList(newAddedProfile.charAt(0)+""), Launcher.getWallpaperInfo(newAddedProfile.charAt(0)+""), Launcher.getGrayScalePref(newAddedProfile.charAt(0)+""));
+                        firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                     }
                 }
             }
@@ -402,7 +405,8 @@ public class ProfilesActivity extends Activity {
                     minimalDesignPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                         @Override
                         public boolean onPreferenceClick(Preference preference) {
-                            firebaseLogger.addLogMessage("events", "profile edited", profile+", minimal design edited, "+Launcher.getProfileSettings(profile));
+                            LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "minimal design edited", Launcher.getSSIDPref(profile), Launcher.getSchedulePref(profile), Launcher.getRingtonePref(profile), Launcher.getNotificationSoundPref(profile), Launcher.getNotificationBlockedPref(profile), Launcher.getMinimalDesignPref(profile), Launcher.getHomeScreenAppsList(profile), Launcher.getWallpaperInfo(profile), Launcher.getGrayScalePref(profile));
+                            firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                             return true;
                         }
                     });
@@ -466,7 +470,8 @@ public class ProfilesActivity extends Activity {
                             minimalDesignPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                                 @Override
                                 public boolean onPreferenceClick(Preference preference) {
-                                    firebaseLogger.addLogMessage("events", "profile edited", profile+", minimal design edited, "+Launcher.getProfileSettings(profileID));
+                                    LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "minimal design edited", Launcher.getSSIDPref(profileID), Launcher.getSchedulePref(profileID), Launcher.getRingtonePref(profileID), Launcher.getNotificationSoundPref(profileID), Launcher.getNotificationBlockedPref(profileID), Launcher.getMinimalDesignPref(profileID), Launcher.getHomeScreenAppsList(profileID), Launcher.getWallpaperInfo(profileID), Launcher.getGrayScalePref(profileID));
+                                    firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                                     return true;
                                 }
                             });
@@ -595,15 +600,18 @@ public class ProfilesActivity extends Activity {
                             } else if(profile.equals("work")){
                                 Preference alarmPref = findPreference("work_schedule");
                                 bindAlarmSummaryPreference(profile, alarmPref);
+                                getActivity().recreate();
                             } else if(profile.equals("home")){
                                 Preference alarmPref = findPreference("home_schedule");
                                 bindAlarmSummaryPreference(profile, alarmPref);
+                                getActivity().recreate();
                             }
                             else {
                                 for(String sub : newAddedProfiles){
                                     String profileID = sub.charAt(0)+"";
                                     Preference alarmPref = findPreference(profileID+"_schedule");
                                     bindAlarmSummaryPreference(profileID, alarmPref);
+                                    getActivity().recreate();
                                 }
                             }
                         }
@@ -774,7 +782,9 @@ public class ProfilesActivity extends Activity {
                         minimalDesignPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                             @Override
                             public boolean onPreferenceClick(Preference preference) {
-                                firebaseLogger.addLogMessage("events", "profile edited", result+", minimal design edited, "+Launcher.getProfileSettings(currentProfileNumber+""));
+                                String profileID = currentProfileNumber+"";
+                                LogEntryProfileEdited logEntry = new LogEntryProfileEdited(result, "minimal design edited", Launcher.getSSIDPref(profileID), Launcher.getSchedulePref(profileID), Launcher.getRingtonePref(profileID), Launcher.getNotificationSoundPref(profileID), Launcher.getNotificationBlockedPref(profileID), Launcher.getMinimalDesignPref(profileID), Launcher.getHomeScreenAppsList(profileID), Launcher.getWallpaperInfo(profileID), Launcher.getGrayScalePref(profileID));
+                                firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                                 return true;
                             }
                         });
@@ -841,7 +851,9 @@ public class ProfilesActivity extends Activity {
                         String profileSetting = ssIDInfo+scheduleInfo+ringtoneInfo+notificationSoundInfo+notificationBlockInfo+minimalDesignInfo+homescreenAppsInfo+wallpaperInfo+grayscaleInfo;
 
                         //*********** <timestamp> - profile added - <profilename> - <profilesettings>
-                        firebaseLogger.addLogMessage("events", "profile added", result+", "+profileSetting);
+                        String profileID = currentProfileNumber+"";
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(result, "new profile", Launcher.getSSIDPref(profileID), Launcher.getSchedulePref(profileID), Launcher.getRingtonePref(profileID), Launcher.getNotificationSoundPref(profileID), Launcher.getNotificationBlockedPref(profileID), Launcher.getMinimalDesignPref(profileID), Launcher.getHomeScreenAppsList(profileID), Launcher.getWallpaperInfo(profileID), Launcher.getGrayScalePref(profileID));
+                        firebaseLogger.addLogMessage("events", "profile added", logEntry);
                     }
                 }
             } else if (requestCode == PROFILE_NAME_CHANGE) {
@@ -878,7 +890,8 @@ public class ProfilesActivity extends Activity {
                         Launcher.mSharedPrefs.edit().putStringSet(ADD_PROFILE_PREF, set1).apply();
 
                         firebaseLogger = FirebaseLogger.getInstance();
-                        firebaseLogger.addLogMessage("events", "profile edited", "new name: "+result+", old name: "+changedProfile+", profile name edited, "+Launcher.getProfileSettings(profileID));
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(changedProfile, result, Launcher.getSSIDPref(profileID), Launcher.getSchedulePref(profileID), Launcher.getRingtonePref(profileID), Launcher.getNotificationSoundPref(profileID), Launcher.getNotificationBlockedPref(profileID), Launcher.getMinimalDesignPref(profileID), Launcher.getHomeScreenAppsList(profileID), Launcher.getWallpaperInfo(profileID), Launcher.getGrayScalePref(profileID));
+                        firebaseLogger.addLogMessage("events", "profile edited", logEntry);
                     }
                 }
             } else if(requestCode == Launcher.REQUEST_PICK_WALLPAPER){
@@ -956,7 +969,23 @@ public class ProfilesActivity extends Activity {
             if(requestCode==NOTIFICATION_BLOCKING_ALLOWED){
                 if(resultCode == RESULT_OK) {
                     firebaseLogger = FirebaseLogger.getInstance();
-                    firebaseLogger.addLogMessage("events", "profile edited", "notification blocking edited, " + Launcher.getProfileSettings(TimePreferenceActivity.selectedProfile));
+                    if(TimePreferenceActivity.selectedProfile.equals("work")||TimePreferenceActivity.selectedProfile.equals("home")||TimePreferenceActivity.selectedProfile.equals("disconnected")||TimePreferenceActivity.selectedProfile.equals("default")){
+                        String selProf = TimePreferenceActivity.selectedProfile;
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(selProf, "notification blocking edited", Launcher.getSSIDPref(selProf), Launcher.getSchedulePref(selProf), Launcher.getRingtonePref(selProf), Launcher.getNotificationSoundPref(selProf), Launcher.getNotificationBlockedPref(selProf), Launcher.getMinimalDesignPref(selProf), Launcher.getHomeScreenAppsList(selProf), Launcher.getWallpaperInfo(selProf), Launcher.getGrayScalePref(selProf));
+                        firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                    } else {
+                        Set set = Launcher.mSharedPrefs.getStringSet(ADD_PROFILE_PREF, null);
+                        if(set!=null){
+                            ArrayList<String> newAddedProfiles = new ArrayList<>(set);
+                            for(String newAddedProfile : newAddedProfiles){
+                                if((newAddedProfile.charAt(0)+"").equals(TimePreferenceActivity.selectedProfile)){
+                                    String selProf = TimePreferenceActivity.selectedProfile;
+                                    LogEntryProfileEdited logEntry = new LogEntryProfileEdited(newAddedProfile.substring(1), "notification blocking edited", Launcher.getSSIDPref(selProf), Launcher.getSchedulePref(selProf), Launcher.getRingtonePref(selProf), Launcher.getNotificationSoundPref(selProf), Launcher.getNotificationBlockedPref(selProf), Launcher.getMinimalDesignPref(selProf), Launcher.getHomeScreenAppsList(selProf), Launcher.getWallpaperInfo(selProf), Launcher.getGrayScalePref(selProf));
+                                    firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
