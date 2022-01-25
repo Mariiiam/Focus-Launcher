@@ -6,14 +6,16 @@ import java.util.List;
 public class LogEntryUnlocks implements Serializable {
     String profile;
     List<String> usedApps;
-    List<String> usedShortcuts;
+    long startTime;
+    List<String> profilesDuringUnlocks;
 
     public LogEntryUnlocks(){}
 
-    public LogEntryUnlocks(String profile, List<String> usedApps, List<String> usedShortcuts) {
+    public LogEntryUnlocks(String profile, List<String> usedApps, long startTime, List<String> profilesDuringUnlocks) {
         this.profile = profile;
         this.usedApps = usedApps;
-        this.usedShortcuts = usedShortcuts;
+        this.startTime = startTime;
+        this.profilesDuringUnlocks = profilesDuringUnlocks;
     }
 
     public String getProfile() {
@@ -32,11 +34,19 @@ public class LogEntryUnlocks implements Serializable {
         this.usedApps = usedApps;
     }
 
-    public List<String> getUsedShortcuts() {
-        return usedShortcuts;
+    public long getStartTime() {
+        return startTime;
     }
 
-    public void setUsedShortcuts(List<String> usedShortcuts) {
-        this.usedShortcuts = usedShortcuts;
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public List<String> getProfilesDuringUnlocks() {
+        return profilesDuringUnlocks;
+    }
+
+    public void setProfilesDuringUnlocks(List<String> profilesDuringUnlocks) {
+        this.profilesDuringUnlocks = profilesDuringUnlocks;
     }
 }

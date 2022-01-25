@@ -21,11 +21,15 @@ import android.animation.*;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.*;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
@@ -368,6 +372,13 @@ public class Launcher extends BaseActivity
 
     public static ArrayList<String> usedShortcuts = new ArrayList<>();
 
+    public static ArrayList<String> profileChangesListInUnlockedMode = new ArrayList<>();
+
+    public static long beginUnlockTime = 0;
+    public static long endLockTime = 0;
+    static boolean isUnlocked = false;
+    static boolean firstOnCreate = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (DEBUG_STRICT_MODE) {
@@ -515,6 +526,7 @@ public class Launcher extends BaseActivity
         //checkLocationPermission(this);
         checkFineLocationPermission(this);
         hasWritePermission(this, true);
+        checkUsageAccessPermission(this);
 
         // For handling default keys
         mDefaultKeySsb = new SpannableStringBuilder();
@@ -719,6 +731,18 @@ public class Launcher extends BaseActivity
                         switchToMinimalLayout(isMinimalDesignON);
                     }
                 }
+            }
+        }
+
+        KeyguardManager myKM = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        if( myKM.inKeyguardRestrictedInputMode()) {
+            //it is locked
+        } else {
+            if(firstOnCreate){
+                beginUnlockTime = System.currentTimeMillis();
+                profileChangesListInUnlockedMode.add(mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default")+"_"+System.currentTimeMillis());
+                isUnlocked = true;
+                firstOnCreate = false;
             }
         }
     }
@@ -1644,6 +1668,7 @@ public class Launcher extends BaseActivity
         //checkLocationPermission(this);
         hasExternalStoragePermission(this);
         checkFineLocationPermission(this);
+        checkUsageAccessPermission(this);
 
     }
 
@@ -2124,14 +2149,12 @@ public class Launcher extends BaseActivity
                     //if profile is not saved in the list
                     String newProfileApps = currentProfile+"_"+info.title.toString();
                     appsOnHomescreenList.add(newProfileApps);
-                    Log.d("---", "new list: "+appsOnHomescreenList);
                     Set<String> set = new HashSet(appsOnHomescreenList);
                     mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
                 }
                 if(isEntryToDelete){
                     appsOnHomescreenList.remove(entryToDelete);
                     appsOnHomescreenList.add(entryToAdd);
-                    Log.d("---", "updated list: "+appsOnHomescreenList);
                     isEntryToDelete = false;
                     Set<String> set = new HashSet(appsOnHomescreenList);
                     mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
@@ -2151,7 +2174,6 @@ public class Launcher extends BaseActivity
                     }
                 }
                 appsOnHomescreenList.add(newProfileApps);
-                Log.d("---", "totally new list: "+appsOnHomescreenList);
                 Set<String> set = new HashSet(appsOnHomescreenList);
                 mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
             }
@@ -2323,10 +2345,96 @@ public class Launcher extends BaseActivity
                 if(usedShortcuts.isEmpty()){
                     usedShortcuts.add("empty");
                 }
-                LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, usedApps, usedShortcuts);
-                firebaseLogger.addLogMessage("unlocks", "screen off", logEntry);
-                usedApps = new ArrayList<>();
-                usedShortcuts = new ArrayList<>();
+
+                if(isUnlocked){
+                    ArrayList<String> profilesList = new ArrayList<>();
+                    ArrayList<String> apps = new ArrayList<>();
+                    endLockTime = System.currentTimeMillis();
+                    if(profileChangesListInUnlockedMode.isEmpty()){
+                        profileChangesListInUnlockedMode.add(mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default"));
+                    }
+                    if(profileChangesListInUnlockedMode.size()==1){
+                        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService("usagestats");
+                        UsageEvents usageEvents = usageStatsManager.queryEvents(beginUnlockTime, endLockTime);
+                        while(usageEvents.hasNextEvent()){
+                            UsageEvents.Event event = new UsageEvents.Event();
+                            usageEvents.getNextEvent(event);
+                            if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
+                                if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
+                                    if(!apps.contains(getLabelFromPackageName(context, event.getPackageName()))){
+                                        if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
+                                            apps.add(getLabelFromPackageName(context, event.getPackageName()));
+                                            String profileName = profileChangesListInUnlockedMode.get(0).split("_")[0];
+                                            if(profileName.equals("home")){
+                                                profileName = context.getString(R.string.profile_home);
+                                            } else if(profileName.equals("work")){
+                                                profileName = context.getString(R.string.profile_work);
+                                            } else if(profileName.equals("default")){
+                                                profileName = context.getString(R.string.profile_default);
+                                            } else if(profileName.equals("disconnected")){
+                                                profileName = context.getString(R.string.profile_disconnected);
+                                            }
+                                            profilesList.add(profileName);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService("usagestats");
+                        long startTime = 0;
+                        long endTime = 0;
+                        for(int i = 0; i<profileChangesListInUnlockedMode.size(); i++){
+                            if(i==0){
+                                startTime = beginUnlockTime;
+                            } else {
+                                startTime = endTime;
+                            }
+                            if(i==profileChangesListInUnlockedMode.size()-1){
+                                endTime = endLockTime;
+                            } else {
+                                endTime = Long.parseLong(profileChangesListInUnlockedMode.get(i+1).split("_")[1]);
+                            }
+                            UsageEvents usageEvents = usageStatsManager.queryEvents(startTime, endTime);
+
+                            while(usageEvents.hasNextEvent()){
+                                UsageEvents.Event event = new UsageEvents.Event();
+                                usageEvents.getNextEvent(event);
+                                if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
+                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
+                                        if(!apps.contains(getLabelFromPackageName(context, event.getPackageName()))){
+                                            if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
+                                                apps.add(getLabelFromPackageName(context, event.getPackageName()));
+                                                String profileName = profileChangesListInUnlockedMode.get(i).split("_")[0];
+                                                if(profileName.equals("home")){
+                                                    profileName = context.getString(R.string.profile_home);
+                                                } else if(profileName.equals("work")){
+                                                    profileName = context.getString(R.string.profile_work);
+                                                } else if(profileName.equals("default")){
+                                                    profileName = context.getString(R.string.profile_default);
+                                                } else if(profileName.equals("disconnected")){
+                                                    profileName = context.getString(R.string.profile_disconnected);
+                                                }
+                                                profilesList.add(profileName);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(apps.isEmpty()){
+                        apps.add("empty");
+                    }
+
+                    LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, apps, beginUnlockTime, profilesList);
+                    firebaseLogger.addLogMessage("unlocks", "phone locked", logEntry);
+                    usedApps = new ArrayList<>();
+                    usedShortcuts = new ArrayList<>();
+                    profileChangesListInUnlockedMode = new ArrayList<>();
+                    isUnlocked = false;
+                }
 
                 // Reset AllApps to its initial state only if we are not in the middle of
                 // processing a multi-step drop
@@ -2338,17 +2446,38 @@ public class Launcher extends BaseActivity
                 }
                 mShouldFadeInScrim = true;
             } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                isUnlocked = true;
+                beginUnlockTime = System.currentTimeMillis();
+                profileChangesListInUnlockedMode.add(mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default")+"_"+System.currentTimeMillis());
                 // ACTION_USER_PRESENT is sent after onStart/onResume. This covers the case where
                 // the user unlocked.
-                LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, null, null);
+                LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, null, 0, null);
                 firebaseLogger.addLogMessage("unlocks", "phone unlocked", logEntry);
                 mShouldFadeInScrim = false;
             } else if(Intent.ACTION_SCREEN_ON.equals(action)){
-                LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, null, null);
+                LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, null, 0, null);
                 firebaseLogger.addLogMessage("unlocks", "screen on", logEntry);
             }
         }
     };
+
+    public static String getLabelFromPackageName(Context context, String packageName){
+        String label = "";
+        PackageManager packageManager = context.getPackageManager();
+        ApplicationInfo applicationInfo;
+        try{
+            applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e){
+            Log.e(TAG, "Package name not found");
+            applicationInfo = null;
+        }
+        if(applicationInfo!=null){
+            label = (String) packageManager.getApplicationLabel(applicationInfo);
+            return label;
+        } else {
+            return label;
+        }
+    }
 
     /*
     private final BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
@@ -2536,9 +2665,7 @@ public class Launcher extends BaseActivity
             return false;
         }
         firstTime = false;
-
         if (mSharedPrefs.getString(CURRENT_PROFILE_PREF, "").equals(profile)) return true;
-
         mSharedPrefs.edit().putString(CURRENT_PROFILE_PREF, profile).apply();
         
         Log.d("LAST PROFILE UPDATE", (lastProfileUpdate == null) ? "null" : lastProfileUpdate);
@@ -2551,7 +2678,6 @@ public class Launcher extends BaseActivity
         updateNotificationSound(profile);
         updateApps(profile);
         updateLayoutDesign(profile);
-
         return true;
     }
 
@@ -2769,6 +2895,23 @@ public class Launcher extends BaseActivity
         if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, CODE_ACCESS_LOCATION_PERMISSION);
         }
+    }
+
+    public static void checkUsageAccessPermission(Activity context){
+        try{
+            PackageManager packageManager = context.getPackageManager();
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
+            AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+            int mode = 0;
+            mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName);
+            if(mode != AppOpsManager.MODE_ALLOWED){
+                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                context.startActivity(intent);
+            }
+        } catch (PackageManager.NameNotFoundException e){
+            Log.e(TAG, "Package name not found "+e.getStackTrace());
+        }
+
     }
 
     public static final int CODE_ACCESS_FINE_LOCATION_PERMISSION = 54;
@@ -5612,6 +5755,7 @@ public class Launcher extends BaseActivity
             if(key.equals(CURRENT_PROFILE_PREF)){
                 String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
                 if(currentProfile!=null){
+                    profileChangesListInUnlockedMode.add(currentProfile+"_"+System.currentTimeMillis());
                     if(currentProfile.equals("home") || currentProfile.equals("work") || currentProfile.equals("default") ||currentProfile.equals("disconnected") ){
                         isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
                         if(isMinimalDesignON){ fetchHomescreenAppList(); }
