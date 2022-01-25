@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="help_screen"
+    android:title="@string/help">
+    <Preference
+        android:persistent="false"
+        android:title="@string/add_apps"
+        android:key="addapps_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$AppsHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/notifications_header"
+        android:key="notification_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$NotificationsHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/title_trigger_rules"
+        android:key="schedule_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$TriggersHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/sounds_title"
+        android:key="sounds_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$SoundsHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/enable_grayscale_title"
+        android:key="grayscale_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$GrayscaleHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/wallpaper_button_text"
+        android:key="wallpaper_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$WallpaperHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/manage_profiles_title"
+        android:key="profiles_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$ProfilesHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/minimal_design_title"
+        android:key="minimaldesign_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$MinimalHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/other_title"
+        android:key="other_help"
+        android:fragment="com.android.launcher3.util.HelpActivity$OtherHelpFragment" />
+</PreferenceScreen>

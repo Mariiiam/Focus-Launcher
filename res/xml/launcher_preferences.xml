@@ -90,10 +90,10 @@
         android:defaultValue=""
         android:persistent="true" />
 
-    <Preference
-        android:persistent="false"
+    <PreferenceScreen
+        android:key="help_screen"
         android:title="@string/help"
-        android:key="help"/>
+        android:persistent="false"/>
 
     <Preference
         android:persistent="false"

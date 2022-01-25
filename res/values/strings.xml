@@ -450,4 +450,18 @@
     <string name="activate">On</string>
     <string name="deactivate">Off</string>
     <string name="help">Help</string>
+    <string name="add_apps">Adding Apps to the Home Screen</string>
+    <string name="sounds_title">Sounds</string>
+    <string name="manage_profiles_title">Manage Profiles</string>
+    <string name="minimal_design_title">Minimal Design</string>
+    <string name="other_title">Other</string>
+    <string name="add_apps_help_text">To add an app to the home screen of your phone, press and hold the app and drag it. You will then see the home screen. Drag the app to the desired position and then release.</string>
+    <string name="notification_help_text">You can hide notifications or just mute them. In order to hide them turn "hide notification" in the profiles settings on. In order to mute them choose "silent" as a notification sound.</string>
+    <string name="trigger_help_text">Select the days and the time to activate the respective profile at specific times. To delete the schedule, deselect the selected days and press "save". Tap the network name, e.g. "WLAN-1234", so that the respective profile is activated as soon as your mobile phone is connected to this network. If you switch off your WIFI or your phone is not connected to a WIFI, the default profile is automatically activated. To delete the WIFI activation, delete the network name.</string>
+    <string name="sounds_help_text">Choose the ring tone and the notification tone so that they remind you in which context you are.</string>
+    <string name="grayscale_help_text">The grayscale mode cannot be switched on and off by the app. Follow the following steps to turn it on or off: 1) Select Grayscale Mode in the profile settings. Or select the added Grayscale button in the notification bar. 2) Activate or Deactivate. 3) Visibility improvements 4) Colour adjustment 5) Greyscale and On</string>
+    <string name="wallpaper_help_text">The wallpaper is there to remind you of the context you are in. Please change your wallpaper only from the profile settings or via the icon that appears when you long press on the home screen of your mobile phone.</string>
+    <string name="profiles_help_text">You can create up to 8 additional profiles. You can rename the newly created profile at any time. Newly created profiles cannot be deleted. They can either be renamed or not used. To do this, delete the activation rules (see help category "Trigger rules").</string>
+    <string name="minimal_help_text">In the minimalist design, the apps are displayed as a list. Before you switch it on, you can move any apps from the app menu to your screen.</string>
+    <string name="other_help_text">If you have any other questions, please feel free to email me. You will find the e-mail address in the instruction PDF that you received by e-mail at the beginning of the study. Thank you for your participation!</string>
 </resources>

@@ -14,10 +14,16 @@ import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 import android.preference.TwoStatePreference;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.android.launcher3.util.HelpActivity;
+
+import android.app.Fragment;
 
 public class SettingsActivity extends com.android.launcher3.SettingsActivity implements PreferenceFragment.OnPreferenceStartFragmentCallback {
     public final static String ICON_PACK_PREF = "pref_icon_pack";
@@ -67,6 +73,16 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
                     return true;
                 }
             });*/
+
+            findPreference("help_screen").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getActivity(), HelpActivity.class);
+                    startActivity(intent);
+                    getActivity().finish();
+                    return true;
+                }
+            });
 
             findPreference(SHOW_PREDICTIONS_PREF).setOnPreferenceChangeListener(this);
             findPreference(ENABLE_MINUS_ONE_PREF).setOnPreferenceChangeListener(this);
