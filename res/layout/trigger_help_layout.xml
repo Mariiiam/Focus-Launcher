@@ -7,24 +7,47 @@
 
     <TextView
         android:id="@+id/trigger_help_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_marginTop_title"
         android:text="@string/title_trigger_rules"
-        android:textSize="25dp"
+        android:textSize="@dimen/help_title_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/trigger_help_text"
-        android:layout_width="wrap_content"
+        android:id="@+id/ssid_help_text"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="70dp"
-        android:text="@string/trigger_help_text"
-        android:textSize="20dp"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_marginTop_text"
+        android:text="@string/ssid_help_text"
+        android:textSize="@dimen/help_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/trigger_help_title" />
+
+    <TextView
+        android:id="@+id/schedule_help_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_marginTop_text"
+        android:text="@string/schedule_help_text"
+        android:textSize="@dimen/help_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ssid_help_text" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:src="@drawable/img_trigger_help"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/schedule_help_text"/>
 
 </android.support.constraint.ConstraintLayout>

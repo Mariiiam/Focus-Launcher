@@ -7,24 +7,36 @@
 
     <TextView
         android:id="@+id/apps_help_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_marginTop_title"
+        android:layout_marginEnd="@dimen/help_margin"
         android:text="@string/add_apps"
-        android:textSize="20sp"
+        android:textSize="@dimen/help_title_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/apps_help_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="70dp"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_marginTop_text"
         android:text="@string/add_apps_help_text"
-        android:textSize="20sp"
+        android:textSize="@dimen/help_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/apps_help_title" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:src="@drawable/img_apps_help"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/apps_help_text"/>
 
 </android.support.constraint.ConstraintLayout>
