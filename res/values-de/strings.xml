@@ -250,4 +250,5 @@
     <string name="other_help_text">Wenn Sie sonstige Fragen haben, können Sie mir gerne per E-Mail schreiben. Die E-Mail Adresse finden Sie in der Anleitungs-PDF, die Sie am Anfang der Studie per E-Mail erhalten haben.</string>
     <string name="thanks_help_text">Vielen Dank für Ihre Teilnahme!</string>
     <string name="ssid_help_text">Tippen Sie den Netzwerknamen, wie z. B. “WLAN-1234”, damit das jeweilige Profil aktiviert wird sobald Ihr Handy mit diesem Netzwerk verbunden wird. Wenn Sie Ihr WLAN ausschalten oder Ihr Handy nicht mit einem WLAN verbunden ist, wird automatisch das Standard-Profil aktiviert. Um die WLAN-Aktivierung zu löschen, löschen Sie den Netzwerknamen.</string>
+    <string name="study_id">Studien-ID</string>
 </resources>

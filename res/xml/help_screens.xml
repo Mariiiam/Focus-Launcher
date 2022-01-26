@@ -48,4 +48,8 @@
         android:title="@string/other_title"
         android:key="other_help"
         android:fragment="com.android.launcher3.util.HelpActivity$OtherHelpFragment" />
+    <Preference
+        android:persistent="false"
+        android:title="@string/study_id"
+        android:key="study_id"/>
 </PreferenceScreen>

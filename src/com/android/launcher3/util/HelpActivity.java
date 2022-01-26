@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.google.android.apps.nexuslauncher.ProfilesActivity;
 
@@ -117,6 +118,26 @@ public class HelpActivity extends Activity implements PreferenceFragment.OnPrefe
         public void onCreate(Bundle savedInstanceState) {
             if(this.parent == this ) super.onCreate(savedInstanceState);
             parent.addPreferencesFromResource(R.xml.help_screens);
+            Preference studyID = (Preference) parent.findPreference("study_id");
+            if(Launcher.mSharedPrefs !=null){
+                String studyIDString = Launcher.mSharedPrefs.getString("userID_firebase", null);
+                if(studyIDString!=null){
+                    studyID.setSummary(studyIDString);
+                }
+            }
+
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            Preference studyID = (Preference) parent.findPreference("study_id");
+            if(Launcher.mSharedPrefs !=null){
+                String studyIDString = Launcher.mSharedPrefs.getString("userID_firebase", null);
+                if(studyIDString!=null){
+                    studyID.setSummary(studyIDString);
+                }
+            }
         }
 
         @Override

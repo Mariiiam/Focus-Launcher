@@ -466,4 +466,5 @@
     <string name="other_help_text">If you have any other questions, please feel free to email me. You will find the e-mail address in the instruction PDF that you received by e-mail at the beginning of the study.</string>
     <string name="thanks_help_text">Thank you for your participation!</string>
     <string name="ssid_help_text">Tap the network name, e.g. "WLAN-1234", so that the respective profile is activated as soon as your mobile phone is connected to this network. If you switch off your WIFI or your phone is not connected to a WIFI, the default profile is automatically activated. To delete the WIFI activation, delete the network name.</string>
+    <string name="study_id">Study ID</string>
 </resources>
