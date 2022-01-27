@@ -97,7 +97,7 @@ public class SettingsActivity extends Activity {
                 // Initialize the UI once
                 rotationPref.setDefaultValue(Utilities.getAllowRotationDefaultValue(getActivity()));
             }
-
+            /*
             DependentSwitchPreference iconBadgingPref =
                     (DependentSwitchPreference) findPreference(ICON_BADGING_PREFERENCE_KEY);
             if (!Utilities.ATLEAST_OREO) {
@@ -111,7 +111,7 @@ public class SettingsActivity extends Activity {
                 mIconBadgingObserver = new NotificationAccessObserver(
                         iconBadgingPref, resolver, getFragmentManager());
                 mIconBadgingObserver.register(NOTIFICATION_BADGING, NOTIFICATION_ENABLED_LISTENERS);
-            }
+            }*/
 
             Preference iconShapeOverride = findPreference(IconShapeOverride.KEY_PREFERENCE);
             if (iconShapeOverride != null) {

@@ -272,7 +272,8 @@ public class PopupDataProvider implements NotificationListener.NotificationsChan
     }
 
     private boolean isBadgingEnabled() {
-        return mLauncher.getSharedPrefs().getBoolean("pref_icon_badging", false);
+        //return mLauncher.getSharedPrefs().getBoolean("pref_icon_badging", false);
+        return false;
     }
 
     @Override

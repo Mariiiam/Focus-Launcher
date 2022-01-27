@@ -90,7 +90,7 @@
     <string name="grayscale_tile">Graustufen</string>
     <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
     <string name="hide_all_notifications_summary">"Alle einkommenden Benachrichtigungen werden ausgeblendet"</string>
-    <string name="grayscale_summary">"Link zu den Eingabehilfen Einstellungen. Sehhilfe > Farbanpassung > Graustufe"</string>
+    <string name="grayscale_summary">"Link zu den Eingabehilfen Einstellungen. Verbesserungen der Sichtbarkeit > Farbanpassung > An auswählen > Graustufen</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
     <string name="title_missing_notification_access" msgid="7503287056163941064">"Benachrichtigungszugriff erforderlich"</string>
@@ -230,8 +230,8 @@
     <string name="every_string">Jeden</string>
     <string name="clock_string">Uhr</string>
     <string name="at_string">um</string>
-    <string name="question_grayscale">Sind Sie dabei den Graustufen-Modus an oder auszuschalten?</string>
-    <string name="activate">Anschalten</string>
+    <string name="question_grayscale">Sind Sie dabei den Graustufen-Modus ein- oder auszuschalten?</string>
+    <string name="activate">Einschalten</string>
     <string name="deactivate">Ausschalten</string>
     <string name="help">Hilfe</string>
     <string name="add_apps">Apps zum Startbildschirm hinzufügen</string>
