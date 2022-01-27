@@ -148,6 +148,12 @@
         </activity>
 
         <activity
+            android:name="com.android.launcher3.util.HelpActivity"
+            android:theme="@style/SettingsTheme"
+            android:excludeFromRecents="true">
+        </activity>
+
+        <activity
             android:name="com.android.launcher3.QuestionGrayscaleDialog"
             android:theme="@style/Theme.Transparent"
             android:excludeFromRecents="true">

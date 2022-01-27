@@ -257,4 +257,10 @@
     <dimen name="day_button_spacing">10dp</dimen>
     <dimen name="setup_spacing_vert">60dp</dimen>
     <dimen name="setup_spacing_vert_small">5dp</dimen>
+
+    <dimen name="help_title_size">20sp</dimen>
+    <dimen name="help_text_size">18sp</dimen>
+    <dimen name="help_margin">20dp</dimen>
+    <dimen name="help_marginTop_title">24dp</dimen>
+    <dimen name="help_marginTop_text">40dp</dimen>
 </resources>

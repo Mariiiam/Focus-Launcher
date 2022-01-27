@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/profiles_help_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_marginTop_title"
+        android:text="@string/profiles"
+        android:textSize="@dimen/help_title_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/profiles_help_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        android:layout_marginTop="@dimen/help_marginTop_text"
+        android:text="@string/profiles_help_text"
+        android:textSize="@dimen/help_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profiles_help_title" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:src="@drawable/img_profiles_help"
+        android:layout_marginStart="@dimen/help_margin"
+        android:layout_marginEnd="@dimen/help_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profiles_help_text"/>
+
+</android.support.constraint.ConstraintLayout>

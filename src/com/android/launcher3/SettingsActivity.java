@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.android.launcher3.graphics.IconShapeOverride;
 import com.android.launcher3.notification.NotificationListener;
+import com.android.launcher3.util.HelpActivity;
 import com.android.launcher3.util.SettingsObserver;
 import com.android.launcher3.views.DependentSwitchPreference;
 import com.google.android.apps.nexuslauncher.ProfilesActivity;
@@ -67,6 +68,7 @@ public class SettingsActivity extends Activity {
         private SystemDisplayRotationLockObserver mRotationLockObserver;
         private NotificationAccessObserver mIconBadgingObserver;
         //private ProfilesActivity.ProfilesSettingsFragment mProfileSettings = new ProfilesActivity.ProfilesSettingsFragment(this);
+        private HelpActivity.HelpFragment mHelpFragment = new HelpActivity.HelpFragment(this);
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -122,14 +124,17 @@ public class SettingsActivity extends Activity {
         }
 
         private void populateProfilesPlaceholder(Bundle savedInstanceState) {
-            PreferenceScreen profiles = (PreferenceScreen) findPreference("profiles_screen");
+            //PreferenceScreen profiles = (PreferenceScreen) findPreference("profiles_screen");
+            PreferenceScreen help = (PreferenceScreen) findPreference("help_screen");
             PreferenceScreen settings = getPreferenceScreen();
             int lastSetting = settings.getPreferenceCount();
             //mProfileSettings.onCreate(savedInstanceState);
+            mHelpFragment.onCreate(savedInstanceState);
             while (settings.getPreferenceCount () > lastSetting) {
                 Preference p = settings.getPreference(lastSetting);
                 settings.removePreference (p); // decreases the preference count
-                profiles.addPreference (p);
+                //profiles.addPreference (p);
+                help.addPreference(p);
             }
         }
 
@@ -148,6 +153,10 @@ public class SettingsActivity extends Activity {
                 mProfileSettings.onDestroy();
                 mProfileSettings = null;
             }*/
+            if (mHelpFragment != null) {
+                mHelpFragment.onDestroy();
+                mHelpFragment = null;
+            }
             super.onDestroy();
         }
     }
