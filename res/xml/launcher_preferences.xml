@@ -22,12 +22,6 @@
             android:icon="@drawable/ic_profiles"
             android:persistent="false"/>-->
 
-    <com.android.launcher3.views.DependentSwitchPreference
-            android:key="pref_icon_badging"
-            android:title="@string/icon_badging_title"
-            android:persistent="true"
-            android:defaultValue="false"/>
-
     <SwitchPreference
         android:key="pref_smartspace"
         android:title="@string/smartspace_preferences_in_settings"
@@ -42,13 +36,6 @@
         android:summary="@string/auto_add_shortcuts_description"
         android:defaultValue="false"
         android:persistent="true"
-        />
-
-    <SwitchPreference
-        android:key="pref_enable_minus_one"
-        android:title="@string/title_show_google_app"
-        android:summary="@string/pref_show_google_now_summary"
-        android:defaultValue="false"
         />
 
     <SwitchPreference
@@ -100,5 +87,18 @@
         android:title="@string/about"
         android:key="open_source_licenses"
         android:fragment="com.google.android.apps.nexuslauncher.SettingsActivity$OpenSourceLicensesFragment" />
+<!--
+    <com.android.launcher3.views.DependentSwitchPreference
+        android:key="pref_icon_badging"
+        android:title="@string/icon_badging_title"
+        android:persistent="true"
+        android:defaultValue="false"
+        android:enabled="false" />
 
+    <SwitchPreference
+        android:key="pref_enable_minus_one"
+        android:title="@string/title_show_google_app"
+        android:summary="@string/pref_show_google_now_summary"
+        android:defaultValue="false"
+        android:enabled="false" />-->
 </PreferenceScreen>

@@ -85,8 +85,8 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
             });
 
             findPreference(SHOW_PREDICTIONS_PREF).setOnPreferenceChangeListener(this);
-            findPreference(ENABLE_MINUS_ONE_PREF).setOnPreferenceChangeListener(this);
-            findPreference(ENABLE_MINUS_ONE_PREF).setTitle(getDisplayGoogleTitle());
+            //findPreference(ENABLE_MINUS_ONE_PREF).setOnPreferenceChangeListener(this);
+            //findPreference(ENABLE_MINUS_ONE_PREF).setTitle(getDisplayGoogleTitle());
 
             /*
             PackageManager packageManager = mContext.getPackageManager();
@@ -104,7 +104,7 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
                     throw new PackageManager.NameNotFoundException();
                 }
             } catch (PackageManager.NameNotFoundException ignored) {
-                getPreferenceScreen().removePreference(findPreference(SettingsActivity.ENABLE_MINUS_ONE_PREF));
+                //getPreferenceScreen().removePreference(findPreference(SettingsActivity.ENABLE_MINUS_ONE_PREF));
             }
 
             mIconPackPref = (CustomIconPreference) findPreference(ICON_PACK_PREF);
@@ -136,17 +136,17 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
         public void onResume() {
             super.onResume();
             mIconPackPref.reloadIconPacks();
-
+            /*
             SwitchPreference minusOne = (SwitchPreference) findPreference(ENABLE_MINUS_ONE_PREF);
             if (minusOne != null && !PixelBridge.isInstalled(getActivity())) {
                 minusOne.setChecked(false);
-            }
+            }*/
         }
 
         @Override
         public boolean onPreferenceChange(Preference preference, final Object newValue) {
             switch (preference.getKey()) {
-                case ENABLE_MINUS_ONE_PREF:
+                /*case ENABLE_MINUS_ONE_PREF:
                     if (PixelBridge.isInstalled(getActivity())) {
                         return true;
                     }
@@ -155,7 +155,7 @@ public class SettingsActivity extends com.android.launcher3.SettingsActivity imp
                         InstallFragment fragment = new InstallFragment();
                         fragment.show(fm, BRIDGE_TAG);
                     }
-                    break;
+                    break;*/
                 case ICON_PACK_PREF:
                     if (!CustomIconUtils.getCurrentPack(mContext).equals(newValue)) {
                         final ProgressDialog applyingDialog = ProgressDialog.show(mContext,
