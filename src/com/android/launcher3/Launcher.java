@@ -69,6 +69,7 @@ import com.android.launcher3.DropTarget.DragObject;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Workspace.ItemOperator;
 import com.android.launcher3.accessibility.LauncherAccessibilityDelegate;
+import com.android.launcher3.alarm.AlarmModel;
 import com.android.launcher3.alarm.AlarmReceiver;
 import com.android.launcher3.alarm.AlarmsService;
 import com.android.launcher3.allapps.AllAppsContainerView;
@@ -367,6 +368,7 @@ public class Launcher extends BaseActivity
     public static ArrayList<String> newAddedProfiles;
 
     private static boolean isRecreatedForThemeChange = false;
+    private static boolean hasRefresh = false;
 
     private static ArrayList<String> usedApps = new ArrayList<>();
 
@@ -808,6 +810,28 @@ public class Launcher extends BaseActivity
                 }
             }
             launcherListView.setAdapter(adapterHomescreen);
+        }
+
+        // recreate Alarms
+        if(!isRecreatedForThemeChange && !hasRefresh){
+            Log.d("---", "on create");
+            Set<String> set = mSharedPrefs.getStringSet(TimePreferenceActivity.SCHEDULE_PREF, null);
+            if (set!=null){
+                ArrayList<String> alarms = new ArrayList<>(set);
+                for(String alarm : alarms){
+                    String profile = alarm.split("_")[0];
+                    List<String> schedule = getSchedulePref(profile);
+                    int hour = Integer.parseInt(schedule.get(schedule.size()-1).split(":")[0]);
+                    int minute = Integer.parseInt(schedule.get(schedule.size()-1).split(":")[1]);
+                    ArrayList<String> days = new ArrayList<>();
+                    for(int i = 0; i<schedule.size()-1; i++){
+                        days.add(schedule.get(i));
+                    }
+                    AlarmModel alarmModel = new AlarmModel(profile, days, hour, minute);
+                    AlarmReceiver.setReminderAlarm(this, alarmModel);
+                }
+            }
+            hasRefresh = false;
         }
     }
 
@@ -2090,6 +2114,7 @@ public class Launcher extends BaseActivity
         favorite.applyFromShortcutInfo(info);
         favorite.setOnClickListener(this);
         favorite.setOnFocusChangeListener(mFocusHandler);
+
         Set<String> appsOnHomescreen = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
 
         String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
@@ -2123,7 +2148,6 @@ public class Launcher extends BaseActivity
                                 for(String app : apps){
                                     if(!apps.contains(info.title.toString())){
                                         String updatedProfileApps = profileApps+","+info.title.toString();
-                                        Log.d("---", "updated profile apps: "+updatedProfileApps);
                                         isEntryToDelete = true;
                                         entryToDelete = profileApps;
                                         entryToAdd = updatedProfileApps;
@@ -2196,6 +2220,7 @@ public class Launcher extends BaseActivity
             }
 
         }
+        hasRefresh = true;
         return favorite;
     }
 
@@ -3638,8 +3663,10 @@ public class Launcher extends BaseActivity
                 deleteWidgetInfo(widgetInfo);
             }
         } else {
+            hasRefresh = true;
             return false;
         }
+        hasRefresh = true;
         return true;
     }
 
