@@ -289,6 +289,43 @@ public class TimePreferenceActivity extends DialogPreference {
                 list.add(btnView.getText().toString());
             }
         }
+        if(list.size()>1){
+            ArrayList<String> sortedList = new ArrayList<>();
+            if(list.contains("MO")){
+                sortedList.add("MO");
+            }
+            if(list.contains("DI")){
+                sortedList.add("DI");
+            }
+            if(list.contains("TU")){
+                sortedList.add("TU");
+            }
+            if(list.contains("MI")){
+                sortedList.add("MI");
+            }
+            if(list.contains("WE")){
+                sortedList.add("WE");
+            }
+            if(list.contains("DO")){
+                sortedList.add("DO");
+            }
+            if(list.contains("TH")){
+                sortedList.add("TH");
+            }
+            if(list.contains("FR")){
+                sortedList.add("FR");
+            }
+            if(list.contains("SA")){
+                sortedList.add("SA");
+            }
+            if(list.contains("SU")){
+                sortedList.add("SU");
+            }
+            if (list.contains("SO")){
+                sortedList.add("SO");
+            }
+            return sortedList;
+        }
         return list;
     }
 

@@ -90,7 +90,7 @@
     <string name="grayscale_tile">Graustufen</string>
     <string name="hide_foreign_notifications_summary" msgid="874121399231955396">"Benachrichtigungen von Apps, die nicht auf dem Startbildschirm dieses Profils sind, werden ausgeblendet"</string>
     <string name="hide_all_notifications_summary">"Alle einkommenden Benachrichtigungen werden ausgeblendet"</string>
-    <string name="grayscale_summary">"Link zu den Eingabehilfen Einstellungen. Verbesserungen der Sichtbarkeit > Farbanpassung > An auswählen > Graustufen</string>
+    <string name="grayscale_summary">"Link zu den Eingabehilfen Einstellungen. Verbesserungen der Sichtbarkeit > Farbanpassung > An > Graustufen</string>
     <string name="icon_badging_desc_on" msgid="2627952638544674079">"Aktiviert"</string>
     <string name="icon_badging_desc_off" msgid="5503319969924580241">"Deaktiviert"</string>
     <string name="title_missing_notification_access" msgid="7503287056163941064">"Benachrichtigungszugriff erforderlich"</string>
@@ -176,7 +176,7 @@
     <string name="profile_pref_ssids">Verknüpfte WLAN-Netzwerke</string>
     <string name="profile_pref_ssids_hint">Dieses Profil wird aktiviert, wenn das Smartphone mit einem der angegebenen WLAN Netzwerke verbunden ist. Ein Netzwerk pro Zeile angeben.</string>
     <string name="profile_pref_ssids_disconnected">WLAN</string>
-    <string name="profile_pref_ssids_disconnected_summary">Dieses Profile wird automatisch mit dem Offline Modus aktiviert</string>
+    <string name="profile_pref_ssids_disconnected_summary">Dieses Profil wird automatisch mit dem Offline-Modus aktiviert</string>
     <string name="profile_pref_ssids_default">WLAN</string>
     <string name="profile_pref_ssids_default_summary">Dieses Profil wird aktiviert, wenn das WLAN mit keinem anderen Profil übereinstimmt</string>
     <string name="title_google_app">Google App</string>

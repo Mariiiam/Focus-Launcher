@@ -405,11 +405,11 @@
     <string name="pref_open_source_licenses_title">Open source licenses</string>
 
     <!-- Notifications -->
-    <string name="channel_name">Focus Launcher</string>
+    <string name="channel_name">Life Relaunched</string>
     <string name="channel_description">Interactive notifications to measure detachment</string>
 
     <!-- Custom -->
-    <string name="app_name_rootless_pixel_launcher">Focus Launcher</string>
+    <string name="app_name_rootless_pixel_launcher">Life Relaunched</string>
     <string name="about_donate">Donate</string>
     <string name="bridge_missing_title">Rootless Pixel Bridge</string>
     <string name="bridge_missing_message">

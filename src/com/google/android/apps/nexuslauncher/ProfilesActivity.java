@@ -423,10 +423,15 @@ public class ProfilesActivity extends Activity {
                     });
 
                     Preference ssidsPref = parent.findPreference(profile + "_ssids");
-                    if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
 
                     Preference schedulePref = parent.findPreference(profile + "_schedule");
                     bindAlarmSummaryPreference(profile, schedulePref);
+
+                    if (ssidsPref.isEnabled()) {
+                        bindPreferenceToOwnAndParentSummary(ssidsPref, schedulePref, profileGroup);
+                        bindProfilesSummary(ssidsPref, schedulePref, profileGroup);
+                    }
+
                 } else {
                     for(String sub : newAddedProfiles){
                         if(sub.substring(1).equals(profile)){
@@ -501,10 +506,14 @@ public class ProfilesActivity extends Activity {
                             });
 
                             Preference ssidsPref = parent.findPreference(profileID + "_ssids");
-                            if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
 
                             Preference schedulePref = parent.findPreference(profileID + "_schedule");
                             bindAlarmSummaryPreference(profileID, schedulePref);
+
+                            if (ssidsPref.isEnabled()) {
+                                bindPreferenceToOwnAndParentSummary(ssidsPref, schedulePref, profileGroup);
+                                bindProfilesSummary(ssidsPref, schedulePref, profileGroup);
+                            }
                         }
                     }
 
@@ -569,12 +578,39 @@ public class ProfilesActivity extends Activity {
                     parent.getPreferenceManager().getSharedPreferences().getString(preference.getKey(), ""));
         }
 
-        private void bindPreferenceToOwnAndParentSummary(Preference preference, final Preference parent) {
+        private void bindProfilesSummary(Preference preferenceSSID, Preference preferenceSchedule, Preference parent){
+            String ssidSummary = "";
+            String scheduleSummary = "";
+            if(preferenceSSID.getSummary()!=null){
+                ssidSummary = preferenceSSID.getSummary().toString();
+            }
+            if(preferenceSchedule.getSummary()!=null){
+                scheduleSummary = preferenceSchedule.getSummary().toString();
+            }
+            String profilesSummary = "";
+            if(!scheduleSummary.equals(preferenceSchedule.getContext().getString(R.string.summary_alarm_empty))){
+                scheduleSummary = scheduleSummary.substring(6);
+                if(!ssidSummary.equals("")){
+                    profilesSummary = ssidSummary+"\n"+scheduleSummary;
+                } else {
+                    profilesSummary = scheduleSummary;
+                }
+            } else {
+                if(!ssidSummary.equals("")){
+                    profilesSummary = ssidSummary;
+                }
+            }
+
+            parent.setSummary(profilesSummary);
+        }
+
+        private void bindPreferenceToOwnAndParentSummary(Preference preference, final Preference schedulePref, final Preference parent) {
             Preference.OnPreferenceChangeListener listener = new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object value) {
                     sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, value);
-                    parent.setSummary(preference.getSummary());
+                    bindProfilesSummary(preference, schedulePref, parent);
+                    //parent.setSummary(preference.getSummary());
                     return true;
                 }
             };
@@ -600,10 +636,16 @@ public class ProfilesActivity extends Activity {
                             } else if(profile.equals("work")){
                                 Preference alarmPref = findPreference("work_schedule");
                                 bindAlarmSummaryPreference(profile, alarmPref);
+                                Preference ssidPref = findPreference("work_ssids");
+                                Preference profilePref = findPreference("profile_work");
+                                bindProfilesSummary(ssidPref, alarmPref, profilePref);
                                 getActivity().recreate();
                             } else if(profile.equals("home")){
                                 Preference alarmPref = findPreference("home_schedule");
                                 bindAlarmSummaryPreference(profile, alarmPref);
+                                Preference ssidPref = findPreference("home_ssids");
+                                Preference profilePref = findPreference("profile_home");
+                                bindProfilesSummary(ssidPref, alarmPref, profilePref);
                                 getActivity().recreate();
                             }
                             else {
@@ -611,6 +653,9 @@ public class ProfilesActivity extends Activity {
                                     String profileID = sub.charAt(0)+"";
                                     Preference alarmPref = findPreference(profileID+"_schedule");
                                     bindAlarmSummaryPreference(profileID, alarmPref);
+                                    Preference ssidPref = findPreference(profileID+"_ssids");
+                                    Preference profilePref = findPreference("profile_"+profileID);
+                                    bindProfilesSummary(ssidPref, alarmPref, profilePref);
                                     getActivity().recreate();
                                 }
                             }
@@ -801,10 +846,14 @@ public class ProfilesActivity extends Activity {
                         });
 
                         Preference ssidsPref = parent.findPreference(currentProfileNumber+"_ssids");
-                        if (ssidsPref.isEnabled()) bindPreferenceToOwnAndParentSummary(ssidsPref, profileGroup);
 
                         Preference schedulePref = parent.findPreference(currentProfileNumber + "_schedule");
                         bindAlarmSummaryPreference(currentProfileNumber+"", schedulePref);
+
+                        if (ssidsPref.isEnabled()) {
+                            bindPreferenceToOwnAndParentSummary(ssidsPref, schedulePref, profileGroup);
+                            bindProfilesSummary(ssidsPref, schedulePref, profileGroup);
+                        }
 
                         Preference changeNamePref = parent.findPreference(currentProfileNumber+"_change_name");
                         bindChangeNamePreference(result, changeNamePref);
