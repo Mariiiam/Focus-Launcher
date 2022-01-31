@@ -5487,3 +5487,669 @@ public class Launcher extends BaseActivity
         if (!updated.isEmpty()) {
             mWorkspace.updateShortcuts(updated);
         }
+    }
+
+    /**
+     * Update the state of a package, typically related to install state.
+     *
+     * Implementation of the method from LauncherModel.Callbacks.
+     */
+    @Override
+    public void bindRestoreItemsChange(final HashSet<ItemInfo> updates) {
+        Runnable r = new Runnable() {
+            public void run() {
+                bindRestoreItemsChange(updates);
+            }
+        };
+        if (waitUntilResume(r)) {
+            return;
+        }
+
+        mWorkspace.updateRestoreItems(updates);
+    }
+
+    /**
+     * A package was uninstalled/updated.  We take both the super set of packageNames
+     * in addition to specific applications to remove, the reason being that
+     * this can be called when a package is updated as well.  In that scenario,
+     * we only remove specific components from the workspace and hotseat, where as
+     * package-removal should clear all items by package name.
+     */
+    @Override
+    public void bindWorkspaceComponentsRemoved(final ItemInfoMatcher matcher) {
+        Runnable r = new Runnable() {
+            public void run() {
+                bindWorkspaceComponentsRemoved(matcher);
+            }
+        };
+        if (waitUntilResume(r)) {
+            return;
+        }
+        mWorkspace.removeItemsByMatcher(matcher);
+        mDragController.onAppsRemoved(matcher);
+    }
+
+    @Override
+    public void bindAppInfosRemoved(final ArrayList<AppInfo> appInfos) {
+        Runnable r = new Runnable() {
+            public void run() {
+                bindAppInfosRemoved(appInfos);
+            }
+        };
+        if (waitUntilResume(r)) {
+            return;
+        }
+        fetchAllAppList();
+        // Update AllApps
+        if (mAppsView != null) {
+            mAppsView.removeApps(appInfos);
+            tryAndUpdatePredictedApps();
+        }
+    }
+
+    @Override
+    public void bindAllWidgets(final MultiHashMap<PackageItemInfo, WidgetItem> allWidgets) {
+        Runnable r = new RunnableWithId(RUNNABLE_ID_BIND_WIDGETS) {
+            @Override
+            public void run() {
+                bindAllWidgets(allWidgets);
+            }
+        };
+        if (waitUntilResume(r)) {
+            return;
+        }
+
+        if (mWidgetsView != null && allWidgets != null) {
+            Executor pendingExecutor = getPendingExecutor();
+            if (pendingExecutor != null && mState != State.WIDGETS) {
+                pendingExecutor.execute(r);
+                return;
+            }
+            mWidgetsView.setWidgets(allWidgets);
+        }
+
+        AbstractFloatingView topView = AbstractFloatingView.getTopOpenView(this);
+        if (topView != null) {
+            topView.onWidgetsBound();
+        }
+    }
+
+    public List<WidgetItem> getWidgetsForPackageUser(PackageUserKey packageUserKey) {
+        return mWidgetsView.getWidgetsForPackageUser(packageUserKey);
+    }
+
+    @Override
+    public void notifyWidgetProvidersChanged() {
+        if (mWorkspace.getState().shouldUpdateWidget) {
+            refreshAndBindWidgetsForPackageUser(null);
+        }
+    }
+
+    /**
+     * @param packageUser if null, refreshes all widgets and shortcuts, otherwise only
+     *                    refreshes the widgets and shortcuts associated with the given package/user
+     */
+    public void refreshAndBindWidgetsForPackageUser(@Nullable PackageUserKey packageUser) {
+        mModel.refreshAndBindWidgetsAndShortcuts(packageUser);
+    }
+
+    public void lockScreenOrientation() {
+        if (mRotationEnabled) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+        }
+    }
+
+    public void unlockScreenOrientation(boolean immediate) {
+        if (mRotationEnabled) {
+            if (immediate) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            } else {
+                mHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                    }
+                }, RESTORE_SCREEN_ORIENTATION_DELAY);
+            }
+        }
+    }
+
+    private void markAppsViewShown() {
+        if (mSharedPrefs.getBoolean(APPS_VIEW_SHOWN, false)) {
+            return;
+        }
+        mSharedPrefs.edit().putBoolean(APPS_VIEW_SHOWN, true).apply();
+    }
+
+    private boolean shouldShowDiscoveryBounce() {
+        UserManagerCompat um = UserManagerCompat.getInstance(this);
+        return mState == State.WORKSPACE && !mSharedPrefs.getBoolean(APPS_VIEW_SHOWN, false) && !um.isDemoUser();
+    }
+
+    protected void moveWorkspaceToDefaultScreen() {
+        mWorkspace.moveToDefaultScreen(false);
+    }
+
+    /**
+     * $ adb shell dumpsys activity com.android.launcher3.Launcher [--all]
+     */
+    @Override
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        super.dump(prefix, fd, writer, args);
+
+        if (args.length > 0 && TextUtils.equals(args[0], "--all")) {
+            writer.println(prefix + "Workspace Items");
+            for (int i = mWorkspace.numCustomPages(); i < mWorkspace.getPageCount(); i++) {
+                writer.println(prefix + "  Homescreen " + i);
+
+                ViewGroup layout = ((CellLayout) mWorkspace.getPageAt(i)).getShortcutsAndWidgets();
+                for (int j = 0; j < layout.getChildCount(); j++) {
+                    Object tag = layout.getChildAt(j).getTag();
+                    if (tag != null) {
+                        writer.println(prefix + "    " + tag.toString());
+                    }
+                }
+            }
+
+            writer.println(prefix + "  Hotseat");
+            ViewGroup layout = mHotseat.getLayout().getShortcutsAndWidgets();
+            for (int j = 0; j < layout.getChildCount(); j++) {
+                Object tag = layout.getChildAt(j).getTag();
+                if (tag != null) {
+                    writer.println(prefix + "    " + tag.toString());
+                }
+            }
+
+            try {
+                FileLog.flushAll(writer);
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        writer.println(prefix + "Misc:");
+        writer.print(prefix + "\tmWorkspaceLoading=" + mWorkspaceLoading);
+        writer.print(" mPendingRequestArgs=" + mPendingRequestArgs);
+        writer.println(" mPendingActivityResult=" + mPendingActivityResult);
+
+        mModel.dumpState(prefix, fd, writer, args);
+
+        if (mLauncherCallbacks != null) {
+            mLauncherCallbacks.dump(prefix, fd, writer, args);
+        }
+    }
+
+    @Override
+    @TargetApi(Build.VERSION_CODES.N)
+    public void onProvideKeyboardShortcuts(
+            List<KeyboardShortcutGroup> data, Menu menu, int deviceId) {
+
+        ArrayList<KeyboardShortcutInfo> shortcutInfos = new ArrayList<>();
+        if (mState == State.WORKSPACE) {
+            shortcutInfos.add(new KeyboardShortcutInfo(getString(R.string.all_apps_button_label),
+                    KeyEvent.KEYCODE_A, KeyEvent.META_CTRL_ON));
+        }
+        View currentFocus = getCurrentFocus();
+        if (new CustomActionsPopup(this, currentFocus).canShow()) {
+            shortcutInfos.add(new KeyboardShortcutInfo(getString(R.string.custom_actions),
+                    KeyEvent.KEYCODE_O, KeyEvent.META_CTRL_ON));
+        }
+        if (currentFocus.getTag() instanceof ItemInfo
+                && DeepShortcutManager.supportsShortcuts((ItemInfo) currentFocus.getTag())) {
+            shortcutInfos.add(new KeyboardShortcutInfo(getString(R.string.action_deep_shortcut),
+                    KeyEvent.KEYCODE_S, KeyEvent.META_CTRL_ON));
+        }
+        if (!shortcutInfos.isEmpty()) {
+            data.add(new KeyboardShortcutGroup(getString(R.string.home_screen), shortcutInfos));
+        }
+
+        super.onProvideKeyboardShortcuts(data, menu, deviceId);
+    }
+
+    @Override
+    public boolean onKeyShortcut(int keyCode, KeyEvent event) {
+        if (event.hasModifiers(KeyEvent.META_CTRL_ON)) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_A:
+                    if (mState == State.WORKSPACE) {
+                        showAppsView(true, true, false);
+                        return true;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_S: {
+                    View focusedView = getCurrentFocus();
+                    if (focusedView instanceof BubbleTextView
+                            && focusedView.getTag() instanceof ItemInfo
+                            && mAccessibilityDelegate.performAction(focusedView,
+                                    (ItemInfo) focusedView.getTag(),
+                                    LauncherAccessibilityDelegate.DEEP_SHORTCUTS)) {
+                        PopupContainerWithArrow.getOpen(this).requestFocus();
+                        return true;
+                    }
+                    break;
+                }
+                case KeyEvent.KEYCODE_O:
+                    if (new CustomActionsPopup(this, getCurrentFocus()).show()) {
+                        return true;
+                    }
+                    break;
+            }
+        }
+        return super.onKeyShortcut(keyCode, event);
+    }
+
+    public static CustomAppWidget getCustomAppWidget(String name) {
+        return sCustomAppWidgets.get(name);
+    }
+
+    public static HashMap<String, CustomAppWidget> getCustomAppWidgets() {
+        return sCustomAppWidgets;
+    }
+
+    public static Launcher getLauncher(Context context) {
+        if (context instanceof Launcher) {
+            return (Launcher) context;
+        }
+        return ((Launcher) ((ContextWrapper) context).getBaseContext());
+    }
+
+    private class WallpaperButtonClickedHandler implements OnSharedPreferenceChangeListener {
+        View view = findViewById(R.id.launcher);
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(ProfilesActivity.WALLPAPER_BTN_CLICKED)){
+                onRequestWallpaperPick();
+            }
+        }
+    }
+
+    private class SchedulePrefChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(TimePreferenceActivity.SCHEDULE_PREF)){
+                AlarmsService.updateAlarmsList();
+            }
+        }
+    }
+
+    private class MinimalDesignPrefChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            for (String profile : availableProfiles) {
+                if(profile.equals("home") || profile.equals("work") || profile.equals("default") ||profile.equals("disconnected") ){
+                    if(key.equals(profile+ProfilesActivity.MINIMAL_DESIGN_PREF)){
+                        String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
+                        if (profile.equals(currentProfile)) {
+                            isMinimalDesignON = mSharedPrefs.getBoolean(profile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                            switchToMinimalLayout(isMinimalDesignON);
+                        }
+                    }
+                } else {
+                    Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                    if(set!=null){
+                        newAddedProfiles = new ArrayList<>(set);
+                        if(newAddedProfiles!=null){
+                            for(String sub : newAddedProfiles){
+                                if(sub.length()!=0){
+                                    if(sub.substring(1).equals(profile)){
+                                        String profileID = sub.charAt(0)+"";
+                                        if(key.equals(profileID+ProfilesActivity.MINIMAL_DESIGN_PREF)){
+                                            String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default");
+                                            if (profile.equals(currentProfile)) {
+                                                isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                                                switchToMinimalLayout(isMinimalDesignON);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private class RotationPrefChangeHandler implements OnSharedPreferenceChangeListener {
+
+        @Override
+        public void onSharedPreferenceChanged(
+                SharedPreferences sharedPreferences, String key) {
+            if (Utilities.ALLOW_ROTATION_PREFERENCE_KEY.equals(key)) {
+                // Recreate the activity so that it initializes the rotation preference again.
+                recreate();
+            }
+        }
+    }
+
+    private class ProfileChangeHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if(key.equals(MANUAL_PROFILE_PREF)){
+                String selectedProfile = mSharedPrefs.getString(MANUAL_PROFILE_PREF, null);
+                if(selectedProfile!=null){
+                    selectedProfile = selectedProfile.split("_")[0];
+                    LogEntryProfileTriggered logEntry = new LogEntryProfileTriggered(selectedProfile, "manually", "");
+                    firebaseLogger.addLogMessage("events", "profile triggered", logEntry);
+                    updateProfile(selectedProfile);
+                }
+            }
+            if(key.equals(AlarmReceiver.CHANGE_PROFILE_ALARM)){
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                String updateToProfile = mSharedPrefs.getString(AlarmReceiver.CHANGE_PROFILE_ALARM, null);
+                if(updateToProfile!= null){
+                    updateToProfile = updateToProfile.split("_")[0];
+                    if(!currentProfile.equals(updateToProfile)){
+                        if(updateToProfile.equals("home") || updateToProfile.equals("work")){
+                            LogEntryProfileTriggered logEntry = new LogEntryProfileTriggered(updateToProfile, "alarm", "");
+                            firebaseLogger.addLogMessage("events", "profile triggered", logEntry);
+                            updateProfile(updateToProfile);
+                        } else {
+                            Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                            if(set!=null) {
+                                newAddedProfiles = new ArrayList<String>(set);
+                                if (newAddedProfiles != null) {
+                                    for(String sub : newAddedProfiles){
+                                        if(updateToProfile.equals(sub.charAt(0)+"")){
+                                            updateToProfile = sub.substring(1);
+                                            LogEntryProfileTriggered logEntry = new LogEntryProfileTriggered(updateToProfile, "alarm", "");
+                                            firebaseLogger.addLogMessage("events", "profile triggered", logEntry);
+                                            updateProfile(updateToProfile);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if(key.equals(CURRENT_PROFILE_PREF)){
+                String currentProfile = mSharedPrefs.getString(CURRENT_PROFILE_PREF, null);
+                if(currentProfile!=null){
+                    profileChangesListInUnlockedMode.add(currentProfile+"_"+System.currentTimeMillis());
+                    if(currentProfile.equals("home") || currentProfile.equals("work") || currentProfile.equals("default") ||currentProfile.equals("disconnected") ){
+                        isMinimalDesignON = mSharedPrefs.getBoolean(currentProfile + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                        if(isMinimalDesignON){ fetchHomescreenAppList(); }
+                    } else {
+                        Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                        if(set!=null){
+                            newAddedProfiles = new ArrayList<String>(set);
+                            if(newAddedProfiles!=null){
+                                for(String sub : newAddedProfiles){
+                                    if(sub.substring(1).equals(currentProfile)){
+                                        String profileID = sub.charAt(0)+"";
+                                        isMinimalDesignON = mSharedPrefs.getBoolean(profileID + ProfilesActivity.MINIMAL_DESIGN_PREF, false);
+                                    }
+                                }
+                            }
+                        }
+                        if(isMinimalDesignON){ fetchHomescreenAppList(); }
+                    }
+                }
+            }
+            if(key.equals(APPS_ON_HOMESCREEN)){
+                if(isMinimalDesignON) {fetchHomescreenAppList();}
+            }
+        }
+    }
+
+    private class SSIDPrefChangeHandler implements OnSharedPreferenceChangeListener {
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+            final String[] keyParts = key.split("_");
+            if (keyParts.length >= 2 && keyParts[1].equals("ssids")) {
+                final String ssid = getCurrentSSID(Launcher.this);
+                if(keyParts[0].length()>1){
+                    LogEntryProfileEdited logEntry = new LogEntryProfileEdited(keyParts[0], "ssid edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                    firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                } else {
+                    Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                    if(set!=null){
+                        ArrayList<String> newAddedProfiles = new ArrayList<>(set);
+                        for(String newAddedProfile : newAddedProfiles){
+                            if((newAddedProfile.charAt(0)+"").equals(keyParts[0])){
+                                LogEntryProfileEdited logEntry = new LogEntryProfileEdited(newAddedProfile.substring(1), "ssid edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                                firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                            }
+                        }
+                    }
+                }
+
+                changeProfile(ssid);
+            }
+        }
+    }
+
+    private class LogProfileEditedHandler implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            final String[] keyParts = key.split("_");
+            if(keyParts.length>=2){
+                if(keyParts[1].equals("ringtone")){
+                    String profile = keyParts[0];
+                    if(profile.length()>1){
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "ringtone edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                        firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                    } else {
+                        for(String newAddedProfile : newAddedProfiles){
+                            if((newAddedProfile.charAt(0)+"").equals(profile)){
+                                profile = newAddedProfile.substring(1);
+                                LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "ringtone edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                                firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(keyParts.length>=3){
+                if(("_"+keyParts[1]+"_"+keyParts[2]).equals("_notification_sound")){
+                    String profile = keyParts[0];
+                    if(profile.length()>1){
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "notification sound edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                        firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                    } else {
+                        for(String newAddedProfile : newAddedProfiles){
+                            if((newAddedProfile.charAt(0)+"").equals(profile)){
+                                profile = newAddedProfile.substring(1);
+                                LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "notification sound edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                                firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                            }
+                        }
+                    }
+                }
+
+                if(("_"+keyParts[1]+"_"+keyParts[2]).equals("_hide_notifications")){
+                    String profile = keyParts[0];
+                    if(profile.length()>1){
+                        LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "notification block edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                        firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                    } else {
+                        for(String newAddedProfile : newAddedProfiles){
+                            if((newAddedProfile.charAt(0)+"").equals(profile)){
+                                profile = newAddedProfile.substring(1);
+                                LogEntryProfileEdited logEntry = new LogEntryProfileEdited(profile, "notification block edited", getSSIDPref(keyParts[0]), getSchedulePref(keyParts[0]), getRingtonePref(keyParts[0]), getNotificationSoundPref(keyParts[0]), getNotificationBlockedPref(keyParts[0]), getMinimalDesignPref(keyParts[0]), getHomeScreenAppsList(keyParts[0]), getWallpaperInfo(keyParts[0]), getGrayScalePref(keyParts[0]));
+                                firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static List<String> getSSIDPref(String profile){
+        String ssID1 = mSharedPrefs.getString(profile+"_ssids", null);
+        List<String> ssIDInfo = new ArrayList<>();
+        if(ssID1!=null){
+            String[] ssID = ssID1.split("\\n");
+            for(String element : ssID){
+                if(!element.equals("")){
+                    ssIDInfo.add(element);
+                }
+            }
+        }
+
+        if(ssIDInfo.isEmpty()){
+            ssIDInfo.add("empty");
+        }
+        return ssIDInfo;
+    }
+
+    public static List<String> getSchedulePref(String profile){
+        Set scheduleSet = mSharedPrefs.getStringSet(TimePreferenceActivity.SCHEDULE_PREF, null);
+        List<String> scheduleInfo = new ArrayList<>();
+        if(scheduleSet!=null){
+            ArrayList<String> scheduleArray = new ArrayList<>(scheduleSet);
+            for(String eachSchedule : scheduleArray){
+                String eachProfile = eachSchedule.split("_")[0];
+                if(eachProfile.equals(profile)){
+                    String daysString = eachSchedule.split("_")[1].substring(1, eachSchedule.split("_")[1].length()-1);
+                    String[] days = daysString.split(",");
+                    for(String day : days){
+                        if((day.charAt(0)+"").equals(" ")){
+                            day = day.substring(1);
+                        }
+                        scheduleInfo.add(day);
+                    }
+                    String time = eachSchedule.split("_")[2];
+                    if(time.split(":")[1].length()==1){
+                        Character lastChar = time.charAt(time.length()-1);
+                        time = time.substring(0,time.length()-1);
+                        time = time+"0"+lastChar;
+                    }
+                    scheduleInfo.add(time);
+                    return scheduleInfo;
+                }
+            }
+        }
+        if(scheduleInfo.isEmpty()){
+            scheduleInfo.add("empty");
+        }
+        return scheduleInfo;
+    }
+
+    public static String getRingtonePref(String profile){
+        String ringtone = mSharedPrefs.getString(profile+"_ringtone", null);
+        String ringtoneInfo = "";
+        if(ringtone!=null){
+            ringtoneInfo = ringtone;
+        }
+        return ringtoneInfo;
+    }
+
+    public static String getNotificationSoundPref(String profile){
+        String notificationSound = mSharedPrefs.getString(profile+"_notification_sound", null);
+        String notificationSoundInfo = "";
+        if(notificationSound!=null){
+            notificationSoundInfo = notificationSound;
+        }
+        return notificationSoundInfo;
+    }
+
+    public static boolean getNotificationBlockedPref(String profile){
+        return mSharedPrefs.getBoolean(profile+"_hide_notifications", false);
+    }
+
+    public static boolean getMinimalDesignPref(String profile){
+        return mSharedPrefs.getBoolean(profile+"_minimal_design", false);
+    }
+
+    public static List<String> getHomeScreenAppsList(String profile){
+        Set homescreenAppsSet = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
+        List<String> homescreenAppsInfo = new ArrayList<>();
+        if(homescreenAppsSet!=null){
+            ArrayList<String> homescreenAppsArray = new ArrayList<>(homescreenAppsSet);
+            for(String homescreenAppProfile : homescreenAppsArray){
+                if(homescreenAppProfile.split("_").length>1){
+                    if(profile.equals(homescreenAppProfile.split("_")[0])){
+                        String[] apps = homescreenAppProfile.split("_")[1].split(",");
+                        for(String app : apps){
+                            if(!app.equals("")){
+                                homescreenAppsInfo.add(app);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(homescreenAppsInfo.isEmpty()){
+            homescreenAppsInfo.add("empty");
+        }
+        return homescreenAppsInfo;
+    }
+
+    public static boolean getGrayScalePref(String profile){
+        boolean grayscaleInfo = false;
+        if(ProfilesActivity.getGrayscaleInfo(profile).equals("true")){
+            grayscaleInfo = true;
+        }
+        return grayscaleInfo;
+    }
+
+    public static String getProfileSettings(String profile){
+        String ssID = mSharedPrefs.getString(profile+"_ssids", null);
+        String ssIDInfo = "ssID: { }, ";
+        if(ssID!=null) {
+            ssIDInfo = "ssID: {" + ssID + "}, ";
+        }
+
+        Set scheduleSet = mSharedPrefs.getStringSet(TimePreferenceActivity.SCHEDULE_PREF, null);
+        String scheduleInfo = "schedule: { }, ";
+        if(scheduleSet!=null){
+            ArrayList<String> scheduleArray = new ArrayList<>(scheduleSet);
+            for(String eachSchedule : scheduleArray){
+                String eachProfile = eachSchedule.split("_")[0];
+                if(eachProfile.equals(profile)){
+                    String days = eachSchedule.split("_")[1];
+                    String time = eachSchedule.split("_")[2];
+                    if(time.split(":")[1].length()==1){
+                        Character lastChar = time.charAt(time.length()-1);
+                        time = time.substring(0,time.length()-1);
+                        time = time+"0"+lastChar;
+                    }
+                    scheduleInfo = "schedule: { "+days+", "+time+" }, ";
+                }
+            }
+        }
+
+        String ringtone = mSharedPrefs.getString(profile+"_ringtone", null);
+        String ringtoneInfo = "ringtone: , ";
+        if(ringtone!=null){
+            ringtoneInfo = "ringtone: "+ringtone+", ";
+        }
+
+        String notificationSound = mSharedPrefs.getString(profile+"_notification_sound", null);
+        String notificationSoundInfo = "notification sound: , ";
+        if(notificationSound!=null){
+            notificationSoundInfo = "notification sound: "+notificationSound+", ";
+        }
+
+        boolean notificationBlock = mSharedPrefs.getBoolean(profile+"_hide_notifications", false);
+        String notificationBlockInfo = "notifications blocked: "+notificationBlock+", ";
+
+        boolean minimalDesign = mSharedPrefs.getBoolean(profile+"_minimal_design", false);
+        String minimalDesignInfo = "minimal design on: "+minimalDesign+", ";
+
+        Set homescreenAppsSet = mSharedPrefs.getStringSet(APPS_ON_HOMESCREEN, null);
+        String homescreenAppsInfo ="homescreen apps: empty, ";
+        if(homescreenAppsSet!=null){
+            ArrayList<String> homescreenAppsArray = new ArrayList<>(homescreenAppsSet);
+            for(String homescreenAppProfile : homescreenAppsArray){
+                if(homescreenAppProfile.split(",").length>1){
+                    if(profile.equals(homescreenAppProfile.split("_")[0])){
+                        homescreenAppsInfo = "homescreen apps: {"+homescreenAppProfile.split("_")[1]+"}, ";
+                    }
+                }
+            }
+        }
+
+        String wallpaperInfo = "wallpaper: "+getWallpaperInfo(profile)+", ";
+
+        String grayscaleInfo = "grayscale on: "+ProfilesActivity.getGrayscaleInfo(profile);
+
+        String profileSetting = ssIDInfo+scheduleInfo+ringtoneInfo+notificationSoundInfo+notificationBlockInfo+minimalDesignInfo+homescreenAppsInfo+wallpaperInfo+grayscaleInfo;
+        return profileSetting;
+    }
+}
+
