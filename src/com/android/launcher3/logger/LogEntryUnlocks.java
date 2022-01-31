@@ -1,21 +1,22 @@
 package com.android.launcher3.logger;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LogEntryUnlocks implements Serializable {
     String profile;
     List<String> usedApps;
     long startTime;
-    List<String> profilesDuringUnlocks;
+    List<ArrayList<String>> appInfos;
 
     public LogEntryUnlocks(){}
 
-    public LogEntryUnlocks(String profile, List<String> usedApps, long startTime, List<String> profilesDuringUnlocks) {
+    public LogEntryUnlocks(String profile, List<String> usedApps, long startTime, List<ArrayList<String>> appInfos) {
         this.profile = profile;
         this.usedApps = usedApps;
         this.startTime = startTime;
-        this.profilesDuringUnlocks = profilesDuringUnlocks;
+        this.appInfos = appInfos;
     }
 
     public String getProfile() {
@@ -42,11 +43,11 @@ public class LogEntryUnlocks implements Serializable {
         this.startTime = startTime;
     }
 
-    public List<String> getProfilesDuringUnlocks() {
-        return profilesDuringUnlocks;
+    public List<ArrayList<String>> getAppInfos() {
+        return appInfos;
     }
 
-    public void setProfilesDuringUnlocks(List<String> profilesDuringUnlocks) {
-        this.profilesDuringUnlocks = profilesDuringUnlocks;
+    public void setAppInfos(List<ArrayList<String>> appInfos) {
+        this.appInfos = appInfos;
     }
 }

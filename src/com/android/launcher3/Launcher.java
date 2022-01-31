@@ -113,6 +113,7 @@ import com.google.android.apps.nexuslauncher.SettingsActivity;
 
 import java.io.*;
 import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Executor;
 
@@ -369,6 +370,7 @@ public class Launcher extends BaseActivity
 
     private static boolean isRecreatedForThemeChange = false;
     private static boolean hasRefresh = false;
+    private static int currentDay = 0;
 
     private static ArrayList<String> usedApps = new ArrayList<>();
 
@@ -798,7 +800,7 @@ public class Launcher extends BaseActivity
                                 for (ResolveInfo resolver : activities) {
                                     // Exclude  this launcher from the list of apps shown
                                     String appName = (String) resolver.loadLabel(packageManager);
-                                    if (appName.equals("Focus Launcher")) continue;
+                                    if (appName.equals("Life Relaunched")) continue;
                                     if (appName.equals(app)) {
                                         adapterHomescreen.add(appName);
                                         homescreenPackageNames.add(resolver.activityInfo.packageName);
@@ -854,7 +856,7 @@ public class Launcher extends BaseActivity
 
                 // Exclude the settings app and this launcher from the list of apps shown
                 String appName = (String) resolver.loadLabel(packageManager);
-                if (appName.equals("Focus Launcher")) continue;
+                if (appName.equals("Life Relaunched")) continue;
                 adapterAll.add(appName);
                 allPackageNames.add(resolver.activityInfo.packageName);
             }
@@ -2373,7 +2375,9 @@ public class Launcher extends BaseActivity
 
                 if(isUnlocked){
                     ArrayList<String> profilesList = new ArrayList<>();
+                    ArrayList<ArrayList<String>> infosApps = new ArrayList<>();
                     ArrayList<String> apps = new ArrayList<>();
+                    int count = 0;
                     endLockTime = System.currentTimeMillis();
                     if(profileChangesListInUnlockedMode.isEmpty()){
                         profileChangesListInUnlockedMode.add(mSharedPrefs.getString(CURRENT_PROFILE_PREF, "default"));
@@ -2386,20 +2390,41 @@ public class Launcher extends BaseActivity
                             usageEvents.getNextEvent(event);
                             if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
                                 if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                    if(!apps.contains(getLabelFromPackageName(context, event.getPackageName()))){
+                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
                                         if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
-                                            apps.add(getLabelFromPackageName(context, event.getPackageName()));
-                                            String profileName = profileChangesListInUnlockedMode.get(0).split("_")[0];
-                                            if(profileName.equals("home")){
-                                                profileName = context.getString(R.string.profile_home);
-                                            } else if(profileName.equals("work")){
-                                                profileName = context.getString(R.string.profile_work);
-                                            } else if(profileName.equals("default")){
-                                                profileName = context.getString(R.string.profile_default);
-                                            } else if(profileName.equals("disconnected")){
-                                                profileName = context.getString(R.string.profile_disconnected);
+                                            if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")) {
+                                                long appStartTime = event.getTimeStamp();
+                                                apps.add(getLabelFromPackageName(context, event.getPackageName()));
+                                                String profileName = profileChangesListInUnlockedMode.get(0).split("_")[0];
+                                                if (profileName.equals("home")) {
+                                                    profileName = context.getString(R.string.profile_home);
+                                                } else if (profileName.equals("work")) {
+                                                    profileName = context.getString(R.string.profile_work);
+                                                } else if (profileName.equals("default")) {
+                                                    profileName = context.getString(R.string.profile_default);
+                                                } else if (profileName.equals("disconnected")) {
+                                                    profileName = context.getString(R.string.profile_disconnected);
+                                                }
+                                                ArrayList<String> infoApp = new ArrayList<>();
+                                                infoApp.add(profileName);
+                                                infoApp.add(appStartTime + "");
+                                                infoApp.add("0");
+                                                infosApps.add(infoApp);
+                                                profilesList.add(profileName);
                                             }
-                                            profilesList.add(profileName);
+                                        }
+                                    }
+                                }
+                            }
+                            if(event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND){
+                                if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
+                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                        if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
+                                            if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")){
+                                                long appEndTime = event.getTimeStamp();
+                                                infosApps.get(count).set(2, appEndTime+"");
+                                                count++;
+                                            }
                                         }
                                     }
                                 }
@@ -2427,20 +2452,41 @@ public class Launcher extends BaseActivity
                                 usageEvents.getNextEvent(event);
                                 if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
                                     if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                        if(!apps.contains(getLabelFromPackageName(context, event.getPackageName()))){
+                                        if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
-                                                apps.add(getLabelFromPackageName(context, event.getPackageName()));
-                                                String profileName = profileChangesListInUnlockedMode.get(i).split("_")[0];
-                                                if(profileName.equals("home")){
-                                                    profileName = context.getString(R.string.profile_home);
-                                                } else if(profileName.equals("work")){
-                                                    profileName = context.getString(R.string.profile_work);
-                                                } else if(profileName.equals("default")){
-                                                    profileName = context.getString(R.string.profile_default);
-                                                } else if(profileName.equals("disconnected")){
-                                                    profileName = context.getString(R.string.profile_disconnected);
+                                                if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")) {
+                                                    long appStartTime = event.getTimeStamp();
+                                                    apps.add(getLabelFromPackageName(context, event.getPackageName()));
+                                                    String profileName = profileChangesListInUnlockedMode.get(0).split("_")[0];
+                                                    if (profileName.equals("home")) {
+                                                        profileName = context.getString(R.string.profile_home);
+                                                    } else if (profileName.equals("work")) {
+                                                        profileName = context.getString(R.string.profile_work);
+                                                    } else if (profileName.equals("default")) {
+                                                        profileName = context.getString(R.string.profile_default);
+                                                    } else if (profileName.equals("disconnected")) {
+                                                        profileName = context.getString(R.string.profile_disconnected);
+                                                    }
+                                                    ArrayList<String> infoApp = new ArrayList<>();
+                                                    infoApp.add(profileName);
+                                                    infoApp.add(appStartTime + "");
+                                                    infoApp.add("0");
+                                                    infosApps.add(infoApp);
+                                                    profilesList.add(profileName);
                                                 }
-                                                profilesList.add(profileName);
+                                            }
+                                        }
+                                    }
+                                }
+                                if(event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND){
+                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
+                                        if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                            if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
+                                                if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")){
+                                                    long appEndTime = event.getTimeStamp();
+                                                    infosApps.get(count).set(2, appEndTime+"");
+                                                    count++;
+                                                }
                                             }
                                         }
                                     }
@@ -2451,9 +2497,36 @@ public class Launcher extends BaseActivity
 
                     if(apps.isEmpty()){
                         apps.add("empty");
+                    } else {
+                        ArrayList<ArrayList<String>> appInfosToRemove = new ArrayList<>();
+                        ArrayList<Integer> appsToRemove = new ArrayList<>();
+                        int counter = 0;
+                        Log.d("---", "before: "+apps.size());
+                        for(ArrayList<String> info : infosApps){
+                            long startAppTime = Long.parseLong(info.get(1));
+                            long endAppTime = Long.parseLong(info.get(2));
+                            if((endAppTime-startAppTime) < 1000){
+                                Log.d("---", "start: "+startAppTime+" end:"+endAppTime);
+                                appInfosToRemove.add(info);
+                                Log.d("---", "counter: "+counter);
+                                appsToRemove.add(counter);
+                            }
+                            counter++;
+                        }
+                        infosApps.removeAll(appInfosToRemove);
+                        for(int i = 0; i <appsToRemove.size(); i++){
+                            int index = 0;
+                            if(i==0){
+                                index = appsToRemove.get(i);
+                            } else {
+                                index = appsToRemove.get(i)-i;
+                            }
+                            apps.remove(index);
+                            Log.d("---", "apps: "+apps);
+                        }
+                        Log.d("---", "after: "+apps.size());
                     }
-
-                    LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, apps, beginUnlockTime, profilesList);
+                    LogEntryUnlocks logEntry = new LogEntryUnlocks(currentProfile, apps, beginUnlockTime, infosApps);
                     firebaseLogger.addLogMessage("unlocks", "phone locked", logEntry);
                     usedApps = new ArrayList<>();
                     usedShortcuts = new ArrayList<>();

@@ -26,7 +26,7 @@ public class ProfileTileService extends TileService {
     @Override
     public void onStartListening(){
         String current_profile = getString(R.string.app_name_rootless_pixel_launcher);
-        Icon icon = Icon.createWithResource(this, R.drawable.ic_focus_launcher_24dp);
+        Icon icon = Icon.createWithResource(this, R.drawable.ic_new_app_logo_24);
         String label;
         if (Launcher.mSharedPrefs != null){
             current_profile = Launcher.mSharedPrefs.getString(Launcher.CURRENT_PROFILE_PREF, "default");
@@ -45,6 +45,7 @@ public class ProfileTileService extends TileService {
         }
         else if(current_profile.equals("default")){
             label = getString(R.string.profile_default);
+            icon = Icon.createWithResource(this, R.drawable.ic_default);
         }
         else {
             label = current_profile;
