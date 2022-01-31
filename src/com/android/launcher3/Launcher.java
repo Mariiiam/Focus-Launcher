@@ -2204,23 +2204,24 @@ public class Launcher extends BaseActivity
                 mSharedPrefs.edit().putStringSet(APPS_ON_HOMESCREEN, set).apply();
             }
             fetchHomescreenAppList();
-            if(currentProfile.equals("home")||currentProfile.equals("work")||currentProfile.equals("disconnected")||currentProfile.equals("default")){
+            if(info.container == -1){
+                if(currentProfile.equals("home")||currentProfile.equals("work")||currentProfile.equals("disconnected")||currentProfile.equals("default")){
                 LogEntryProfileEdited logEntry = new LogEntryProfileEdited(currentProfile, "app added on homescreen", getSSIDPref(currentProfile), getSchedulePref(currentProfile), getRingtonePref(currentProfile), getNotificationSoundPref(currentProfile), getNotificationBlockedPref(currentProfile), getMinimalDesignPref(currentProfile), getHomeScreenAppsList(currentProfile), getWallpaperInfo(currentProfile), getGrayScalePref(currentProfile));
                 firebaseLogger.addLogMessage("events", "profile edited", logEntry);
-            } else {
-                Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
-                if(set!=null){
-                    ArrayList<String> newAddedProfiles = new ArrayList<>(set);
-                    for(String newAddedProfile: newAddedProfiles){
-                        if(newAddedProfile.substring(1).equals(currentProfile) || (newAddedProfile.charAt(0)+"").equals(currentProfile)){
-                            String profile = newAddedProfile.charAt(0)+"";
-                            LogEntryProfileEdited logEntry = new LogEntryProfileEdited(newAddedProfile.substring(1), "app added on homescreen", getSSIDPref(profile), getSchedulePref(profile), getRingtonePref(profile), getNotificationSoundPref(profile), getNotificationBlockedPref(profile), getMinimalDesignPref(profile), getHomeScreenAppsList(profile), getWallpaperInfo(profile), getGrayScalePref(profile));
-                            firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                } else {
+                    Set set = mSharedPrefs.getStringSet(ProfilesActivity.ADD_PROFILE_PREF, null);
+                    if(set!=null){
+                        ArrayList<String> newAddedProfiles = new ArrayList<>(set);
+                        for(String newAddedProfile: newAddedProfiles){
+                            if(newAddedProfile.substring(1).equals(currentProfile) || (newAddedProfile.charAt(0)+"").equals(currentProfile)){
+                                String profile = newAddedProfile.charAt(0)+"";
+                                LogEntryProfileEdited logEntry = new LogEntryProfileEdited(newAddedProfile.substring(1), "app added on homescreen", getSSIDPref(profile), getSchedulePref(profile), getRingtonePref(profile), getNotificationSoundPref(profile), getNotificationBlockedPref(profile), getMinimalDesignPref(profile), getHomeScreenAppsList(profile), getWallpaperInfo(profile), getGrayScalePref(profile));
+                                firebaseLogger.addLogMessage("events", "profile edited", logEntry);
+                            }
                         }
                     }
                 }
             }
-
         }
         hasRefresh = true;
         return favorite;
