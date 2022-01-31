@@ -2392,8 +2392,8 @@ public class Launcher extends BaseActivity
                             UsageEvents.Event event = new UsageEvents.Event();
                             usageEvents.getNextEvent(event);
                             if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
-                                if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher")){
                                         if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")) {
                                                 long appStartTime = event.getTimeStamp();
@@ -2420,8 +2420,8 @@ public class Launcher extends BaseActivity
                                 }
                             }
                             if(event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND){
-                                if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher")){
                                         if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")){
                                                 long appEndTime = event.getTimeStamp();
@@ -2454,8 +2454,8 @@ public class Launcher extends BaseActivity
                                 UsageEvents.Event event = new UsageEvents.Event();
                                 usageEvents.getNextEvent(event);
                                 if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                        if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                        if(!event.getPackageName().equals("life.relaunched.launcher")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                                 if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")) {
                                                     long appStartTime = event.getTimeStamp();
@@ -2482,8 +2482,8 @@ public class Launcher extends BaseActivity
                                     }
                                 }
                                 if(event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                        if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                        if(!event.getPackageName().equals("life.relaunched.launcher")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                                 if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")){
                                                     long appEndTime = event.getTimeStamp();

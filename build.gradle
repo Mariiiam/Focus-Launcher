@@ -56,14 +56,14 @@ android {
 
     productFlavors {
         aosp {
-            applicationId 'amirz.rootless.nexuslauncher'
-            testApplicationId 'amirz.rootless.nexuslauncher.tests'
+            applicationId 'life.relaunched.launcher'
+            testApplicationId 'life.relaunched.launcher.tests'
             flavorDimensions 'default'
         }
 
         l3go {
-            applicationId 'amirz.rootless.nexuslauncher'
-            testApplicationId 'amirz.rootless.nexuslauncher.tests'
+            applicationId 'life.relaunched.launcher'
+            testApplicationId 'life.relaunched.launcher.tests'
             flavorDimensions 'default'
         }
     }

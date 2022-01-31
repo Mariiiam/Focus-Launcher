@@ -200,7 +200,7 @@ public class NotificationListener extends NotificationListenerService {
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-        if (sbn.getPackageName().equals("amirz.rootless.nexuslauncher.debug") && sbn.getId() == 1337) {
+        if (sbn.getPackageName().equals("life.relaunched.launcher.debug") && sbn.getId() == 1337) {
             cancelNotification(sbn.getKey());
             return;
         }
