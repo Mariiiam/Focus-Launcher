@@ -1,4 +1,4 @@
-#Datenschutzerklärung zur App "Life Relaunched"
+# Datenschutzerklärung zur App "Life Relaunched"
 
 Die App "Life Relaunched" wird im Rahmen einer Nutzerstudie an der LMU München verwendet.
 
