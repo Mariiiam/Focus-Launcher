@@ -21,10 +21,10 @@ android {
     buildToolsVersion '27.0.3'
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 30
         targetSdkVersion 30
-        versionCode 30907
-        versionName "3.10"
+        versionCode 33000
+        versionName "3.30"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -42,13 +42,13 @@ android {
 
         optimized {
             initWith debug
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard.flags'
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard.flags'
         }

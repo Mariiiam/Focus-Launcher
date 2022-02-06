@@ -528,7 +528,7 @@ public class Launcher extends BaseActivity
         }
 
         //checkLocationPermission(this);
-        checkFineLocationPermission(this);
+        //checkFineLocationPermission(this);
         checkAppsPermission(this);
         hasWritePermission(this, true);
         checkUsageAccessPermission(this);
@@ -1692,11 +1692,7 @@ public class Launcher extends BaseActivity
             mLauncherCallbacks.onResume();
         }
 
-        //checkLocationPermission(this);
-        hasExternalStoragePermission(this);
         checkFineLocationPermission(this);
-        checkAppsPermission(this);
-        checkUsageAccessPermission(this);
 
     }
 

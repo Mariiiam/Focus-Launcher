@@ -589,11 +589,17 @@ public class ProfilesActivity extends Activity {
             }
             String profilesSummary = "";
             if(!scheduleSummary.equals(preferenceSchedule.getContext().getString(R.string.summary_alarm_empty))){
-                scheduleSummary = scheduleSummary.substring(6);
-                if(!ssidSummary.equals("")){
-                    profilesSummary = ssidSummary+"\n"+scheduleSummary;
+                if(scheduleSummary.length()>6){
+                    scheduleSummary = scheduleSummary.substring(6);
+                    if(!ssidSummary.equals("")){
+                        profilesSummary = ssidSummary+"\n"+scheduleSummary;
+                    } else {
+                        profilesSummary = scheduleSummary;
+                    }
                 } else {
-                    profilesSummary = scheduleSummary;
+                    if(!ssidSummary.equals("")){
+                        profilesSummary = ssidSummary;
+                    }
                 }
             } else {
                 if(!ssidSummary.equals("")){
