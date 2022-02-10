@@ -44,10 +44,8 @@ Die erteilte Einwilligungserklärung kann ohne Angabe von Gründen mit Wirkung f
 
 Nach der Datenschutz-Grundverordnung (DSGVO) haben Sie ein Recht auf die Auskunft über Ihre bei der Ludwig-Maximilians-Universität gespeicherten personenbezogenen Daten. Wegen dieser Auskünfte und eventueller weiterer Erläuterungen können Sie sich postalisch oder per E-Mail an untenstehende Adresse wenden:
 
-LMU München, HCUM, z. Hd.: Name, Adresse
+z. Hd.: Nađa Terzimehić
+Frauenlobstraße 7A
+80337 Munich
+nadja.terzimehic@ifi.lmu.de
 
-Email.
-
-Details der Kontaktperson
-
-Adresse
