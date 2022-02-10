@@ -42,8 +42,6 @@ Die im Rahmen der vorstehenden Zwecke erhobenen persönlichen Daten meiner Perso
 
 Die erteilte Einwilligungserklärung kann ohne Angabe von Gründen mit Wirkung für die Zukunft abgeändert oder gänzlich widerrufen werden. Die Widerrufserklärung kann unter Angabe des Studientitels „Implicit Context-Aware Smartphone Intervention - Design Space and Field Study“ postalisch oder per E-Mail an die unten genannten Kontaktdaten gerichtet werden.
 
-Nach Studienteilnahme besteht bis April 2022 die Möglichkeit, die vollständige Löschung der erhobenen Daten unter Angabe des Studientitels bei der LMU München zu erwirken, solange die Daten noch diesem Code zuordenbar sind.
-
 Nach der Datenschutz-Grundverordnung (DSGVO) haben Sie ein Recht auf die Auskunft über Ihre bei der Ludwig-Maximilians-Universität gespeicherten personenbezogenen Daten. Wegen dieser Auskünfte und eventueller weiterer Erläuterungen können Sie sich postalisch oder per E-Mail an untenstehende Adresse wenden:
 
 LMU München, HCUM, z. Hd.: Name, Adresse
