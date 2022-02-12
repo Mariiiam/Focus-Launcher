@@ -6031,6 +6031,9 @@ public class Launcher extends BaseActivity
         if(ringtone!=null){
             ringtoneInfo = ringtone;
         }
+        if(ringtoneInfo.equals("")){
+            ringtoneInfo = "silent";
+        }
         return ringtoneInfo;
     }
 
