@@ -21,7 +21,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.launcher3"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-sdk android:targetSdkVersion="23" android:minSdkVersion="21"/>
     <!--
     Manifest entries specific to Launcher3. This is merged with AndroidManifest-common.xml.
     Refer comments around specific entries on how to extend individual components.
@@ -60,6 +59,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
 
     <!-- Only needed if OverlayService is used -->
     <!--<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />-->

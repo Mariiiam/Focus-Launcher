@@ -528,7 +528,8 @@ public class Launcher extends BaseActivity
         }
 
         //checkLocationPermission(this);
-        checkFineLocationPermission(this);
+        //checkFineLocationPermission(this);
+        checkAppsPermission(this);
         hasWritePermission(this, true);
         checkUsageAccessPermission(this);
 
@@ -1691,10 +1692,7 @@ public class Launcher extends BaseActivity
             mLauncherCallbacks.onResume();
         }
 
-        //checkLocationPermission(this);
-        hasExternalStoragePermission(this);
         checkFineLocationPermission(this);
-        checkUsageAccessPermission(this);
 
     }
 
@@ -2390,8 +2388,8 @@ public class Launcher extends BaseActivity
                             UsageEvents.Event event = new UsageEvents.Event();
                             usageEvents.getNextEvent(event);
                             if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
-                                if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher")){
                                         if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")) {
                                                 long appStartTime = event.getTimeStamp();
@@ -2418,8 +2416,8 @@ public class Launcher extends BaseActivity
                                 }
                             }
                             if(event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND){
-                                if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher")){
                                         if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")){
                                                 long appEndTime = event.getTimeStamp();
@@ -2452,8 +2450,8 @@ public class Launcher extends BaseActivity
                                 UsageEvents.Event event = new UsageEvents.Event();
                                 usageEvents.getNextEvent(event);
                                 if(event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                        if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                        if(!event.getPackageName().equals("life.relaunched.launcher")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                                 if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")) {
                                                     long appStartTime = event.getTimeStamp();
@@ -2480,8 +2478,8 @@ public class Launcher extends BaseActivity
                                     }
                                 }
                                 if(event.getEventType() == UsageEvents.Event.MOVE_TO_BACKGROUND){
-                                    if(!event.getPackageName().equals("amirz.rootless.nexuslauncher.debug")){
-                                        if(!event.getPackageName().equals("amirz.rootless.nexuslauncher")){
+                                    if(!event.getPackageName().equals("life.relaunched.launcher.debug")){
+                                        if(!event.getPackageName().equals("life.relaunched.launcher")){
                                             if(!getLabelFromPackageName(context, event.getPackageName()).equals("")){
                                                 if(!getLabelFromPackageName(context, event.getPackageName()).equals("Life Relaunched")){
                                                     long appEndTime = event.getTimeStamp();
@@ -3017,6 +3015,13 @@ public class Launcher extends BaseActivity
     public static void checkFineLocationPermission(Activity context){
         if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, CODE_ACCESS_FINE_LOCATION_PERMISSION);
+        }
+    }
+
+    public static final int CODE_ACCESS_APPS_PERMISSION = 58;
+    public static void checkAppsPermission(Activity context){
+        if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.QUERY_ALL_PACKAGES)!=PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.QUERY_ALL_PACKAGES}, CODE_ACCESS_APPS_PERMISSION);
         }
     }
 
@@ -6025,6 +6030,9 @@ public class Launcher extends BaseActivity
         String ringtoneInfo = "";
         if(ringtone!=null){
             ringtoneInfo = ringtone;
+        }
+        if(ringtoneInfo.equals("")){
+            ringtoneInfo = "silent";
         }
         return ringtoneInfo;
     }

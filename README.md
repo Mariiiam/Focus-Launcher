@@ -5,7 +5,7 @@ Based on Rootless Pixel Launcher by Amir Zaidi.
 
 ## Links
 
-Play Store release: https://play.google.com/store/apps/details?id=amirz.rootless.nexuslauncher
+Play Store release: https://play.google.com/store/apps/details?id=life.relaunched.launcher
 
 Photos and videos: https://photos.app.goo.gl/qdcAcLOdiu8Kl1Bh1 
 

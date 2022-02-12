@@ -17,14 +17,14 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion '27.0.3'
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 29
-        versionCode 30907
-        versionName "3.10"
+        minSdkVersion 30
+        targetSdkVersion 30
+        versionCode 35000
+        versionName "3.50"
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -42,13 +42,13 @@ android {
 
         optimized {
             initWith debug
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard.flags'
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard.flags'
         }
@@ -56,14 +56,14 @@ android {
 
     productFlavors {
         aosp {
-            applicationId 'amirz.rootless.nexuslauncher'
-            testApplicationId 'amirz.rootless.nexuslauncher.tests'
+            applicationId 'life.relaunched.launcher'
+            testApplicationId 'life.relaunched.launcher.tests'
             flavorDimensions 'default'
         }
 
         l3go {
-            applicationId 'amirz.rootless.nexuslauncher'
-            testApplicationId 'amirz.rootless.nexuslauncher.tests'
+            applicationId 'life.relaunched.launcher'
+            testApplicationId 'life.relaunched.launcher.tests'
             flavorDimensions 'default'
         }
     }
